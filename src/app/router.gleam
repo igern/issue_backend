@@ -1,0 +1,40 @@
+import app/issue/issue_router
+import app/types.{type Context}
+import app/user/user_router
+import gleam/http.{Get}
+import gleam/json
+import wisp.{type Request, type Response}
+
+pub fn handle_request(req: Request, ctx: Context) -> Response {
+  use req <- middleware(req)
+  use <- issue_router.router(req, ctx)
+  use <- user_router.router(req, ctx)
+
+  case wisp.path_segments(req), req.method {
+    [], Get -> {
+      json.object([#("version", json.string("1.0.0"))])
+      |> json.to_string_builder()
+      |> wisp.json_response(200)
+    }
+    _, _ ->
+      json.object([
+        //
+        #("code", json.int(404)),
+        #("message", json.string("not found")),
+      ])
+      |> json.to_string_builder()
+      |> wisp.json_response(404)
+  }
+}
+
+pub fn middleware(
+  req: Request,
+  handle_request: fn(Request) -> Response,
+) -> Response {
+  let req = wisp.method_override(req)
+  use <- wisp.log_request(req)
+  use <- wisp.rescue_crashes
+  use req <- wisp.handle_head(req)
+
+  handle_request(req)
+}

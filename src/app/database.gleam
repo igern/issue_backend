@@ -14,4 +14,12 @@ pub fn init_schemas(connection: Connection) {
     password TEXT NOT NULL)
     "
   let assert Ok(Nil) = sqlight.exec(user_sql, connection)
+
+  let refresh_token_sql =
+    "CREATE TABLE IF NOT EXISTS refresh_tokens (
+    token TEXT PRIMARY KEY,
+    userId TEXT NOT NULL,
+    expiresAt TEXT NOT NULL)
+    "
+  let assert Ok(Nil) = sqlight.exec(refresh_token_sql, connection)
 }

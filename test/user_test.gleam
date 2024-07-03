@@ -1,5 +1,6 @@
 import app/router
 import app/user/inputs/create_user_input.{CreateUserInput}
+import app/user/inputs/login_input.{LoginInput}
 import app/user/outputs/user.{User}
 import gleam/json
 import gleeunit/should
@@ -23,4 +24,20 @@ pub fn create_user_test() {
   let assert Ok(data) =
     json.decode(testing.string_body(response), user.decoder())
   data |> should.equal(User(id: 1, email: "jonas@hotmail.dk"))
+}
+
+pub fn user_login_test() {
+  use ctx <- utils.with_context
+
+  utils.create_user(ctx)
+  let input =
+    login_input.to_json(LoginInput(
+      email: "jonas@hotmail.dk",
+      password: "secret1234",
+    ))
+
+  let response =
+    router.handle_request(testing.post_json("/auth/login", [], input), ctx)
+
+  response.status |> should.equal(201)
 }

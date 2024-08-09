@@ -11,8 +11,8 @@ pub fn main() {
 }
 
 pub fn version_test() {
-  use ctx <- utils.with_context
-  let response = router.handle_request(testing.get("/", []), ctx)
+  use t <- utils.with_context
+  let response = router.handle_request(testing.get("/", []), t.context)
 
   response.status |> should.equal(200)
 
@@ -23,8 +23,8 @@ pub fn version_test() {
 }
 
 pub fn not_found_test() {
-  use ctx <- utils.with_context
-  let response = router.handle_request(testing.get("/invalid", []), ctx)
+  use t <- utils.with_context
+  let response = router.handle_request(testing.get("/invalid", []), t.context)
 
   response.status |> should.equal(404)
 

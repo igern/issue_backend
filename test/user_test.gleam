@@ -1,5 +1,5 @@
 import app/router
-import app/user/inputs/create_user_input.{CreateUserInput}
+import app/user/inputs/create_user_input
 import app/user/inputs/login_input.{LoginInput}
 import app/user/outputs/user.{User}
 import gleam/json
@@ -8,36 +8,33 @@ import utils
 import wisp/testing
 
 pub fn create_user_test() {
-  use ctx <- utils.with_context
+  use t <- utils.with_context
 
-  let input =
-    create_user_input.to_json(CreateUserInput(
-      email: "jonas@hotmail.dk",
-      password: "secret1234",
-    ))
+  use t, input <- utils.next_create_user_input(t)
+  let json = create_user_input.to_json(input)
 
   let response =
-    router.handle_request(testing.post_json("/users", [], input), ctx)
+    router.handle_request(testing.post_json("/users", [], json), t.context)
 
   response.status |> should.equal(201)
 
   let assert Ok(data) =
     json.decode(testing.string_body(response), user.decoder())
-  data |> should.equal(User(id: 1, email: "jonas@hotmail.dk"))
+  data |> should.equal(User(id: 1, email: input.email))
 }
 
 pub fn user_login_test() {
-  use ctx <- utils.with_context
+  use t <- utils.with_context
 
-  utils.create_user(ctx)
+  use t, user <- utils.create_next_user(t)
   let input =
-    login_input.to_json(LoginInput(
-      email: "jonas@hotmail.dk",
-      password: "secret1234",
-    ))
+    login_input.to_json(LoginInput(email: user.email, password: "secret1234"))
 
   let response =
-    router.handle_request(testing.post_json("/auth/login", [], input), ctx)
+    router.handle_request(
+      testing.post_json("/auth/login", [], input),
+      t.context,
+    )
 
   response.status |> should.equal(201)
 }

@@ -18,7 +18,6 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
     }
     _, _ ->
       json.object([
-        //
         #("code", json.int(404)),
         #("message", json.string("not found")),
       ])

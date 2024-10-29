@@ -1,6 +1,6 @@
+import app/auth/auth_guards
 import app/issue/issue_service
 import app/types.{type Context}
-import app/user/auth_guards
 import gleam/http.{Delete, Get, Patch, Post}
 import wisp.{type Request, type Response}
 

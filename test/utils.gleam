@@ -1,3 +1,5 @@
+import app/auth/inputs/login_input.{type LoginInput, LoginInput}
+import app/auth/outputs/auth_tokens.{type AuthTokens}
 import app/database
 import app/issue/inputs/create_issue_input.{
   type CreateIssueInput, CreateIssueInput,
@@ -6,8 +8,6 @@ import app/issue/outputs/issue.{type Issue}
 import app/router
 import app/types.{type Context, Context}
 import app/user/inputs/create_user_input.{type CreateUserInput, CreateUserInput}
-import app/user/inputs/login_input.{type LoginInput, LoginInput}
-import app/user/outputs/auth_tokens.{type AuthTokens}
 import app/user/outputs/user.{type User}
 import gleam/int
 import gleam/json.{type Json}

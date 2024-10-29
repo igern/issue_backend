@@ -1,6 +1,6 @@
+import app/auth/inputs/login_input.{LoginInput}
 import app/router
 import app/user/inputs/create_user_input
-import app/user/inputs/login_input.{LoginInput}
 import app/user/outputs/user.{User}
 import gleam/json
 import gleeunit/should

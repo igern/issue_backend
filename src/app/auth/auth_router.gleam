@@ -27,6 +27,7 @@ fn login(req: Request, ctx: Context) {
   use input <- response_utils.or_decode_error(login_input.from_dynamic(json))
 
   use result <- response_utils.map_service_errors(auth_service.login(input, ctx))
+
   auth_tokens.to_json(result)
   |> json.to_string_builder()
   |> wisp.json_response(201)

@@ -1,6 +1,10 @@
 import app/auth/inputs/login_input.{type LoginInput}
+import app/auth/inputs/refresh_auth_tokens_input.{type RefreshAuthTokensInput}
 import app/auth/outputs/auth_tokens.{type AuthTokens, AuthTokens}
-import app/common/response_utils.{DatabaseError, InvalidCredentialsError}
+import app/common/response_utils.{
+  DatabaseError, InvalidCredentialsError, RefreshTokenExpiredError,
+  RefreshTokenNotFoundError,
+}
 import app/types.{type Context}
 import aragorn2
 import birl
@@ -9,6 +13,7 @@ import gleam/bit_array
 import gleam/crypto
 import gleam/dynamic
 import gleam/int
+import gleam/order
 import gwt
 import sqlight
 
@@ -40,6 +45,32 @@ pub fn login(input: LoginInput, ctx: Context) {
   }
 }
 
+pub fn refresh_auth_tokens(input: RefreshAuthTokensInput, ctx: Context) {
+  let sql = "select * from refresh_tokens where token = ?"
+
+  let result =
+    sqlight.query(
+      sql,
+      ctx.connection,
+      [sqlight.text(input.refresh_token)],
+      dynamic.tuple3(dynamic.string, dynamic.int, dynamic.string),
+    )
+
+  case result {
+    Ok([#(_, user_id, expires_at)]) -> {
+      let assert Ok(expires_at) = birl.parse(expires_at)
+      case birl.compare(birl.now(), expires_at) {
+        order.Lt -> {
+          Ok(create_auth_tokens(user_id, ctx))
+        }
+        _ -> Error(RefreshTokenExpiredError)
+      }
+    }
+    Error(_) -> Error(DatabaseError)
+    _ -> Error(RefreshTokenNotFoundError)
+  }
+}
+
 fn create_auth_tokens(user_id: Int, ctx: Context) {
   let refresh_token = create_refresh_token(user_id, ctx)
   let access_token = create_access_token(int.to_string(user_id))
@@ -64,7 +95,7 @@ fn create_refresh_token(user_id: Int, ctx: Context) {
           |> birl.to_iso8601
           |> sqlight.text,
       ],
-      expecting: dynamic.tuple3(dynamic.string, dynamic.string, dynamic.string),
+      expecting: dynamic.tuple3(dynamic.string, dynamic.int, dynamic.string),
     )
 
   case result {

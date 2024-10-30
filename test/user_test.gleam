@@ -1,4 +1,3 @@
-import app/auth/inputs/login_input.{LoginInput}
 import app/router
 import app/user/inputs/create_user_input
 import app/user/outputs/user.{User}
@@ -21,20 +20,4 @@ pub fn create_user_test() {
   let assert Ok(data) =
     json.decode(testing.string_body(response), user.decoder())
   data |> should.equal(User(id: 1, email: input.email))
-}
-
-pub fn user_login_test() {
-  use t <- utils.with_context
-
-  use t, user <- utils.create_next_user(t)
-  let input =
-    login_input.to_json(LoginInput(email: user.email, password: "secret1234"))
-
-  let response =
-    router.handle_request(
-      testing.post_json("/auth/login", [], input),
-      t.context,
-    )
-
-  response.status |> should.equal(201)
 }

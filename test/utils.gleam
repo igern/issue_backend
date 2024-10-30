@@ -126,7 +126,7 @@ pub fn create_next_user_and_login(
   use t, user <- create_next_user(t)
   let auth_tokens =
     login(t, LoginInput(email: user.email, password: "secret1234"))
-  handler(t, AuthorizedUser(user: user, auth_tokens: auth_tokens))
+  handler(t, AuthorizedUser(user:, auth_tokens:))
 }
 
 pub fn bearer_header(access_token: String) {

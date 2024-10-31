@@ -57,11 +57,22 @@ pub fn refresh_auth_tokens(input: RefreshAuthTokensInput, ctx: Context) {
     )
 
   case result {
-    Ok([#(_, user_id, expires_at)]) -> {
+    Ok([#(token, user_id, expires_at)]) -> {
       let assert Ok(expires_at) = birl.parse(expires_at)
       case birl.compare(birl.now(), expires_at) {
         order.Lt -> {
-          Ok(create_auth_tokens(user_id, ctx))
+          let sql = "delete from refresh_tokens where token = ?"
+
+          let _ =
+            sqlight.query(
+              sql,
+              ctx.connection,
+              [sqlight.text(token)],
+              dynamic.tuple3(dynamic.string, dynamic.int, dynamic.string),
+            )
+          let auth_tokens = create_auth_tokens(user_id, ctx)
+
+          Ok(auth_tokens)
         }
         _ -> Error(RefreshTokenExpiredError)
       }

@@ -8,14 +8,6 @@ import gleam/http.{Post}
 import gleam/json
 import wisp.{type Request, type Response}
 
-pub fn invalid_credentials_response() {
-  response_utils.json_response(400, "invalid credentials")
-}
-
-pub fn database_error_response() {
-  response_utils.json_response(503, "database error")
-}
-
 pub fn router(req: Request, ctx: Context, handle_request: fn() -> Response) {
   case wisp.path_segments(req), req.method {
     ["auth", "login"], Post -> login(req, ctx)

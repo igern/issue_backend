@@ -1,20 +1,19 @@
-import app/common/response_utils
-import app/issue/inputs/create_issue_input
+import app/common/response_utils.{DatabaseError}
+import app/issue/inputs/create_issue_input.{type CreateIssueInput}
 import app/issue/inputs/update_issue_input
+import app/issue/outputs/issue.{Issue}
 import app/types.{type Context}
 import gleam/dynamic
 import gleam/int
 import gleam/json
+import gleam/list
 import sqlight
 import wisp.{type Request, type Response}
 
-pub fn create(req: Request, ctx: Context) -> Response {
-  use json <- wisp.require_json(req)
-  use input <- response_utils.or_400(create_issue_input.from_dynamic(json))
-
+pub fn create(input: CreateIssueInput, ctx: Context) {
   let sql = "insert into issues (name) values (?) returning *"
 
-  let assert Ok([#(id, name)]) =
+  let result =
     sqlight.query(
       sql,
       on: ctx.connection,
@@ -22,15 +21,16 @@ pub fn create(req: Request, ctx: Context) -> Response {
       expecting: dynamic.tuple2(dynamic.int, dynamic.string),
     )
 
-  json.object([#("id", json.int(id)), #("name", json.string(name))])
-  |> json.to_string_builder()
-  |> wisp.json_response(201)
+  case result {
+    Ok([#(id, name)]) -> Ok(Issue(id, name))
+    _ -> Error(DatabaseError)
+  }
 }
 
-pub fn find_all(ctx: Context) -> Response {
+pub fn find_all(ctx: Context) {
   let sql = "select * from issues"
 
-  let assert Ok(results) =
+  let result =
     sqlight.query(
       sql,
       on: ctx.connection,
@@ -38,12 +38,17 @@ pub fn find_all(ctx: Context) -> Response {
       expecting: dynamic.tuple2(dynamic.int, dynamic.string),
     )
 
-  json.array(results, of: fn(issue) {
-    let #(id, name) = issue
-    json.object([#("id", json.int(id)), #("name", json.string(name))])
-  })
-  |> json.to_string_builder
-  |> wisp.json_response(200)
+  case result {
+    Ok(result) -> {
+      let issues =
+        list.map(result, fn(issue) {
+          let #(id, name) = issue
+          Issue(id, name)
+        })
+      Ok(issues)
+    }
+    _ -> Error(DatabaseError)
+  }
 }
 
 pub fn find_one(id: String, ctx: Context) -> Response {

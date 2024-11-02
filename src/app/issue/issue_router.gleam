@@ -66,7 +66,9 @@ fn update_issue(req: Request, id: String, ctx: Context) {
   use <- auth_guards.jwt(req)
   use id <- response_utils.or_400(int.parse(id))
   use json <- wisp.require_json(req)
-  use input <- response_utils.or_400(update_issue_input.from_dynamic(json))
+  use input <- response_utils.or_decode_error(update_issue_input.from_dynamic(
+    json,
+  ))
 
   use result <- response_utils.map_service_errors(issue_service.update_one(
     id,

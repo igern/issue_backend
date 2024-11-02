@@ -7,6 +7,10 @@ import gleam/dynamic
 import gleam/list
 import sqlight
 
+fn issue_decoder() {
+  dynamic.tuple2(dynamic.int, dynamic.string)
+}
+
 pub fn create(input: CreateIssueInput, ctx: Context) {
   let sql = "insert into issues (name) values (?) returning *"
 
@@ -15,7 +19,7 @@ pub fn create(input: CreateIssueInput, ctx: Context) {
       sql,
       on: ctx.connection,
       with: [sqlight.text(input.name)],
-      expecting: dynamic.tuple2(dynamic.int, dynamic.string),
+      expecting: issue_decoder(),
     )
 
   case result {
@@ -28,12 +32,7 @@ pub fn find_all(ctx: Context) {
   let sql = "select * from issues"
 
   let result =
-    sqlight.query(
-      sql,
-      on: ctx.connection,
-      with: [],
-      expecting: dynamic.tuple2(dynamic.int, dynamic.string),
-    )
+    sqlight.query(sql, on: ctx.connection, with: [], expecting: issue_decoder())
 
   case result {
     Ok(result) -> {
@@ -56,7 +55,7 @@ pub fn find_one(id: Int, ctx: Context) {
       sql,
       on: ctx.connection,
       with: [sqlight.int(id)],
-      expecting: dynamic.tuple2(dynamic.int, dynamic.string),
+      expecting: issue_decoder(),
     )
 
   case result {
@@ -74,7 +73,7 @@ pub fn update_one(id: Int, input: UpdateIssueInput, ctx: Context) {
       sql,
       on: ctx.connection,
       with: [sqlight.text(input.name), sqlight.int(id)],
-      expecting: dynamic.tuple2(dynamic.int, dynamic.string),
+      expecting: issue_decoder(),
     )
 
   case result {
@@ -92,7 +91,7 @@ pub fn delete_one(id: Int, ctx: Context) {
       sql,
       on: ctx.connection,
       with: [sqlight.int(id)],
-      expecting: dynamic.tuple2(dynamic.int, dynamic.string),
+      expecting: issue_decoder(),
     )
 
   case result {

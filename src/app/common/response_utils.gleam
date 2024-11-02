@@ -8,6 +8,7 @@ pub fn map_service_errors(
   next: fn(a) -> Response,
 ) -> Response {
   case result {
+    Error(IssueNotFoundError) -> issue_not_found_error_response()
     Error(RefreshTokenExpiredError) -> refresh_token_expired_error_response()
     Error(RefreshTokenNotFoundError) -> refresh_token_not_found_error_response()
     Error(InvalidCredentialsError) -> invalid_credentials_response()
@@ -17,6 +18,7 @@ pub fn map_service_errors(
 }
 
 pub type ServiceError {
+  IssueNotFoundError
   RefreshTokenExpiredError
   RefreshTokenNotFoundError
   InvalidCredentialsError
@@ -37,6 +39,10 @@ pub fn refresh_token_not_found_error_response() {
 
 pub fn refresh_token_expired_error_response() {
   json_response(400, "refresh token expired")
+}
+
+pub fn issue_not_found_error_response() {
+  json_response(404, "issue not found")
 }
 
 pub fn or_400(

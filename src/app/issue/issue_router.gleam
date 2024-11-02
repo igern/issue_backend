@@ -5,6 +5,7 @@ import app/issue/issue_service
 import app/issue/outputs/issue
 import app/types.{type Context}
 import gleam/http.{Delete, Get, Patch, Post}
+import gleam/int
 import gleam/json
 import wisp.{type Request, type Response}
 
@@ -12,10 +13,7 @@ pub fn router(req: Request, ctx: Context, handle_request: fn() -> Response) {
   case wisp.path_segments(req), req.method {
     ["issues"], Post -> create_issue(req, ctx)
     ["issues"], Get -> find_issues(req, ctx)
-    ["issues", id], Get -> {
-      use <- auth_guards.jwt(req)
-      issue_service.find_one(id, ctx)
-    }
+    ["issues", id], Get -> find_issue(req, id, ctx)
     ["issues", id], Patch -> {
       use <- auth_guards.jwt(req)
       issue_service.update_one(req, id, ctx)
@@ -51,6 +49,20 @@ fn find_issues(req: Request, ctx: Context) {
   use result <- response_utils.map_service_errors(issue_service.find_all(ctx))
 
   json.array(result, issue.to_json)
+  |> json.to_string_builder()
+  |> wisp.json_response(200)
+}
+
+fn find_issue(req: Request, id: String, ctx: Context) {
+  use <- auth_guards.jwt(req)
+  use id <- response_utils.or_400(int.parse(id))
+
+  use result <- response_utils.map_service_errors(issue_service.find_one(
+    id,
+    ctx,
+  ))
+
+  issue.to_json(result)
   |> json.to_string_builder()
   |> wisp.json_response(200)
 }

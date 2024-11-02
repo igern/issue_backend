@@ -1,4 +1,4 @@
-import app/common/response_utils.{DatabaseError}
+import app/common/response_utils.{DatabaseError, IssueNotFoundError}
 import app/issue/inputs/create_issue_input.{type CreateIssueInput}
 import app/issue/inputs/update_issue_input
 import app/issue/outputs/issue.{Issue}
@@ -51,9 +51,7 @@ pub fn find_all(ctx: Context) {
   }
 }
 
-pub fn find_one(id: String, ctx: Context) -> Response {
-  use id <- response_utils.or_400(int.parse(id))
-
+pub fn find_one(id: Int, ctx: Context) {
   let sql = "select * from issues where id = ?"
 
   let result =
@@ -65,12 +63,9 @@ pub fn find_one(id: String, ctx: Context) -> Response {
     )
 
   case result {
-    Ok([#(id, name)]) -> {
-      json.object([#("id", json.int(id)), #("name", json.string(name))])
-      |> json.to_string_builder()
-      |> wisp.json_response(200)
-    }
-    _ -> wisp.not_found()
+    Ok([#(id, name)]) -> Ok(Issue(id, name))
+    Error(_) -> Error(DatabaseError)
+    _ -> Error(IssueNotFoundError)
   }
 }
 

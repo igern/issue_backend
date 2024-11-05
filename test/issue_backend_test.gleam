@@ -12,7 +12,7 @@ pub fn main() {
 
 pub fn version_test() {
   use t <- utils.with_context
-  let response = router.handle_request(testing.get("/", []), t.context)
+  let response = router.handle_request(testing.get("/api", []), t.context)
 
   response.status |> should.equal(200)
 

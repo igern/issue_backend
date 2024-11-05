@@ -58,7 +58,7 @@ pub fn create_issue(
 
   let response =
     router.handle_request(
-      testing.post_json("/issues", [bearer_header(access_token)], json),
+      testing.post_json("/api/issues", [bearer_header(access_token)], json),
       t.context,
     )
   response.status |> should.equal(201)
@@ -89,7 +89,7 @@ pub fn create_user(
   let json = create_user_input.to_json(input)
 
   let response =
-    router.handle_request(testing.post_json("/users", [], json), t.context)
+    router.handle_request(testing.post_json("/api/users", [], json), t.context)
   response.status |> should.equal(201)
 
   let assert Ok(user) =
@@ -109,7 +109,7 @@ pub fn create_next_user(
 pub fn login(t: TestContext, input: LoginInput) {
   let response =
     router.handle_request(
-      testing.post_json("/auth/login", [], login_input.to_json(input)),
+      testing.post_json("/api/auth/login", [], login_input.to_json(input)),
       t.context,
     )
 

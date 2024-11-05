@@ -12,11 +12,11 @@ import wisp.{type Request, type Response}
 
 pub fn router(req: Request, ctx: Context, handle_request: fn() -> Response) {
   case wisp.path_segments(req), req.method {
-    ["issues"], Post -> create_issue(req, ctx)
-    ["issues"], Get -> find_issues(req, ctx)
-    ["issues", id], Get -> find_issue(req, id, ctx)
-    ["issues", id], Patch -> update_issue(req, id, ctx)
-    ["issues", id], Delete -> delete_issue(req, id, ctx)
+    ["api", "issues"], Post -> create_issue(req, ctx)
+    ["api", "issues"], Get -> find_issues(req, ctx)
+    ["api", "issues", id], Get -> find_issue(req, id, ctx)
+    ["api", "issues", id], Patch -> update_issue(req, id, ctx)
+    ["api", "issues", id], Delete -> delete_issue(req, id, ctx)
     _, _ -> handle_request()
   }
 }

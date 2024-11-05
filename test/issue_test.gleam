@@ -20,7 +20,7 @@ pub fn create_issue_test() {
   let response =
     router.handle_request(
       testing.post_json(
-        "/issues",
+        "/api/issues",
         [utils.bearer_header(authorized_user.auth_tokens.access_token)],
         json,
       ),
@@ -37,7 +37,7 @@ pub fn find_issues_0_test() {
   use t, authorized_user <- utils.create_next_user_and_login(t)
   let response =
     router.handle_request(
-      testing.get("/issues", [
+      testing.get("/api/issues", [
         utils.bearer_header(authorized_user.auth_tokens.access_token),
       ]),
       t.context,
@@ -57,7 +57,7 @@ pub fn find_issues_1_test() {
 
   let response =
     router.handle_request(
-      testing.get("/issues", [
+      testing.get("/api/issues", [
         utils.bearer_header(authorized_user.auth_tokens.access_token),
       ]),
       t.context,
@@ -78,7 +78,7 @@ pub fn find_issues_2_test() {
 
   let response =
     router.handle_request(
-      testing.get("/issues", [
+      testing.get("/api/issues", [
         utils.bearer_header(authorized_user.auth_tokens.access_token),
       ]),
       t.context,
@@ -98,7 +98,7 @@ pub fn find_one_issue_test() {
 
   let response =
     router.handle_request(
-      testing.get("issues/" <> int.to_string(issue.id), [
+      testing.get("/api/issues/" <> int.to_string(issue.id), [
         utils.bearer_header(authorized_user.auth_tokens.access_token),
       ]),
       t.context,
@@ -115,7 +115,7 @@ pub fn find_one_issue_not_found_test() {
   use t, authorized_user <- utils.create_next_user_and_login(t)
   let response =
     router.handle_request(
-      testing.get("issues/" <> "1", [
+      testing.get("/api/issues/" <> "1", [
         utils.bearer_header(authorized_user.auth_tokens.access_token),
       ]),
       t.context,
@@ -130,7 +130,7 @@ pub fn find_one_issue_invalid_id_test() {
   use t, authorized_user <- utils.create_next_user_and_login(t)
   let response =
     router.handle_request(
-      testing.get("issues/" <> "Invalid", [
+      testing.get("/api/issues/" <> "Invalid", [
         utils.bearer_header(authorized_user.auth_tokens.access_token),
       ]),
       t.context,
@@ -149,7 +149,7 @@ pub fn update_one_issue_test() {
   let response =
     router.handle_request(
       testing.patch_json(
-        "issues/" <> int.to_string(issue.id),
+        "/api/issues/" <> int.to_string(issue.id),
         [utils.bearer_header(authorized_user.auth_tokens.access_token)],
         input,
       ),
@@ -171,7 +171,7 @@ pub fn update_one_issue_not_found_test() {
   let response =
     router.handle_request(
       testing.patch_json(
-        "issues/" <> "1",
+        "/api/issues/" <> "1",
         [utils.bearer_header(authorized_user.auth_tokens.access_token)],
         input,
       ),
@@ -190,7 +190,7 @@ pub fn update_one_issue_invalid_id_test() {
   let response =
     router.handle_request(
       testing.patch_json(
-        "issues/" <> "Invalid",
+        "/api/issues/" <> "Invalid",
         [utils.bearer_header(authorized_user.auth_tokens.access_token)],
         input,
       ),
@@ -209,7 +209,7 @@ pub fn delete_one_issue_test() {
   let response =
     router.handle_request(
       testing.delete(
-        "issues/" <> int.to_string(issue.id),
+        "/api/issues/" <> int.to_string(issue.id),
         [utils.bearer_header(authorized_user.auth_tokens.access_token)],
         "",
       ),
@@ -230,7 +230,7 @@ pub fn delete_one_issue_not_found_test() {
   let response =
     router.handle_request(
       testing.delete(
-        "issues/" <> "1",
+        "/api/issues/" <> "1",
         [utils.bearer_header(authorized_user.auth_tokens.access_token)],
         "",
       ),
@@ -248,7 +248,7 @@ pub fn delete_one_issue_invalid_id_test() {
   let response =
     router.handle_request(
       testing.delete(
-        "issues/" <> "Invalid",
+        "/api/issues/" <> "Invalid",
         [utils.bearer_header(authorized_user.auth_tokens.access_token)],
         "",
       ),

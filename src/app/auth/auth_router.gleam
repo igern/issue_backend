@@ -10,8 +10,9 @@ import wisp.{type Request, type Response}
 
 pub fn router(req: Request, ctx: Context, handle_request: fn() -> Response) {
   case wisp.path_segments(req), req.method {
-    ["auth", "login"], Post -> login(req, ctx)
-    ["auth", "refresh_auth_tokens"], Post -> refresh_auth_tokens(req, ctx)
+    ["api", "auth", "login"], Post -> login(req, ctx)
+    ["api", "auth", "refresh_auth_tokens"], Post ->
+      refresh_auth_tokens(req, ctx)
     _, _ -> handle_request()
   }
 }

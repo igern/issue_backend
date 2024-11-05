@@ -19,7 +19,7 @@ pub fn login_test() {
 
   let response =
     router.handle_request(
-      testing.post_json("/auth/login", [], input),
+      testing.post_json("/api/auth/login", [], input),
       t.context,
     )
 
@@ -36,7 +36,7 @@ pub fn login_invalid_email_test() {
 
   let response =
     router.handle_request(
-      testing.post_json("/auth/login", [], input),
+      testing.post_json("/api/auth/login", [], input),
       t.context,
     )
 
@@ -56,7 +56,7 @@ pub fn login_invalid_password_test() {
 
   let response =
     router.handle_request(
-      testing.post_json("/auth/login", [], input),
+      testing.post_json("/api/auth/login", [], input),
       t.context,
     )
 
@@ -75,7 +75,7 @@ pub fn refresh_auth_tokens_test() {
 
   let response =
     router.handle_request(
-      testing.post_json("/auth/refresh_auth_tokens", [], input),
+      testing.post_json("/api/auth/refresh_auth_tokens", [], input),
       t.context,
     )
 
@@ -102,7 +102,7 @@ pub fn refresh_auth_tokens_not_found_test() {
 
   let response =
     router.handle_request(
-      testing.post_json("/auth/refresh_auth_tokens", [], input),
+      testing.post_json("/api/auth/refresh_auth_tokens", [], input),
       t.context,
     )
 
@@ -133,7 +133,7 @@ pub fn refresh_auth_tokens_expired_test() {
 
   let response =
     router.handle_request(
-      testing.post_json("/auth/refresh_auth_tokens", [], input),
+      testing.post_json("/api/auth/refresh_auth_tokens", [], input),
       t.context,
     )
 

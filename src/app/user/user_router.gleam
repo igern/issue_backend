@@ -9,7 +9,7 @@ import wisp.{type Request, type Response}
 
 pub fn router(req: Request, ctx: Context, handle_request: fn() -> Response) {
   case wisp.path_segments(req), req.method {
-    ["users"], Post -> create_user(req, ctx)
+    ["api", "users"], Post -> create_user(req, ctx)
     _, _ -> handle_request()
   }
 }

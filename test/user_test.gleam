@@ -13,7 +13,7 @@ pub fn create_user_test() {
   let json = create_user_input.to_json(input)
 
   let response =
-    router.handle_request(testing.post_json("/users", [], json), t.context)
+    router.handle_request(testing.post_json("api/users", [], json), t.context)
 
   response.status |> should.equal(201)
 

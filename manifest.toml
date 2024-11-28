@@ -23,7 +23,6 @@ packages = [
   { name = "gwt", version = "1.0.0", build_tools = ["gleam"], requirements = ["birl", "gleam_crypto", "gleam_json", "gleam_stdlib"], otp_app = "gwt", source = "hex", outer_checksum = "7F18FFAEF6B9461995AC556AC9E80A4ABA9AC080792EA5B1904ACA087A58FEDA" },
   { name = "hpack_erl", version = "0.3.0", build_tools = ["rebar3"], requirements = [], otp_app = "hpack", source = "hex", outer_checksum = "D6137D7079169D8C485C6962DFE261AF5B9EF60FBC557344511C1E65E3D95FB0" },
   { name = "logging", version = "1.2.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "logging", source = "hex", outer_checksum = "FCB111401BDB4703A440A94FF8CC7DA521112269C065F219C2766998333E7738" },
-  { name = "lustre", version = "4.6.1", build_tools = ["gleam"], requirements = ["gleam_erlang", "gleam_json", "gleam_otp", "gleam_stdlib"], otp_app = "lustre", source = "hex", outer_checksum = "486C3CFBD126939CAD2CA8B92A979A2DAADA5BABAA62BF2B163CD21E257BD4A1" },
   { name = "marceau", version = "1.3.0", build_tools = ["gleam"], requirements = [], otp_app = "marceau", source = "hex", outer_checksum = "2D1C27504BEF45005F5DFB18591F8610FB4BFA91744878210BDC464412EC44E9" },
   { name = "mist", version = "1.2.0", build_tools = ["gleam"], requirements = ["birl", "gleam_erlang", "gleam_http", "gleam_otp", "gleam_stdlib", "glisten", "gramps", "hpack_erl", "logging"], otp_app = "mist", source = "hex", outer_checksum = "109B4D64E68C104CC23BB3CC5441ECD479DD7444889DA01113B75C6AF0F0E17B" },
   { name = "platform", version = "1.0.0", build_tools = ["gleam"], requirements = [], otp_app = "platform", source = "hex", outer_checksum = "8339420A95AD89AAC0F82F4C3DB8DD401041742D6C3F46132A8739F6AEB75391" },
@@ -46,7 +45,6 @@ gleam_json = { version = ">= 1.0.1 and < 2.0.0" }
 gleam_stdlib = { version = ">= 0.34.0 and < 2.0.0" }
 gleeunit = { version = ">= 1.0.0 and < 2.0.0" }
 gwt = { version = ">= 1.0.0 and < 2.0.0" }
-lustre = { version = ">= 4.6.1 and < 5.0.0" }
 mist = { version = ">= 1.2.0 and < 2.0.0" }
 radiate = { version = ">= 0.4.0 and < 1.0.0" }
 sqlight = { version = ">= 0.9.1 and < 1.0.0" }

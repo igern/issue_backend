@@ -22,14 +22,15 @@ pub fn router(req: Request, ctx: Context, handle_request: fn() -> Response) {
 }
 
 fn create_issue(req: Request, ctx: Context) {
-  use <- auth_guards.jwt(req)
+  use payload <- auth_guards.jwt(req)
   use json <- wisp.require_json(req)
   use input <- response_utils.or_decode_error(create_issue_input.from_dynamic(
     json,
   ))
-
+  let assert Ok(user_id) = int.parse(payload.sub)
   use result <- response_utils.map_service_errors(issue_service.create(
     input,
+    user_id,
     ctx,
   ))
 
@@ -39,7 +40,7 @@ fn create_issue(req: Request, ctx: Context) {
 }
 
 fn find_issues(req: Request, ctx: Context) {
-  use <- auth_guards.jwt(req)
+  use _ <- auth_guards.jwt(req)
 
   use result <- response_utils.map_service_errors(issue_service.find_all(ctx))
 
@@ -49,7 +50,7 @@ fn find_issues(req: Request, ctx: Context) {
 }
 
 fn find_issue(req: Request, id: String, ctx: Context) {
-  use <- auth_guards.jwt(req)
+  use _ <- auth_guards.jwt(req)
   use id <- response_utils.or_400(int.parse(id))
 
   use result <- response_utils.map_service_errors(issue_service.find_one(
@@ -63,7 +64,7 @@ fn find_issue(req: Request, id: String, ctx: Context) {
 }
 
 fn update_issue(req: Request, id: String, ctx: Context) {
-  use <- auth_guards.jwt(req)
+  use _ <- auth_guards.jwt(req)
   use id <- response_utils.or_400(int.parse(id))
   use json <- wisp.require_json(req)
   use input <- response_utils.or_decode_error(update_issue_input.from_dynamic(
@@ -82,7 +83,7 @@ fn update_issue(req: Request, id: String, ctx: Context) {
 }
 
 fn delete_issue(req: Request, id: String, ctx: Context) {
-  use <- auth_guards.jwt(req)
+  use _ <- auth_guards.jwt(req)
   use id <- response_utils.or_400(int.parse(id))
 
   use result <- response_utils.map_service_errors(issue_service.delete_one(

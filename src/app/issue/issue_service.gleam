@@ -8,22 +8,22 @@ import gleam/list
 import sqlight
 
 fn issue_decoder() {
-  dynamic.tuple2(dynamic.int, dynamic.string)
+  dynamic.tuple3(dynamic.int, dynamic.string, dynamic.int)
 }
 
-pub fn create(input: CreateIssueInput, ctx: Context) {
-  let sql = "insert into issues (name) values (?) returning *"
+pub fn create(input: CreateIssueInput, user_id: Int, ctx: Context) {
+  let sql = "insert into issues (name, creator_id) values (?, ?) returning *"
 
   let result =
     sqlight.query(
       sql,
       on: ctx.connection,
-      with: [sqlight.text(input.name)],
+      with: [sqlight.text(input.name), sqlight.int(user_id)],
       expecting: issue_decoder(),
     )
 
   case result {
-    Ok([#(id, name)]) -> Ok(Issue(id, name))
+    Ok([#(id, name, creator_id)]) -> Ok(Issue(id, name, creator_id))
     _ -> Error(DatabaseError)
   }
 }
@@ -38,8 +38,8 @@ pub fn find_all(ctx: Context) {
     Ok(result) -> {
       let issues =
         list.map(result, fn(issue) {
-          let #(id, name) = issue
-          Issue(id, name)
+          let #(id, name, creator_id) = issue
+          Issue(id, name, creator_id)
         })
       Ok(issues)
     }
@@ -59,7 +59,7 @@ pub fn find_one(id: Int, ctx: Context) {
     )
 
   case result {
-    Ok([#(id, name)]) -> Ok(Issue(id, name))
+    Ok([#(id, name, creator_id)]) -> Ok(Issue(id, name, creator_id))
     Error(_) -> Error(DatabaseError)
     _ -> Error(IssueNotFoundError)
   }
@@ -77,7 +77,7 @@ pub fn update_one(id: Int, input: UpdateIssueInput, ctx: Context) {
     )
 
   case result {
-    Ok([#(id, name)]) -> Ok(Issue(id, name))
+    Ok([#(id, name, creator_id)]) -> Ok(Issue(id, name, creator_id))
     Error(_) -> Error(DatabaseError)
     _ -> Error(IssueNotFoundError)
   }
@@ -95,7 +95,7 @@ pub fn delete_one(id: Int, ctx: Context) {
     )
 
   case result {
-    Ok([#(id, name)]) -> Ok(Issue(id, name))
+    Ok([#(id, name, creator_id)]) -> Ok(Issue(id, name, creator_id))
     Error(_) -> Error(DatabaseError)
     _ -> Error(IssueNotFoundError)
   }

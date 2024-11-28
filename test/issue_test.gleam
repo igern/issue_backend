@@ -29,7 +29,12 @@ pub fn create_issue_test() {
   response.status |> should.equal(201)
   let assert Ok(data) =
     json.decode(testing.string_body(response), issue.decoder())
-  data |> should.equal(Issue(id: 1, name: input.name))
+  data
+  |> should.equal(Issue(
+    id: 1,
+    name: input.name,
+    creator_id: authorized_user.user.id,
+  ))
 }
 
 pub fn find_issues_0_test() {

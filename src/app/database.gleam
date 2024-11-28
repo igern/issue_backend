@@ -4,7 +4,8 @@ pub fn init_schemas(connection: Connection) {
   let issues_sql =
     "CREATE TABLE IF NOT EXISTS issues (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL)
+    name TEXT NOT NULL,
+    creator_id INTEGER NOT NULL)
     "
   let assert Ok(Nil) = sqlight.exec(issues_sql, connection)
   let user_sql =

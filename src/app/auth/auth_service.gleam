@@ -2,8 +2,8 @@ import app/auth/inputs/login_input.{type LoginInput}
 import app/auth/inputs/refresh_auth_tokens_input.{type RefreshAuthTokensInput}
 import app/auth/outputs/auth_tokens.{type AuthTokens, AuthTokens}
 import app/common/response_utils.{
-  DatabaseError, InvalidCredentialsError, RefreshTokenExpiredError,
-  RefreshTokenNotFoundError,
+  type ServiceError, DatabaseError, InvalidCredentialsError,
+  RefreshTokenExpiredError, RefreshTokenNotFoundError,
 }
 import app/types.{type Context}
 import aragorn2
@@ -14,10 +14,14 @@ import gleam/crypto
 import gleam/dynamic
 import gleam/int
 import gleam/order
+import gleam/result
 import gwt
-import sqlight
+import sqlight.{ConstraintPrimarykey, SqlightError}
 
-pub fn login(input: LoginInput, ctx: Context) {
+pub fn login(
+  input: LoginInput,
+  ctx: Context,
+) -> Result(AuthTokens, ServiceError) {
   let sql = "select * from users where email = ?"
 
   let result =
@@ -28,7 +32,7 @@ pub fn login(input: LoginInput, ctx: Context) {
       expecting: dynamic.tuple3(dynamic.int, dynamic.string, dynamic.string),
     )
   case result {
-    Ok([#(id, _, password)]) -> {
+    Ok([#(user_id, _, password)]) -> {
       case
         aragorn2.verify_password(
           aragorn2.hasher(),
@@ -36,7 +40,9 @@ pub fn login(input: LoginInput, ctx: Context) {
           bit_array.from_string(password),
         )
       {
-        Ok(Nil) -> Ok(create_auth_tokens(id, ctx))
+        Ok(Nil) -> {
+          create_auth_tokens(user_id, ctx)
+        }
         _ -> Error(InvalidCredentialsError)
       }
     }
@@ -45,7 +51,10 @@ pub fn login(input: LoginInput, ctx: Context) {
   }
 }
 
-pub fn refresh_auth_tokens(input: RefreshAuthTokensInput, ctx: Context) {
+pub fn refresh_auth_tokens(
+  input: RefreshAuthTokensInput,
+  ctx: Context,
+) -> Result(AuthTokens, ServiceError) {
   let sql = "select * from refresh_tokens where token = ?"
 
   let result =
@@ -63,7 +72,7 @@ pub fn refresh_auth_tokens(input: RefreshAuthTokensInput, ctx: Context) {
         order.Lt -> {
           let sql = "delete from refresh_tokens where token = ?"
 
-          let _ = case
+          case
             sqlight.query(
               sql,
               ctx.connection,
@@ -72,8 +81,7 @@ pub fn refresh_auth_tokens(input: RefreshAuthTokensInput, ctx: Context) {
             )
           {
             Ok(_) -> {
-              let auth_tokens = create_auth_tokens(user_id, ctx)
-              Ok(auth_tokens)
+              create_auth_tokens(user_id, ctx)
             }
             Error(error) -> Error(DatabaseError(error))
           }
@@ -86,13 +94,10 @@ pub fn refresh_auth_tokens(input: RefreshAuthTokensInput, ctx: Context) {
   }
 }
 
-fn create_auth_tokens(user_id: Int, ctx: Context) {
-  let refresh_token = create_refresh_token(user_id, ctx)
-  let access_token = create_access_token(int.to_string(user_id))
-  AuthTokens(refresh_token: refresh_token, access_token: access_token)
-}
-
-fn create_refresh_token(user_id: Int, ctx: Context) {
+fn create_refresh_token(
+  user_id: Int,
+  ctx: Context,
+) -> Result(String, ServiceError) {
   let sql =
     "insert into refresh_tokens (token, userId, expiresAt) values (?, ?, ?) returning *"
 
@@ -114,14 +119,24 @@ fn create_refresh_token(user_id: Int, ctx: Context) {
     )
 
   case result {
-    Ok([#(token, _, _)]) -> token
-    Error(error) ->
-      todo as "should handle if there is an error with the database"
-    _ -> create_refresh_token(user_id, ctx)
+    Ok([#(token, _, _)]) -> Ok(token)
+    Error(SqlightError(ConstraintPrimarykey, _, _)) ->
+      create_refresh_token(user_id, ctx)
+    Error(error) -> Error(DatabaseError(error))
+    _ -> panic as "More than one row was returned from an insert."
   }
 }
 
-fn create_access_token(sub: String) {
+fn create_auth_tokens(
+  user_id: Int,
+  ctx: Context,
+) -> Result(AuthTokens, ServiceError) {
+  use refresh_token <- result.try(create_refresh_token(user_id, ctx))
+  let access_token = create_access_token(int.to_string(user_id))
+  Ok(AuthTokens(refresh_token: refresh_token, access_token: access_token))
+}
+
+fn create_access_token(sub: String) -> String {
   gwt.new()
   |> gwt.set_subject(sub)
   |> gwt.set_expiration(

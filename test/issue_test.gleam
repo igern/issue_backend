@@ -262,3 +262,11 @@ pub fn delete_one_issue_invalid_id_test() {
 
   response.status |> should.equal(400)
 }
+
+pub fn these_test() {
+  use t <- utils.with_context
+
+  use t, authorized_user <- utils.create_next_user_and_login(t)
+  use t, authorized_user2 <- utils.create_next_user_and_login(t)
+  Nil
+}

@@ -40,7 +40,7 @@ pub fn login(input: LoginInput, ctx: Context) {
         _ -> Error(InvalidCredentialsError)
       }
     }
-    Error(_) -> Error(DatabaseError)
+    Error(error) -> Error(DatabaseError(error))
     _ -> Error(InvalidCredentialsError)
   }
 }
@@ -63,21 +63,27 @@ pub fn refresh_auth_tokens(input: RefreshAuthTokensInput, ctx: Context) {
         order.Lt -> {
           let sql = "delete from refresh_tokens where token = ?"
 
-          let _ =
+          let _ = case
             sqlight.query(
               sql,
               ctx.connection,
               [sqlight.text(token)],
               dynamic.tuple3(dynamic.string, dynamic.int, dynamic.string),
             )
-          let auth_tokens = create_auth_tokens(user_id, ctx)
-
-          Ok(auth_tokens)
+          {
+            Ok(_) -> {
+              let auth_tokens = create_auth_tokens(user_id, ctx)
+              Ok(auth_tokens)
+            }
+            Error(error) -> {
+              Error(DatabaseError(error))
+            }
+          }
         }
         _ -> Error(RefreshTokenExpiredError)
       }
     }
-    Error(_) -> Error(DatabaseError)
+    Error(error) -> Error(DatabaseError(error))
     _ -> Error(RefreshTokenNotFoundError)
   }
 }

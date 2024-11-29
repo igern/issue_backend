@@ -24,7 +24,8 @@ pub fn create(input: CreateIssueInput, user_id: Int, ctx: Context) {
 
   case result {
     Ok([#(id, name, creator_id)]) -> Ok(Issue(id, name, creator_id))
-    _ -> Error(DatabaseError)
+    Error(error) -> Error(DatabaseError(error))
+    _ -> panic as "More than one row was returned from an insert."
   }
 }
 
@@ -43,7 +44,7 @@ pub fn find_all(ctx: Context) {
         })
       Ok(issues)
     }
-    _ -> Error(DatabaseError)
+    Error(error) -> Error(DatabaseError(error))
   }
 }
 
@@ -60,7 +61,7 @@ pub fn find_one(id: Int, ctx: Context) {
 
   case result {
     Ok([#(id, name, creator_id)]) -> Ok(Issue(id, name, creator_id))
-    Error(_) -> Error(DatabaseError)
+    Error(error) -> Error(DatabaseError(error))
     _ -> Error(IssueNotFoundError)
   }
 }
@@ -78,7 +79,7 @@ pub fn update_one(id: Int, input: UpdateIssueInput, ctx: Context) {
 
   case result {
     Ok([#(id, name, creator_id)]) -> Ok(Issue(id, name, creator_id))
-    Error(_) -> Error(DatabaseError)
+    Error(error) -> Error(DatabaseError(error))
     _ -> Error(IssueNotFoundError)
   }
 }
@@ -96,7 +97,7 @@ pub fn delete_one(id: Int, ctx: Context) {
 
   case result {
     Ok([#(id, name, creator_id)]) -> Ok(Issue(id, name, creator_id))
-    Error(_) -> Error(DatabaseError)
+    Error(error) -> Error(DatabaseError(error))
     _ -> Error(IssueNotFoundError)
   }
 }

@@ -1,6 +1,7 @@
 import gleam/dynamic
 import gleam/json
 import gleam/string
+import sqlight
 import wisp.{type Response}
 
 pub fn map_service_errors(
@@ -12,7 +13,10 @@ pub fn map_service_errors(
     Error(RefreshTokenExpiredError) -> refresh_token_expired_error_response()
     Error(RefreshTokenNotFoundError) -> refresh_token_not_found_error_response()
     Error(InvalidCredentialsError) -> invalid_credentials_response()
-    Error(DatabaseError) -> database_error_response()
+    Error(DatabaseError(error)) -> {
+      wisp.log_error(string.inspect(error))
+      database_error_response()
+    }
     Ok(a) -> next(a)
   }
 }
@@ -22,7 +26,7 @@ pub type ServiceError {
   RefreshTokenExpiredError
   RefreshTokenNotFoundError
   InvalidCredentialsError
-  DatabaseError
+  DatabaseError(sqlight.Error)
 }
 
 pub fn invalid_credentials_response() {

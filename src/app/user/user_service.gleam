@@ -25,6 +25,7 @@ pub fn create(input: CreateUserInput, ctx: Context) {
     )
   {
     Ok([#(id, email, _)]) -> Ok(User(id, email))
-    _ -> Error(DatabaseError)
+    Error(error) -> Error(DatabaseError(error))
+    _ -> panic as "More than one row was returned from an insert."
   }
 }

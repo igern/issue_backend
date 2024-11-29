@@ -4,6 +4,7 @@ import app/common/response_utils
 import app/router
 import birl
 import gleam/dynamic
+import gleam/io
 import gleeunit/should
 import sqlight
 import utils
@@ -78,6 +79,7 @@ pub fn refresh_auth_tokens_test() {
       testing.post_json("/api/auth/refresh_auth_tokens", [], input),
       t.context,
     )
+  response.status |> should.equal(201)
 
   let sql = "select * from refresh_tokens where token = ?"
 
@@ -89,7 +91,7 @@ pub fn refresh_auth_tokens_test() {
       dynamic.tuple3(dynamic.string, dynamic.int, dynamic.string),
     )
 
-  response.status |> should.equal(201)
+  Nil
 }
 
 pub fn refresh_auth_tokens_not_found_test() {

@@ -75,9 +75,7 @@ pub fn refresh_auth_tokens(input: RefreshAuthTokensInput, ctx: Context) {
               let auth_tokens = create_auth_tokens(user_id, ctx)
               Ok(auth_tokens)
             }
-            Error(error) -> {
-              Error(DatabaseError(error))
-            }
+            Error(error) -> Error(DatabaseError(error))
           }
         }
         _ -> Error(RefreshTokenExpiredError)
@@ -117,6 +115,8 @@ fn create_refresh_token(user_id: Int, ctx: Context) {
 
   case result {
     Ok([#(token, _, _)]) -> token
+    Error(error) ->
+      todo as "should handle if there is an error with the database"
     _ -> create_refresh_token(user_id, ctx)
   }
 }

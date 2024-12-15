@@ -2,26 +2,23 @@ import app/common/response_utils.{DatabaseError, IssueNotFoundError}
 import app/issue/inputs/create_issue_input.{type CreateIssueInput}
 import app/issue/inputs/update_issue_input.{type UpdateIssueInput}
 import app/issue/outputs/issue.{Issue}
-import app/profile/profile_service
 import app/types.{type Context}
 import gleam/dynamic
 import gleam/list
-import gleam/result
 import sqlight
 
 fn issue_decoder() {
   dynamic.tuple3(dynamic.int, dynamic.string, dynamic.int)
 }
 
-pub fn create(input: CreateIssueInput, user_id: Int, ctx: Context) {
-  use profile <- result.try(profile_service.find_one_from_user_id(user_id, ctx))
+pub fn create(input: CreateIssueInput, profile_id: Int, ctx: Context) {
   let sql = "insert into issues (name, creator_id) values (?, ?) returning *"
 
   let result =
     sqlight.query(
       sql,
       on: ctx.connection,
-      with: [sqlight.text(input.name), sqlight.int(profile.id)],
+      with: [sqlight.text(input.name), sqlight.int(profile_id)],
       expecting: issue_decoder(),
     )
 

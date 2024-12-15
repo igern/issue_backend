@@ -55,13 +55,14 @@ pub fn profile_not_found_error_response() {
   json_response(404, "profile not found")
 }
 
-pub fn or_400(
-  result: Result(value, error),
-  next: fn(value) -> Response,
-) -> Response {
+pub fn or_response(
+  result: Result(a, b),
+  error: Response,
+  handle: fn(a) -> Response,
+) {
   case result {
-    Ok(value) -> next(value)
-    Error(_) -> wisp.bad_request()
+    Ok(result) -> handle(result)
+    Error(_) -> error
   }
 }
 

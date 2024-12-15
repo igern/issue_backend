@@ -17,7 +17,7 @@ pub fn router(req: Request, ctx: Context, handle_request: fn() -> Response) {
 }
 
 pub fn create_profile(req: Request, ctx: Context) {
-  use payload <- auth_guards.jwt(req)
+  use payload <- auth_guards.require_jwt(req)
   use json <- wisp.require_json(req)
   use input <- response_utils.or_decode_error(create_profile_input.from_dynamic(
     json,

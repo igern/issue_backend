@@ -39,11 +39,11 @@ pub fn create_issue_test() {
 
 pub fn find_issues_0_test() {
   use t <- utils.with_context
-  use t, authorized_user <- utils.create_next_user_and_login(t)
+  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
   let response =
     router.handle_request(
       testing.get("/api/issues", [
-        utils.bearer_header(authorized_user.auth_tokens.access_token),
+        utils.bearer_header(authorized_profile.auth_tokens.access_token),
       ]),
       t.context,
     )
@@ -129,11 +129,11 @@ pub fn find_one_issue_test() {
 
 pub fn find_one_issue_not_found_test() {
   use t <- utils.with_context
-  use t, authorized_user <- utils.create_next_user_and_login(t)
+  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
   let response =
     router.handle_request(
       testing.get("/api/issues/" <> "1", [
-        utils.bearer_header(authorized_user.auth_tokens.access_token),
+        utils.bearer_header(authorized_profile.auth_tokens.access_token),
       ]),
       t.context,
     )
@@ -144,11 +144,11 @@ pub fn find_one_issue_not_found_test() {
 pub fn find_one_issue_invalid_id_test() {
   use t <- utils.with_context
 
-  use t, authorized_user <- utils.create_next_user_and_login(t)
+  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
   let response =
     router.handle_request(
       testing.get("/api/issues/" <> "Invalid", [
-        utils.bearer_header(authorized_user.auth_tokens.access_token),
+        utils.bearer_header(authorized_profile.auth_tokens.access_token),
       ]),
       t.context,
     )
@@ -185,14 +185,14 @@ pub fn update_one_issue_test() {
 pub fn update_one_issue_not_found_test() {
   use t <- utils.with_context
 
-  use t, authorized_user <- utils.create_next_user_and_login(t)
+  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
   let input = update_issue_input.to_json(UpdateIssueInput(name: "Mikkel"))
 
   let response =
     router.handle_request(
       testing.patch_json(
         "/api/issues/" <> "1",
-        [utils.bearer_header(authorized_user.auth_tokens.access_token)],
+        [utils.bearer_header(authorized_profile.auth_tokens.access_token)],
         input,
       ),
       t.context,
@@ -204,14 +204,14 @@ pub fn update_one_issue_not_found_test() {
 pub fn update_one_issue_invalid_id_test() {
   use t <- utils.with_context
 
-  use t, authorized_user <- utils.create_next_user_and_login(t)
+  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
   let input = update_issue_input.to_json(UpdateIssueInput(name: "Mikkel"))
 
   let response =
     router.handle_request(
       testing.patch_json(
         "/api/issues/" <> "Invalid",
-        [utils.bearer_header(authorized_user.auth_tokens.access_token)],
+        [utils.bearer_header(authorized_profile.auth_tokens.access_token)],
         input,
       ),
       t.context,
@@ -248,13 +248,13 @@ pub fn delete_one_issue_test() {
 pub fn delete_one_issue_not_found_test() {
   use t <- utils.with_context
 
-  use t, authorized_user <- utils.create_next_user_and_login(t)
+  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
 
   let response =
     router.handle_request(
       testing.delete(
         "/api/issues/" <> "1",
-        [utils.bearer_header(authorized_user.auth_tokens.access_token)],
+        [utils.bearer_header(authorized_profile.auth_tokens.access_token)],
         "",
       ),
       t.context,
@@ -266,13 +266,13 @@ pub fn delete_one_issue_not_found_test() {
 pub fn delete_one_issue_invalid_id_test() {
   use t <- utils.with_context
 
-  use t, authorized_user <- utils.create_next_user_and_login(t)
+  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
 
   let response =
     router.handle_request(
       testing.delete(
         "/api/issues/" <> "Invalid",
-        [utils.bearer_header(authorized_user.auth_tokens.access_token)],
+        [utils.bearer_header(authorized_profile.auth_tokens.access_token)],
         "",
       ),
       t.context,

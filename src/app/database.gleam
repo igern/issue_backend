@@ -23,4 +23,15 @@ pub fn init_schemas(connection: Connection) {
     expiresAt TEXT NOT NULL)
     "
   let assert Ok(Nil) = sqlight.exec(refresh_token_sql, connection)
+
+  let profile_sql =
+    "
+  CREATE TABLE IF NOT EXISTS profiles (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  name TEXT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users (id)
+  )
+  "
+  let assert Ok(Nil) = sqlight.exec(profile_sql, connection)
 }

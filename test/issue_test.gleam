@@ -12,7 +12,7 @@ import wisp/testing
 pub fn create_issue_test() {
   use t <- utils.with_context
 
-  use t, authorized_user <- utils.create_next_user_and_login(t)
+  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
 
   use t, input <- utils.next_create_issue_input(t)
   let json = create_issue_input.to_json(input)
@@ -21,7 +21,7 @@ pub fn create_issue_test() {
     router.handle_request(
       testing.post_json(
         "/api/issues",
-        [utils.bearer_header(authorized_user.auth_tokens.access_token)],
+        [utils.bearer_header(authorized_profile.auth_tokens.access_token)],
         json,
       ),
       t.context,
@@ -33,7 +33,7 @@ pub fn create_issue_test() {
   |> should.equal(Issue(
     id: 1,
     name: input.name,
-    creator_id: authorized_user.user.id,
+    creator_id: authorized_profile.user.id,
   ))
 }
 
@@ -57,13 +57,16 @@ pub fn find_issues_0_test() {
 pub fn find_issues_1_test() {
   use t <- utils.with_context
 
-  use t, authorized_user <- utils.create_next_user_and_login(t)
-  use issue <- utils.create_issue(t, authorized_user.auth_tokens.access_token)
+  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
+  use issue <- utils.create_issue(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
 
   let response =
     router.handle_request(
       testing.get("/api/issues", [
-        utils.bearer_header(authorized_user.auth_tokens.access_token),
+        utils.bearer_header(authorized_profile.auth_tokens.access_token),
       ]),
       t.context,
     )
@@ -77,14 +80,20 @@ pub fn find_issues_1_test() {
 pub fn find_issues_2_test() {
   use t <- utils.with_context
 
-  use t, authorized_user <- utils.create_next_user_and_login(t)
-  use issue1 <- utils.create_issue(t, authorized_user.auth_tokens.access_token)
-  use issue2 <- utils.create_issue(t, authorized_user.auth_tokens.access_token)
+  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
+  use issue1 <- utils.create_issue(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
+  use issue2 <- utils.create_issue(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
 
   let response =
     router.handle_request(
       testing.get("/api/issues", [
-        utils.bearer_header(authorized_user.auth_tokens.access_token),
+        utils.bearer_header(authorized_profile.auth_tokens.access_token),
       ]),
       t.context,
     )
@@ -98,13 +107,16 @@ pub fn find_issues_2_test() {
 pub fn find_one_issue_test() {
   use t <- utils.with_context
 
-  use t, authorized_user <- utils.create_next_user_and_login(t)
-  use issue <- utils.create_issue(t, authorized_user.auth_tokens.access_token)
+  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
+  use issue <- utils.create_issue(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
 
   let response =
     router.handle_request(
       testing.get("/api/issues/" <> int.to_string(issue.id), [
-        utils.bearer_header(authorized_user.auth_tokens.access_token),
+        utils.bearer_header(authorized_profile.auth_tokens.access_token),
       ]),
       t.context,
     )
@@ -147,15 +159,18 @@ pub fn find_one_issue_invalid_id_test() {
 pub fn update_one_issue_test() {
   use t <- utils.with_context
 
-  use t, authorized_user <- utils.create_next_user_and_login(t)
-  use issue <- utils.create_issue(t, authorized_user.auth_tokens.access_token)
+  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
+  use issue <- utils.create_issue(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
   let input = update_issue_input.to_json(UpdateIssueInput(name: "Mikkel"))
 
   let response =
     router.handle_request(
       testing.patch_json(
         "/api/issues/" <> int.to_string(issue.id),
-        [utils.bearer_header(authorized_user.auth_tokens.access_token)],
+        [utils.bearer_header(authorized_profile.auth_tokens.access_token)],
         input,
       ),
       t.context,
@@ -208,14 +223,17 @@ pub fn update_one_issue_invalid_id_test() {
 pub fn delete_one_issue_test() {
   use t <- utils.with_context
 
-  use t, authorized_user <- utils.create_next_user_and_login(t)
-  use issue <- utils.create_issue(t, authorized_user.auth_tokens.access_token)
+  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
+  use issue <- utils.create_issue(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
 
   let response =
     router.handle_request(
       testing.delete(
         "/api/issues/" <> int.to_string(issue.id),
-        [utils.bearer_header(authorized_user.auth_tokens.access_token)],
+        [utils.bearer_header(authorized_profile.auth_tokens.access_token)],
         "",
       ),
       t.context,

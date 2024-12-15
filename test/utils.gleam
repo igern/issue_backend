@@ -5,6 +5,10 @@ import app/issue/inputs/create_issue_input.{
   type CreateIssueInput, CreateIssueInput,
 }
 import app/issue/outputs/issue.{type Issue}
+import app/profile/inputs/create_profile_input.{
+  type CreateProfileInput, CreateProfileInput,
+}
+import app/profile/outputs/profile.{type Profile}
 import app/router
 import app/types.{type Context, Context}
 import app/user/inputs/create_user_input.{type CreateUserInput, CreateUserInput}
@@ -22,6 +26,10 @@ pub type TestContext {
 
 pub type AuthorizedUser {
   AuthorizedUser(user: User, auth_tokens: AuthTokens)
+}
+
+pub type AuthorizedProfile {
+  AuthorizedProfile(profile: Profile, user: User, auth_tokens: AuthTokens)
 }
 
 pub fn to_body(json: Json) {
@@ -127,6 +135,64 @@ pub fn create_next_user_and_login(
   let auth_tokens =
     login(t, LoginInput(email: user.email, password: "secret1234"))
   handler(t, AuthorizedUser(user:, auth_tokens:))
+}
+
+pub fn create_next_user_and_profile_and_login(
+  t: TestContext,
+  handler: fn(TestContext, AuthorizedProfile) -> Nil,
+) {
+  use t, authorized_user <- create_next_user_and_login(t)
+  use t, profile <- create_next_profile(t, authorized_user)
+  handler(
+    t,
+    AuthorizedProfile(
+      profile,
+      authorized_user.user,
+      authorized_user.auth_tokens,
+    ),
+  )
+}
+
+pub fn next_create_profile_input(
+  t: TestContext,
+  handler: fn(TestContext, CreateProfileInput) -> Nil,
+) {
+  handler(
+    TestContext(..t, next: t.next + 1),
+    CreateProfileInput(name: int.to_string(t.next)),
+  )
+}
+
+pub fn create_profile(
+  t: TestContext,
+  authorized_user: AuthorizedUser,
+  input: CreateProfileInput,
+  handler: fn(Profile) -> Nil,
+) {
+  let json = create_profile_input.to_json(input)
+  let response =
+    router.handle_request(
+      testing.post_json(
+        "/api/profiles",
+        [bearer_header(authorized_user.auth_tokens.access_token)],
+        json,
+      ),
+      t.context,
+    )
+
+  let assert Ok(profile) =
+    json.decode(testing.string_body(response), profile.decoder())
+  handler(profile)
+}
+
+pub fn create_next_profile(
+  t: TestContext,
+  authorized_user: AuthorizedUser,
+  handler: fn(TestContext, Profile) -> Nil,
+) {
+  use t, input <- next_create_profile_input(t)
+  use profile <- create_profile(t, authorized_user, input)
+  handler(t, profile)
 }
 
 pub fn bearer_header(access_token: String) {

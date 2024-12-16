@@ -9,6 +9,7 @@ pub fn map_service_errors(
   next: fn(a) -> Response,
 ) -> Response {
   case result {
+    Error(UserNotFoundError) -> user_not_found_error_response()
     Error(ProfileNotFoundError) -> profile_not_found_error_response()
     Error(IssueNotFoundError) -> issue_not_found_error_response()
     Error(RefreshTokenExpiredError) -> refresh_token_expired_error_response()
@@ -23,6 +24,7 @@ pub fn map_service_errors(
 }
 
 pub type ServiceError {
+  UserNotFoundError
   ProfileNotFoundError
   IssueNotFoundError
   RefreshTokenExpiredError
@@ -33,6 +35,10 @@ pub type ServiceError {
 
 pub fn invalid_credentials_response() {
   json_response(400, "invalid credentials")
+}
+
+pub fn refresh_token_expired_error_response() {
+  json_response(400, "refresh token expired")
 }
 
 pub fn missing_authorization_header_response() {
@@ -51,12 +57,16 @@ pub fn profile_required_response() {
   json_response(403, "profile required")
 }
 
+pub fn can_not_delete_other_user_response() {
+  json_response(403, "can not delete other user")
+}
+
 pub fn refresh_token_not_found_error_response() {
   json_response(404, "refresh token not found")
 }
 
-pub fn refresh_token_expired_error_response() {
-  json_response(400, "refresh token expired")
+pub fn user_not_found_error_response() {
+  json_response(404, "user not found")
 }
 
 pub fn issue_not_found_error_response() {

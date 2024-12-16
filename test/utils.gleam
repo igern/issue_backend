@@ -202,6 +202,7 @@ pub fn bearer_header(access_token: String) {
 }
 
 pub fn response_equal(response1: Response, response2: Response) {
+  response1.status |> should.equal(response2.status)
   testing.string_body(response1)
   |> should.equal(
     response2

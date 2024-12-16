@@ -1,6 +1,5 @@
 # issue_backend
 
 ## Backlog
-- create deleting profile/user
-- add test to when user has been deleted but accesstoken is still valid
+- add test for what happens when deleting a user with a profile
 - update issue list requests to use pagination

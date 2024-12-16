@@ -1,5 +1,6 @@
 import app/auth/inputs/login_input.{type LoginInput, LoginInput}
 import app/auth/outputs/auth_tokens.{type AuthTokens}
+import app/common/response_utils
 import app/database
 import app/issue/inputs/create_issue_input.{
   type CreateIssueInput, CreateIssueInput,
@@ -13,11 +14,12 @@ import app/router
 import app/types.{type Context, Context}
 import app/user/inputs/create_user_input.{type CreateUserInput, CreateUserInput}
 import app/user/outputs/user.{type User}
+import gleam/http
 import gleam/int
 import gleam/json.{type Json}
 import gleeunit/should
 import sqlight
-import wisp
+import wisp.{type Response}
 import wisp/testing
 
 pub type TestContext {
@@ -197,4 +199,62 @@ pub fn create_next_profile(
 
 pub fn bearer_header(access_token: String) {
   #("authorization", "Bearer " <> access_token)
+}
+
+pub fn response_equal(response1: Response, response2: Response) {
+  testing.string_body(response1)
+  |> should.equal(
+    response2
+    |> testing.string_body,
+  )
+}
+
+pub fn missing_authorization_header_tester(method: http.Method, path: String) {
+  use t <- with_context
+  let response =
+    router.handle_request(testing.request(method, path, [], <<>>), t.context)
+
+  response
+  |> response_equal(response_utils.missing_authorization_header_response())
+}
+
+pub fn invalid_bearer_format_tester(method: http.Method, path: String) {
+  use t <- with_context
+  let response =
+    router.handle_request(
+      testing.request(method, path, [#("authorization", "token")], <<>>),
+      t.context,
+    )
+  response
+  |> response_equal(response_utils.invalid_bearer_format_response())
+}
+
+pub fn invalid_jwt_tester(method: http.Method, path: String) {
+  use t <- with_context
+  let response =
+    router.handle_request(
+      testing.request(method, path, [#("authorization", "bearer token")], <<>>),
+      t.context,
+    )
+
+  response |> response_equal(response_utils.invalid_jwt_response())
+}
+
+pub fn profile_required_tester(method: http.Method, path: String) {
+  use t <- with_context
+
+  use t, authorized_user <- create_next_user_and_login(t)
+
+  let response =
+    router.handle_request(
+      testing.request(
+        method,
+        path,
+        [bearer_header(authorized_user.auth_tokens.access_token)],
+        <<>>,
+      ),
+      t.context,
+    )
+
+  response |> response_equal(response_utils.profile_required_response())
 }

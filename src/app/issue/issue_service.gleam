@@ -11,14 +11,14 @@ fn issue_decoder() {
   dynamic.tuple3(dynamic.int, dynamic.string, dynamic.int)
 }
 
-pub fn create(input: CreateIssueInput, profile_id: Int, ctx: Context) {
+pub fn create(input: CreateIssueInput, creator_id: Int, ctx: Context) {
   let sql = "insert into issues (name, creator_id) values (?, ?) returning *"
 
   let result =
     sqlight.query(
       sql,
       on: ctx.connection,
-      with: [sqlight.text(input.name), sqlight.int(profile_id)],
+      with: [sqlight.text(input.name), sqlight.int(creator_id)],
       expecting: issue_decoder(),
     )
 

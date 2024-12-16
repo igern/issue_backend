@@ -1,6 +1,7 @@
 import app/profile/inputs/create_profile_input
 import app/profile/outputs/profile
 import app/router
+import gleam/http
 import gleam/json
 import gleeunit/should
 import utils
@@ -34,4 +35,16 @@ pub fn create_profile_test() {
     user_id: authorized_user.user.id,
     name: data.name,
   ))
+}
+
+pub fn create_profile_missing_authorization_header_test() {
+  utils.missing_authorization_header_tester(http.Post, "/api/profiles")
+}
+
+pub fn create_profile_invalid_bearer_format_test() {
+  utils.invalid_bearer_format_tester(http.Post, "/api/profiles")
+}
+
+pub fn create_profile_invalid_jwt_test() {
+  utils.invalid_jwt_tester(http.Post, "/api/profiles")
 }

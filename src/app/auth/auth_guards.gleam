@@ -15,15 +15,15 @@ pub fn require_jwt(
 ) -> Response {
   use bearer_token <- response_utils.or_response(
     list.key_find(req.headers, "authorization"),
-    response_utils.json_response(401, "missing authorization header"),
+    response_utils.missing_authorization_header_response(),
   )
   use #(_, token) <- response_utils.or_response(
     string.split_once(bearer_token, " "),
-    response_utils.json_response(401, "invalid bearer format"),
+    response_utils.invalid_bearer_format_response(),
   )
   use jwt <- response_utils.or_response(
     gwt.from_signed_string(token, "secret"),
-    response_utils.json_response(401, "invalid jwt"),
+    response_utils.invalid_jwt_response(),
   )
   let assert Ok(sub) = gwt.get_subject(jwt)
   let assert Ok(exp) = gwt.get_expiration(jwt)
@@ -39,7 +39,7 @@ pub fn require_profile(
   let assert Ok(user_id) = int.parse(payload.sub)
   use profile <- response_utils.or_response(
     profile_service.find_one_from_user_id(user_id, ctx),
-    response_utils.json_response(403, "profile required"),
+    response_utils.profile_required_response(),
   )
   handle_request(profile)
 }

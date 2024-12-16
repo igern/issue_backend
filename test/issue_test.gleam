@@ -3,6 +3,7 @@ import app/issue/inputs/update_issue_input.{UpdateIssueInput}
 import app/issue/outputs/issue.{Issue}
 import app/router
 import gleam/dynamic
+import gleam/http
 import gleam/int
 import gleam/json
 import gleeunit/should
@@ -35,6 +36,22 @@ pub fn create_issue_test() {
     name: input.name,
     creator_id: authorized_profile.user.id,
   ))
+}
+
+pub fn create_issue_missing_authorization_header_test() {
+  utils.missing_authorization_header_tester(http.Post, "/api/issues")
+}
+
+pub fn create_issue_invalid_bearer_format_test() {
+  utils.invalid_bearer_format_tester(http.Post, "/api/issues")
+}
+
+pub fn create_issue_invalid_jwt_test() {
+  utils.invalid_jwt_tester(http.Post, "/api/issues")
+}
+
+pub fn create_issue_profile_required_test() {
+  utils.profile_required_tester(http.Post, "/api/issues")
 }
 
 pub fn find_issues_0_test() {
@@ -104,6 +121,22 @@ pub fn find_issues_2_test() {
   data |> should.equal([issue1, issue2])
 }
 
+pub fn find_issues_missing_authorization_header_test() {
+  utils.missing_authorization_header_tester(http.Get, "/api/issues")
+}
+
+pub fn find_issues_invalid_bearer_format_test() {
+  utils.invalid_bearer_format_tester(http.Get, "/api/issues")
+}
+
+pub fn find_issues_invalid_jwt_test() {
+  utils.invalid_jwt_tester(http.Get, "/api/issues")
+}
+
+pub fn find_issues_profile_required_test() {
+  utils.profile_required_tester(http.Get, "/api/issues")
+}
+
 pub fn find_one_issue_test() {
   use t <- utils.with_context
 
@@ -154,6 +187,22 @@ pub fn find_one_issue_invalid_id_test() {
     )
 
   response.status |> should.equal(400)
+}
+
+pub fn find_one_missing_authorization_header_test() {
+  utils.missing_authorization_header_tester(http.Get, "/api/issues/1")
+}
+
+pub fn find_one_invalid_bearer_format_test() {
+  utils.invalid_bearer_format_tester(http.Get, "/api/issues/1")
+}
+
+pub fn find_one_invalid_jwt_test() {
+  utils.invalid_jwt_tester(http.Get, "/api/issues/1")
+}
+
+pub fn find_one_profile_required_test() {
+  utils.profile_required_tester(http.Get, "/api/issues/1")
 }
 
 pub fn update_one_issue_test() {
@@ -220,6 +269,22 @@ pub fn update_one_issue_invalid_id_test() {
   response.status |> should.equal(400)
 }
 
+pub fn update_one_missing_authorization_header_test() {
+  utils.missing_authorization_header_tester(http.Patch, "/api/issues/1")
+}
+
+pub fn update_one_invalid_bearer_format_test() {
+  utils.invalid_bearer_format_tester(http.Patch, "/api/issues/1")
+}
+
+pub fn update_one_invalid_jwt_test() {
+  utils.invalid_jwt_tester(http.Patch, "/api/issues/1")
+}
+
+pub fn update_one_profile_required_test() {
+  utils.profile_required_tester(http.Patch, "/api/issues/1")
+}
+
 pub fn delete_one_issue_test() {
   use t <- utils.with_context
 
@@ -279,4 +344,20 @@ pub fn delete_one_issue_invalid_id_test() {
     )
 
   response.status |> should.equal(400)
+}
+
+pub fn delete_one_missing_authorization_header_test() {
+  utils.missing_authorization_header_tester(http.Delete, "/api/issues/1")
+}
+
+pub fn delete_one_invalid_bearer_format_test() {
+  utils.invalid_bearer_format_tester(http.Delete, "/api/issues/1")
+}
+
+pub fn delete_one_invalid_jwt_test() {
+  utils.invalid_jwt_tester(http.Delete, "/api/issues/1")
+}
+
+pub fn delete_one_profile_required_test() {
+  utils.profile_required_tester(http.Delete, "/api/issues/1")
 }

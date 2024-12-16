@@ -1,6 +1,6 @@
 # issue_backend
 
 ## Backlog
-- add unauthorized and forbidden tests for all endpoints
 - create deleting profile/user
+- add test to when user has been deleted but accesstoken is still valid
 - update issue list requests to use pagination

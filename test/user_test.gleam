@@ -114,6 +114,26 @@ pub fn delete_one_user_with_profile_test() {
   )
 }
 
+pub fn delete_one_user_other_user_test() {
+  use t <- utils.with_context
+
+  use t, authorized_profil1 <- utils.create_next_user_and_profile_and_login(t)
+  use t, authorized_profil2 <- utils.create_next_user_and_profile_and_login(t)
+
+  let response =
+    router.handle_request(
+      testing.delete_json(
+        "api/users/" <> authorized_profil2.user.id |> int.to_string,
+        [utils.bearer_header(authorized_profil1.auth_tokens.access_token)],
+        json.object([]),
+      ),
+      t.context,
+    )
+
+  response
+  |> utils.response_equal(response_utils.can_not_delete_other_user_response())
+}
+
 pub fn delete_one_user_missing_authorization_header_test() {
   utils.missing_authorization_header_tester(http.Delete, "/api/users/1")
 }

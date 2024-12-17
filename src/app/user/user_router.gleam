@@ -42,6 +42,7 @@ fn delete_user(req: Request, id: String, ctx: Context) {
   )
 
   case user_id == id {
+    False -> response_utils.can_not_delete_other_user_response()
     True -> {
       use result <- response_utils.map_service_errors(user_service.delete_one(
         id,
@@ -52,6 +53,5 @@ fn delete_user(req: Request, id: String, ctx: Context) {
       |> json.to_string_builder()
       |> wisp.json_response(200)
     }
-    False -> response_utils.can_not_delete_other_user_response()
   }
 }

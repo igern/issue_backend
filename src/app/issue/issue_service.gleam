@@ -1,3 +1,4 @@
+import app/common/inputs/pagination_input.{type PaginationInput}
 import app/common/response_utils.{DatabaseError, IssueNotFoundError}
 import app/issue/inputs/create_issue_input.{type CreateIssueInput}
 import app/issue/inputs/update_issue_input.{type UpdateIssueInput}
@@ -29,11 +30,16 @@ pub fn create(input: CreateIssueInput, creator_id: Int, ctx: Context) {
   }
 }
 
-pub fn find_all(ctx: Context) {
-  let sql = "select * from issues"
+pub fn find_all(input: PaginationInput, ctx: Context) {
+  let sql = "select * from issues limit ? offset ?"
 
   let result =
-    sqlight.query(sql, on: ctx.connection, with: [], expecting: issue_decoder())
+    sqlight.query(
+      sql,
+      on: ctx.connection,
+      with: [sqlight.int(input.take), sqlight.int(input.skip)],
+      expecting: issue_decoder(),
+    )
 
   case result {
     Ok(result) -> {

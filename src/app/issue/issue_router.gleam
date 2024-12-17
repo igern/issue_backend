@@ -1,4 +1,5 @@
 import app/auth/auth_guards
+import app/common/inputs/pagination_input.{PaginationInput}
 import app/common/response_utils
 import app/issue/inputs/create_issue_input
 import app/issue/inputs/update_issue_input
@@ -8,6 +9,10 @@ import app/types.{type Context}
 import gleam/http.{Delete, Get, Patch, Post}
 import gleam/int
 import gleam/json
+import gleam/list
+import gleam/option
+import gleam/result
+import gleam/uri
 import wisp.{type Request, type Response}
 
 pub fn router(req: Request, ctx: Context, handle_request: fn() -> Response) {
@@ -38,10 +43,27 @@ fn create_issue(req: Request, ctx: Context) {
   |> wisp.json_response(201)
 }
 
+fn parse_pagination_input(query: option.Option(String)) {
+  use query <- result.try(option.to_result(query, Nil))
+  use params <- result.try(uri.parse_query(query))
+  use skip <- result.try(list.find(params, fn(param) { param.0 == "skip" }))
+  use skip <- result.try(int.parse(skip.1))
+  use take <- result.try(list.find(params, fn(param) { param.0 == "take" }))
+  use take <- result.try(int.parse(take.1))
+  Ok(PaginationInput(skip, take))
+}
+
 fn find_issues(req: Request, ctx: Context) {
   use _ <- auth_guards.require_profile(req, ctx)
+  use input <- response_utils.or_response(
+    parse_pagination_input(req.query),
+    response_utils.json_response(400, "invalid pagination input"),
+  )
 
-  use result <- response_utils.map_service_errors(issue_service.find_all(ctx))
+  use result <- response_utils.map_service_errors(issue_service.find_all(
+    input,
+    ctx,
+  ))
 
   json.array(result, issue.to_json)
   |> json.to_string_builder()

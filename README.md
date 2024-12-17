@@ -1,4 +1,5 @@
 # issue_backend
 
 ## Backlog
-- update issue list requests to use pagination
+- Update find_issues to return paginated results
+- Add profile image to profile

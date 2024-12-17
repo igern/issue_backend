@@ -57,9 +57,10 @@ pub fn create_issue_profile_required_test() {
 pub fn find_issues_0_test() {
   use t <- utils.with_context
   use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
+
   let response =
     router.handle_request(
-      testing.get("/api/issues", [
+      testing.get("/api/issues?skip=0&take=10", [
         utils.bearer_header(authorized_profile.auth_tokens.access_token),
       ]),
       t.context,
@@ -82,7 +83,7 @@ pub fn find_issues_1_test() {
 
   let response =
     router.handle_request(
-      testing.get("/api/issues", [
+      testing.get("/api/issues?skip=0&take=10", [
         utils.bearer_header(authorized_profile.auth_tokens.access_token),
       ]),
       t.context,
@@ -109,7 +110,7 @@ pub fn find_issues_2_test() {
 
   let response =
     router.handle_request(
-      testing.get("/api/issues", [
+      testing.get("/api/issues?skip=0&take=10", [
         utils.bearer_header(authorized_profile.auth_tokens.access_token),
       ]),
       t.context,
@@ -119,6 +120,50 @@ pub fn find_issues_2_test() {
   let assert Ok(data) =
     json.decode(testing.string_body(response), dynamic.list(issue.decoder()))
   data |> should.equal([issue1, issue2])
+}
+
+pub fn find_issues_3_test() {
+  use t <- utils.with_context
+
+  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
+  use issue1 <- utils.create_issue(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
+  use issue2 <- utils.create_issue(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
+  use issue3 <- utils.create_issue(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
+
+  let response =
+    router.handle_request(
+      testing.get("/api/issues?skip=0&take=1", [
+        utils.bearer_header(authorized_profile.auth_tokens.access_token),
+      ]),
+      t.context,
+    )
+
+  response.status |> should.equal(200)
+  let assert Ok(data) =
+    json.decode(testing.string_body(response), dynamic.list(issue.decoder()))
+  data |> should.equal([issue1])
+
+  let response =
+    router.handle_request(
+      testing.get("/api/issues?skip=1&take=2", [
+        utils.bearer_header(authorized_profile.auth_tokens.access_token),
+      ]),
+      t.context,
+    )
+
+  response.status |> should.equal(200)
+  let assert Ok(data) =
+    json.decode(testing.string_body(response), dynamic.list(issue.decoder()))
+  data |> should.equal([issue2, issue3])
 }
 
 pub fn find_issues_missing_authorization_header_test() {

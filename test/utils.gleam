@@ -161,7 +161,7 @@ pub fn next_create_profile_input(
 ) {
   handler(
     TestContext(..t, next: t.next + 1),
-    CreateProfileInput(name: int.to_string(t.next)),
+    CreateProfileInput(name: "name" <> int.to_string(t.next)),
   )
 }
 

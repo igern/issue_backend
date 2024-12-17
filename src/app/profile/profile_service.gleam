@@ -5,7 +5,7 @@ import app/types.{type Context}
 import gleam/dynamic
 import sqlight
 
-fn profile_decoder() {
+pub fn profile_decoder() {
   dynamic.tuple3(dynamic.int, dynamic.int, dynamic.string)
 }
 

@@ -1,4 +1,5 @@
 import app/common/response_utils
+import app/profile/profile_service
 import app/router
 import app/user/inputs/create_user_input
 import app/user/outputs/user.{User}
@@ -77,6 +78,40 @@ pub fn delete_one_user_not_found_test() {
 
   response
   |> utils.response_equal(response_utils.user_not_found_error_response())
+}
+
+pub fn delete_one_user_with_profile_test() {
+  use t <- utils.with_context
+
+  use t, authorized_profil <- utils.create_next_user_and_profile_and_login(t)
+
+  let response =
+    router.handle_request(
+      testing.delete_json(
+        "api/users/" <> authorized_profil.user.id |> int.to_string,
+        [utils.bearer_header(authorized_profil.auth_tokens.access_token)],
+        json.object([]),
+      ),
+      t.context,
+    )
+
+  let sql = "select * from profiles where id = ?"
+  let result =
+    sqlight.query(
+      sql,
+      t.context.connection,
+      [sqlight.int(authorized_profil.profile.id)],
+      profile_service.profile_decoder(),
+    )
+  result |> should.equal(Ok([]))
+
+  response
+  |> utils.response_equal(
+    authorized_profil.user
+    |> user.to_json()
+    |> json.to_string_builder()
+    |> wisp.json_response(200),
+  )
 }
 
 pub fn delete_one_user_missing_authorization_header_test() {

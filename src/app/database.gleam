@@ -1,6 +1,9 @@
 import sqlight.{type Connection}
 
 pub fn init_schemas(connection: Connection) {
+  let enable_foreign_keys_sql = "PRAGMA foreign_keys = ON;"
+  let assert Ok(Nil) = sqlight.exec(enable_foreign_keys_sql, connection)
+
   let issues_sql =
     "CREATE TABLE IF NOT EXISTS issues (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,7 +33,7 @@ pub fn init_schemas(connection: Connection) {
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL,
   name TEXT NOT NULL,
-  FOREIGN KEY (user_id) REFERENCES users (id)
+  FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
   )
   "
   let assert Ok(Nil) = sqlight.exec(profile_sql, connection)

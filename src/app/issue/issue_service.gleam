@@ -3,6 +3,7 @@ import app/common/response_utils.{DatabaseError, IssueNotFoundError}
 import app/issue/inputs/create_issue_input.{type CreateIssueInput}
 import app/issue/inputs/update_issue_input.{type UpdateIssueInput}
 import app/issue/outputs/issue.{Issue}
+import app/issue/outputs/paginated_issues
 import app/types.{type Context}
 import gleam/dynamic
 import gleam/list
@@ -30,27 +31,43 @@ pub fn create(input: CreateIssueInput, creator_id: Int, ctx: Context) {
   }
 }
 
-pub fn find_all(input: PaginationInput, ctx: Context) {
-  let sql = "select * from issues limit ? offset ?"
+pub fn find_paginated(input: PaginationInput, ctx: Context) {
+  let items_sql = "select * from issues limit ? offset ?"
+  let total_sql = "select count(*) from issues"
 
-  let result =
+  let items_result =
     sqlight.query(
-      sql,
+      items_sql,
       on: ctx.connection,
       with: [sqlight.int(input.take), sqlight.int(input.skip)],
       expecting: issue_decoder(),
     )
-
-  case result {
-    Ok(result) -> {
+  let total_result =
+    sqlight.query(
+      total_sql,
+      ctx.connection,
+      [],
+      dynamic.element(0, dynamic.int),
+    )
+  case items_result, total_result {
+    Ok(items_result), Ok(totals) -> {
+      let assert [total] = totals
       let issues =
-        list.map(result, fn(issue) {
+        list.map(items_result, fn(issue) {
           let #(id, name, creator_id) = issue
           Issue(id, name, creator_id)
         })
-      Ok(issues)
+      let issues_length = list.length(issues)
+      let paginated_issues =
+        paginated_issues.PaginatedIssues(
+          total: total,
+          has_more: total > issues_length + input.skip,
+          items: issues,
+        )
+      Ok(paginated_issues)
     }
-    Error(error) -> Error(DatabaseError(error))
+    Error(error), _ -> Error(DatabaseError(error))
+    _, Error(error) -> Error(DatabaseError(error))
   }
 }
 

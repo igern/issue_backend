@@ -1,8 +1,8 @@
 import app/issue/inputs/create_issue_input
 import app/issue/inputs/update_issue_input.{UpdateIssueInput}
 import app/issue/outputs/issue.{Issue}
+import app/issue/outputs/paginated_issues
 import app/router
-import gleam/dynamic
 import gleam/http
 import gleam/int
 import gleam/json
@@ -68,8 +68,8 @@ pub fn find_issues_0_test() {
 
   response.status |> should.equal(200)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), dynamic.list(issue.decoder()))
-  data |> should.equal([])
+    json.decode(testing.string_body(response), paginated_issues.decoder())
+  data |> should.equal(paginated_issues.PaginatedIssues(0, False, []))
 }
 
 pub fn find_issues_1_test() {
@@ -91,8 +91,8 @@ pub fn find_issues_1_test() {
 
   response.status |> should.equal(200)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), dynamic.list(issue.decoder()))
-  data |> should.equal([issue])
+    json.decode(testing.string_body(response), paginated_issues.decoder())
+  data |> should.equal(paginated_issues.PaginatedIssues(1, False, [issue]))
 }
 
 pub fn find_issues_2_test() {
@@ -118,8 +118,9 @@ pub fn find_issues_2_test() {
 
   response.status |> should.equal(200)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), dynamic.list(issue.decoder()))
-  data |> should.equal([issue1, issue2])
+    json.decode(testing.string_body(response), paginated_issues.decoder())
+  data
+  |> should.equal(paginated_issues.PaginatedIssues(2, False, [issue1, issue2]))
 }
 
 pub fn find_issues_3_test() {
@@ -149,8 +150,8 @@ pub fn find_issues_3_test() {
 
   response.status |> should.equal(200)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), dynamic.list(issue.decoder()))
-  data |> should.equal([issue1])
+    json.decode(testing.string_body(response), paginated_issues.decoder())
+  data |> should.equal(paginated_issues.PaginatedIssues(3, True, [issue1]))
 
   let response =
     router.handle_request(
@@ -162,8 +163,9 @@ pub fn find_issues_3_test() {
 
   response.status |> should.equal(200)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), dynamic.list(issue.decoder()))
-  data |> should.equal([issue2, issue3])
+    json.decode(testing.string_body(response), paginated_issues.decoder())
+  data
+  |> should.equal(paginated_issues.PaginatedIssues(3, False, [issue2, issue3]))
 }
 
 pub fn find_issues_missing_authorization_header_test() {

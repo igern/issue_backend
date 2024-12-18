@@ -5,6 +5,7 @@ import app/issue/inputs/create_issue_input
 import app/issue/inputs/update_issue_input
 import app/issue/issue_service
 import app/issue/outputs/issue
+import app/issue/outputs/paginated_issues
 import app/types.{type Context}
 import gleam/http.{Delete, Get, Patch, Post}
 import gleam/int
@@ -60,12 +61,13 @@ fn find_issues(req: Request, ctx: Context) {
     response_utils.json_response(400, "invalid pagination input"),
   )
 
-  use result <- response_utils.map_service_errors(issue_service.find_all(
+  use result <- response_utils.map_service_errors(issue_service.find_paginated(
     input,
     ctx,
   ))
 
-  json.array(result, issue.to_json)
+  result
+  |> paginated_issues.to_json
   |> json.to_string_builder()
   |> wisp.json_response(200)
 }

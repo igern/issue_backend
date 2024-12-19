@@ -19,7 +19,7 @@ jobs:
       - id: cache-gleam
         uses: actions/cache@v3
         with:
-          path: build/packages
+          path: build
           key: ${{runner.os}}-gleam-${{ hashFiles('manifest.toml')}}
       - if: ${{ !steps.cache-gleam.outputs.cache-hit }}
         run: gleam deps download

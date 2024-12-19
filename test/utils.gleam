@@ -14,9 +14,13 @@ import app/router
 import app/types.{type Context, Context}
 import app/user/inputs/create_user_input.{type CreateUserInput, CreateUserInput}
 import app/user/outputs/user.{type User}
+import bucket
+import dot_env
+import dot_env/env
 import gleam/http
 import gleam/int
 import gleam/json.{type Json}
+import gleam/option
 import gleeunit/should
 import sqlight
 import wisp.{type Response}
@@ -39,10 +43,25 @@ pub fn to_body(json: Json) {
 }
 
 pub fn with_context(test_case: fn(TestContext) -> Nil) -> Nil {
-  use connection <- sqlight.with_connection(":memory:")
+  dot_env.load_default()
+  let assert Ok(host) = env.get_string("STORAGE_HOST")
+  let assert Ok(access) = env.get_string("STORAGE_ACCESS")
+  let assert Ok(secret) = env.get_string("STORAGE_SECRET")
+  let assert Ok(region) = env.get_string("STORAGE_SECRET")
+  let creds =
+    bucket.Credentials(
+      host:,
+      port: option.Some(9090),
+      scheme: http.Http,
+      region:,
+      access_key_id: access,
+      secret_access_key: secret,
+    )
 
+  use connection <- sqlight.with_connection(":memory:")
   let assert Ok(Nil) = database.init_schemas(connection)
-  let context = Context(connection: connection)
+
+  let context = Context(connection: connection, storage_credentials: creds)
   let test_context = TestContext(context: context, next: 1)
 
   test_case(test_context)

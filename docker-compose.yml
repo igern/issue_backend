@@ -1,0 +1,14 @@
+version: '3.1'
+
+services:
+  s3-mock:
+    image: adobe/s3mock
+    restart: always
+    ports:
+      - 9090:9090
+    environment:
+      initialBuckets: 'issues'
+      root: '/data'
+
+volumes:
+  data:

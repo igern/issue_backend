@@ -17,7 +17,7 @@ jobs:
           gleam-version: "1.6.3"
           rebar3-version: "3"
       - id: cache-gleam
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: build
           key: ${{runner.os}}-gleam-${{ hashFiles('manifest.toml')}}

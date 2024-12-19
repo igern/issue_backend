@@ -30,6 +30,6 @@ pub fn create_profile(req: Request, ctx: Context) {
   ))
 
   profile.to_json(result)
-  |> json.to_string_builder()
+  |> json.to_string_tree()
   |> wisp.json_response(201)
 }

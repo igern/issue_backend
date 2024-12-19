@@ -40,7 +40,7 @@ fn create_issue(req: Request, ctx: Context) {
   ))
 
   issue.to_json(result)
-  |> json.to_string_builder()
+  |> json.to_string_tree()
   |> wisp.json_response(201)
 }
 
@@ -68,7 +68,7 @@ fn find_issues(req: Request, ctx: Context) {
 
   result
   |> paginated_issues.to_json
-  |> json.to_string_builder()
+  |> json.to_string_tree()
   |> wisp.json_response(200)
 }
 
@@ -85,7 +85,7 @@ fn find_issue(req: Request, id: String, ctx: Context) {
   ))
 
   issue.to_json(result)
-  |> json.to_string_builder()
+  |> json.to_string_tree()
   |> wisp.json_response(200)
 }
 
@@ -107,7 +107,7 @@ fn update_issue(req: Request, id: String, ctx: Context) {
   ))
 
   issue.to_json(result)
-  |> json.to_string_builder()
+  |> json.to_string_tree()
   |> wisp.json_response(200)
 }
 
@@ -124,6 +124,6 @@ fn delete_issue(req: Request, id: String, ctx: Context) {
   ))
 
   issue.to_json(result)
-  |> json.to_string_builder()
+  |> json.to_string_tree()
   |> wisp.json_response(200)
 }

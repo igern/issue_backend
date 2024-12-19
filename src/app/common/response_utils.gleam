@@ -112,6 +112,6 @@ pub fn or_decode_error(
 
 pub fn json_response(code: Int, message: String) {
   json.object([#("code", json.int(code)), #("message", json.string(message))])
-  |> json.to_string_builder()
+  |> json.to_string_tree()
   |> wisp.json_response(code)
 }

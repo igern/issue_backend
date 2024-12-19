@@ -35,7 +35,7 @@ pub type AuthorizedProfile {
 }
 
 pub fn to_body(json: Json) {
-  wisp.Text(json.to_string_builder(json))
+  wisp.Text(json.to_string_tree(json))
 }
 
 pub fn with_context(test_case: fn(TestContext) -> Nil) -> Nil {

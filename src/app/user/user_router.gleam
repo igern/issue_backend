@@ -29,7 +29,7 @@ fn create_user(req: Request, ctx: Context) {
   ))
 
   user.to_json(result)
-  |> json.to_string_builder()
+  |> json.to_string_tree()
   |> wisp.json_response(201)
 }
 
@@ -50,7 +50,7 @@ fn delete_user(req: Request, id: String, ctx: Context) {
       ))
 
       user.to_json(result)
-      |> json.to_string_builder()
+      |> json.to_string_tree()
       |> wisp.json_response(200)
     }
   }

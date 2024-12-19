@@ -19,7 +19,7 @@ pub fn version_test() {
   let expected_json = json.object([#("version", json.string("1.0.0"))])
 
   response.body
-  |> should.equal(wisp.Text(json.to_string_builder(expected_json)))
+  |> should.equal(wisp.Text(json.to_string_tree(expected_json)))
 }
 
 pub fn not_found_test() {
@@ -34,5 +34,5 @@ pub fn not_found_test() {
       #("message", json.string("not found")),
     ])
   response.body
-  |> should.equal(wisp.Text(json.to_string_builder(expected_json)))
+  |> should.equal(wisp.Text(json.to_string_tree(expected_json)))
 }

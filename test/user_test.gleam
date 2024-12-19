@@ -47,7 +47,7 @@ pub fn delete_one_user_test() {
   response
   |> utils.response_equal(
     user.to_json(authorized_user.user)
-    |> json.to_string_builder()
+    |> json.to_string_tree()
     |> wisp.json_response(200),
   )
 }
@@ -109,7 +109,7 @@ pub fn delete_one_user_with_profile_test() {
   |> utils.response_equal(
     authorized_profil.user
     |> user.to_json()
-    |> json.to_string_builder()
+    |> json.to_string_tree()
     |> wisp.json_response(200),
   )
 }

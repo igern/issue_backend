@@ -17,7 +17,7 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
   case wisp.path_segments(req), req.method {
     ["api"], Get -> {
       json.object([#("version", json.string("1.0.0"))])
-      |> json.to_string_builder()
+      |> json.to_string_tree()
       |> wisp.json_response(200)
     }
     _, _ ->
@@ -25,7 +25,7 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
         #("code", json.int(404)),
         #("message", json.string("not found")),
       ])
-      |> json.to_string_builder()
+      |> json.to_string_tree()
       |> wisp.json_response(404)
   }
 }

@@ -24,7 +24,7 @@ fn login(req: Request, ctx: Context) {
   use result <- response_utils.map_service_errors(auth_service.login(input, ctx))
 
   auth_tokens.to_json(result)
-  |> json.to_string_builder()
+  |> json.to_string_tree()
   |> wisp.json_response(201)
 }
 
@@ -39,6 +39,6 @@ fn refresh_auth_tokens(req: Request, ctx: Context) {
   )
 
   auth_tokens.to_json(result)
-  |> json.to_string_builder()
+  |> json.to_string_tree()
   |> wisp.json_response(201)
 }

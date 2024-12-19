@@ -9,6 +9,7 @@ import wisp/wisp_mist
 
 pub fn main() {
   wisp.configure_logger()
+
   let secret_key_base = wisp.random_string(64)
 
   use connection <- sqlight.with_connection(":memory:")

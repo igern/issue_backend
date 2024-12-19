@@ -16,10 +16,12 @@ jobs:
           otp-version: "27.0"
           gleam-version: "1.6.3"
           rebar3-version: "3"
-      - uses: actions/cache@v3
+      - id: cache-gleam
+        uses: actions/cache@v3
         with:
-          path: build
+          path: build/packages
           key: ${{runner.os}}-gleam-${{ hashFiles('manifest.toml')}}
-      - run: gleam deps download
+      - if: ${{ !steps.cache-gleam.outputs.cache-hit }}
+        run: gleam deps download
       - run: gleam test
       - run: gleam format --check src test

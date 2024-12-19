@@ -3,9 +3,7 @@ import app/profile/outputs/profile
 import app/router
 import gleam/http
 import gleam/int
-import gleam/io
 import gleam/json
-import gleam/result
 import gleeunit/should
 import simplifile
 import utils

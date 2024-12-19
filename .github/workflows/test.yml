@@ -9,6 +9,13 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      s3-mock:
+        image: adobe/s3mock
+        ports:
+          - 9090:9090
+        env:
+          initialBuckets: 'issues'
     steps:
       - uses: actions/checkout@v4
       - uses: erlef/setup-beam@v1
@@ -24,4 +31,11 @@ jobs:
       - if: ${{ !steps.cache-gleam.outputs.cache-hit }}
         run: gleam deps download
       - run: gleam test
+        env:
+          STORAGE_PORT: 9090
+          STORAGE_HOST: localhost
+          STORAGE_BUCKET: issues
+          STORAGE_ACCESS: test
+          STORAGE_SECRET: test
+          STORAGE_REGION: here
       - run: gleam format --check src test

@@ -22,10 +22,11 @@ pub fn main() {
   let assert Ok(access) = env.get_string("STORAGE_ACCESS")
   let assert Ok(secret) = env.get_string("STORAGE_SECRET")
   let assert Ok(region) = env.get_string("STORAGE_SECRET")
+  let assert Ok(port) = env.get_int("STORAGE_PORT")
   let creds =
     bucket.Credentials(
       host:,
-      port: option.Some(9090),
+      port: option.Some(port),
       scheme: http.Http,
       region:,
       access_key_id: access,

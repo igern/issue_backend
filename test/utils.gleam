@@ -44,6 +44,7 @@ pub fn to_body(json: Json) {
 
 pub fn with_context(test_case: fn(TestContext) -> Nil) -> Nil {
   dot_env.load_default()
+  let assert Ok(storage) = env.get_string("STORAGE_BUCKET")
   let assert Ok(host) = env.get_string("STORAGE_HOST")
   let assert Ok(access) = env.get_string("STORAGE_ACCESS")
   let assert Ok(secret) = env.get_string("STORAGE_SECRET")
@@ -62,7 +63,12 @@ pub fn with_context(test_case: fn(TestContext) -> Nil) -> Nil {
   use connection <- sqlight.with_connection(":memory:")
   let assert Ok(Nil) = database.init_schemas(connection)
 
-  let context = Context(connection: connection, storage_credentials: creds)
+  let context =
+    Context(
+      connection: connection,
+      storage_credentials: creds,
+      storage_bucket: storage,
+    )
   let test_context = TestContext(context: context, next: 1)
 
   test_case(test_context)

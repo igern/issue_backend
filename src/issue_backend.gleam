@@ -1,6 +1,5 @@
 import app/database
 import app/router
-import app/storage/storage
 import app/types.{Context}
 import bucket
 import dot_env
@@ -34,12 +33,16 @@ pub fn main() {
     )
 
   let assert Ok(bucket) = env.get_string("STORAGE_BUCKET")
-  storage.upload_file(creds, bucket, "test", <<>>)
 
   use connection <- sqlight.with_connection(":memory:")
   let assert Ok(Nil) = database.init_schemas(connection)
 
-  let context = Context(connection: connection, storage_credentials: creds)
+  let context =
+    Context(
+      connection: connection,
+      storage_credentials: creds,
+      storage_bucket: bucket,
+    )
 
   let handler = router.handle_request(_, context)
   let assert Ok(_) =

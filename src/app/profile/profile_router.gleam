@@ -4,16 +4,16 @@ import app/profile/inputs/create_profile_input
 import app/profile/outputs/profile
 import app/profile/profile_service
 import app/types.{type Context}
-import gleam/http.{Post, Put}
+import gleam/http.{Post}
 import gleam/int
-import gleam/io
 import gleam/json
+import gleam/list
 import wisp.{type Request, type Response}
 
 pub fn router(req: Request, ctx: Context, handle_request: fn() -> Response) {
   case wisp.path_segments(req), req.method {
     ["api", "profiles"], Post -> create_profile(req, ctx)
-    ["api", "profiles", id, "profile-picture"], Put ->
+    ["api", "profiles", id, "profile-picture"], Post ->
       upload_profile_picture(req, ctx, id)
     _, _ -> handle_request()
   }
@@ -38,8 +38,29 @@ pub fn create_profile(req: Request, ctx: Context) {
 }
 
 pub fn upload_profile_picture(req: Request, ctx: Context, id: String) {
-  use payload <- auth_guards.require_profile(req, ctx)
-  use <- wisp.require_content_type(req, "image/jpeg")
-  use body <- wisp.require_bit_array_body(req)
-  response_utils.json_response(201, "Great")
+  use profile <- auth_guards.require_profile(req, ctx)
+
+  use id <- response_utils.or_response(
+    int.parse(id),
+    response_utils.json_response(400, "invalid id"),
+  )
+
+  case profile.id == id {
+    False -> response_utils.can_not_update_other_profile_response()
+    True -> {
+      use formdata <- wisp.require_form(req)
+      use file <- response_utils.or_response(
+        list.key_find(formdata.files, "file"),
+        response_utils.json_response(400, "missing file"),
+      )
+
+      use result <- response_utils.map_service_errors(
+        profile_service.upload_profile_picture(file.path, id, ctx),
+      )
+
+      profile.to_json(result)
+      |> json.to_string_tree()
+      |> wisp.json_response(201)
+    }
+  }
 }

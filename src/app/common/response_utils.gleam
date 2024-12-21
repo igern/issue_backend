@@ -1,6 +1,8 @@
 import gleam/dynamic
+import gleam/httpc
 import gleam/json
 import gleam/string
+import simplifile
 import sqlight
 import wisp.{type Response}
 
@@ -19,6 +21,15 @@ pub fn map_service_errors(
       wisp.log_error(string.inspect(error))
       database_error_response()
     }
+    Error(FileReadError(error)) -> {
+      wisp.log_error(string.inspect(error))
+      file_read_error_response()
+    }
+    Error(FileUploadError(error)) -> {
+      wisp.log_error(string.inspect(error))
+      file_upload_error_response()
+    }
+
     Ok(a) -> next(a)
   }
 }
@@ -31,6 +42,8 @@ pub type ServiceError {
   RefreshTokenNotFoundError
   InvalidCredentialsError
   DatabaseError(sqlight.Error)
+  FileReadError(simplifile.FileError)
+  FileUploadError(httpc.HttpError)
 }
 
 pub fn invalid_credentials_response() {
@@ -61,6 +74,10 @@ pub fn can_not_delete_other_user_response() {
   json_response(403, "can not delete other user")
 }
 
+pub fn can_not_update_other_profile_response() {
+  json_response(403, "can not update other profile")
+}
+
 pub fn refresh_token_not_found_error_response() {
   json_response(404, "refresh token not found")
 }
@@ -79,6 +96,14 @@ pub fn profile_not_found_error_response() {
 
 pub fn database_error_response() {
   json_response(503, "database error")
+}
+
+pub fn file_read_error_response() {
+  json_response(503, "file read error")
+}
+
+pub fn file_upload_error_response() {
+  json_response(503, "file upload error")
 }
 
 pub fn or_response(

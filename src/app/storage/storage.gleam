@@ -1,7 +1,9 @@
 import bucket
 import bucket/put_object
 import gleam/httpc
-import gleam/io
+import gleam/int
+import gleam/option
+import gleam/result
 
 pub fn upload_file(
   credentials: bucket.Credentials,
@@ -9,16 +11,17 @@ pub fn upload_file(
   key: String,
   body: BitArray,
 ) {
+  let path =
+    credentials.host
+    <> ":"
+    <> credentials.port |> option.unwrap(9090) |> int.to_string
+    <> "/"
+    <> bucket
+    <> "/"
+    <> key
   let response =
     put_object.request(bucket:, key:, body:)
     |> put_object.build(credentials)
     |> httpc.send_bits
-  case response {
-    Ok(response) -> {
-      Nil
-    }
-    Error(error) -> {
-      Nil
-    }
-  }
+  response |> result.replace(path)
 }

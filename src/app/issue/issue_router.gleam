@@ -74,10 +74,6 @@ fn find_issues(req: Request, ctx: Context) {
 
 fn find_issue(req: Request, id: String, ctx: Context) {
   use _ <- auth_guards.require_profile(req, ctx)
-  use id <- response_utils.or_response(
-    int.parse(id),
-    response_utils.json_response(400, "invalid id"),
-  )
 
   use result <- response_utils.map_service_errors(issue_service.find_one(
     id,
@@ -91,10 +87,6 @@ fn find_issue(req: Request, id: String, ctx: Context) {
 
 fn update_issue(req: Request, id: String, ctx: Context) {
   use _ <- auth_guards.require_profile(req, ctx)
-  use id <- response_utils.or_response(
-    int.parse(id),
-    response_utils.json_response(400, "invalid id"),
-  )
   use json <- wisp.require_json(req)
   use input <- response_utils.or_decode_error(update_issue_input.from_dynamic(
     json,
@@ -113,10 +105,6 @@ fn update_issue(req: Request, id: String, ctx: Context) {
 
 fn delete_issue(req: Request, id: String, ctx: Context) {
   use _ <- auth_guards.require_profile(req, ctx)
-  use id <- response_utils.or_response(
-    int.parse(id),
-    response_utils.json_response(400, "invalid id"),
-  )
 
   use result <- response_utils.map_service_errors(issue_service.delete_one(
     id,

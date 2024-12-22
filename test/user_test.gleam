@@ -5,7 +5,6 @@ import app/user/inputs/create_user_input
 import app/user/outputs/user.{User}
 import app/user/user_service
 import gleam/http
-import gleam/int
 import gleam/json
 import gleeunit/should
 import sqlight
@@ -26,7 +25,7 @@ pub fn create_user_test() {
 
   let assert Ok(data) =
     json.decode(testing.string_body(response), user.decoder())
-  data |> should.equal(User(id: 1, email: input.email))
+  data |> should.equal(User(id: data.id, email: input.email))
 }
 
 pub fn delete_one_user_test() {
@@ -37,7 +36,7 @@ pub fn delete_one_user_test() {
   let response =
     router.handle_request(
       testing.delete_json(
-        "api/users/" <> authorized_user.user.id |> int.to_string,
+        "api/users/" <> authorized_user.user.id,
         [utils.bearer_header(authorized_user.auth_tokens.access_token)],
         json.object([]),
       ),
@@ -63,13 +62,13 @@ pub fn delete_one_user_not_found_test() {
     sqlight.query(
       sql,
       t.context.connection,
-      [sqlight.int(authorized_user.user.id)],
+      [sqlight.text(authorized_user.user.id)],
       user_service.user_decoder(),
     )
   let response =
     router.handle_request(
       testing.delete_json(
-        "api/users/" <> authorized_user.user.id |> int.to_string,
+        "api/users/" <> authorized_user.user.id,
         [utils.bearer_header(authorized_user.auth_tokens.access_token)],
         json.object([]),
       ),
@@ -88,7 +87,7 @@ pub fn delete_one_user_with_profile_test() {
   let response =
     router.handle_request(
       testing.delete_json(
-        "api/users/" <> authorized_profil.user.id |> int.to_string,
+        "api/users/" <> authorized_profil.user.id,
         [utils.bearer_header(authorized_profil.auth_tokens.access_token)],
         json.object([]),
       ),
@@ -100,7 +99,7 @@ pub fn delete_one_user_with_profile_test() {
     sqlight.query(
       sql,
       t.context.connection,
-      [sqlight.int(authorized_profil.profile.id)],
+      [sqlight.text(authorized_profil.profile.id)],
       profile_service.profile_decoder(),
     )
   result |> should.equal(Ok([]))
@@ -123,7 +122,7 @@ pub fn delete_one_user_other_user_test() {
   let response =
     router.handle_request(
       testing.delete_json(
-        "api/users/" <> authorized_profil2.user.id |> int.to_string,
+        "api/users/" <> authorized_profil2.user.id,
         [utils.bearer_header(authorized_profil1.auth_tokens.access_token)],
         json.object([]),
       ),

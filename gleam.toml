@@ -27,6 +27,7 @@ bucket = ">= 1.2.0 and < 2.0.0"
 dot_env = ">= 1.2.0 and < 2.0.0"
 gleam_httpc = ">= 4.0.0 and < 5.0.0"
 simplifile = ">= 2.2.0 and < 3.0.0"
+youid = ">= 1.2.0 and < 2.0.0"
 
 [dev-dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"

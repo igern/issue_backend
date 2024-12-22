@@ -6,28 +6,30 @@ import app/profile/outputs/profile.{Profile}
 import app/storage/storage
 import app/types.{type Context}
 import gleam/dynamic
-import gleam/int
 import gleam/result
 import simplifile
 import sqlight
+import youid/uuid
 
 pub fn profile_decoder() {
   dynamic.tuple4(
-    dynamic.int,
-    dynamic.int,
+    dynamic.string,
+    dynamic.string,
     dynamic.string,
     dynamic.optional(dynamic.string),
   )
 }
 
-pub fn create(input: CreateProfileInput, user_id: Int, ctx: Context) {
-  let sql = "insert into profiles (user_id, name) values (?, ?) returning *"
+pub fn create(input: CreateProfileInput, user_id: String, ctx: Context) {
+  let sql =
+    "insert into profiles (id, user_id, name) values (?, ?, ?) returning *"
+  let id = uuid.v4_string()
 
   let result =
     sqlight.query(
       sql,
       ctx.connection,
-      [sqlight.int(user_id), sqlight.text(input.name)],
+      [sqlight.text(id), sqlight.text(user_id), sqlight.text(input.name)],
       profile_decoder(),
     )
 
@@ -39,14 +41,14 @@ pub fn create(input: CreateProfileInput, user_id: Int, ctx: Context) {
   }
 }
 
-pub fn find_one_from_user_id(user_id: Int, ctx: Context) {
+pub fn find_one_from_user_id(user_id: String, ctx: Context) {
   let sql = "select * from profiles where user_id = ?"
 
   let result =
     sqlight.query(
       sql,
       ctx.connection,
-      [sqlight.int(user_id)],
+      [sqlight.text(user_id)],
       profile_decoder(),
     )
 
@@ -58,7 +60,7 @@ pub fn find_one_from_user_id(user_id: Int, ctx: Context) {
   }
 }
 
-pub fn upload_profile_picture(file_path: String, id: Int, ctx: Context) {
+pub fn upload_profile_picture(file_path: String, id: String, ctx: Context) {
   use file <- result.try(
     simplifile.read_bits(file_path)
     |> result.map_error(fn(error) { FileReadError(error) }),
@@ -68,7 +70,7 @@ pub fn upload_profile_picture(file_path: String, id: Int, ctx: Context) {
     storage.upload_file(
       ctx.storage_credentials,
       ctx.storage_bucket,
-      "profile-pictures/" <> id |> int.to_string <> ".jpg",
+      "profile-pictures/" <> id <> ".jpg",
       file,
     )
     |> result.map_error(fn(error) { response_utils.FileUploadError(error) }),
@@ -80,7 +82,7 @@ pub fn upload_profile_picture(file_path: String, id: Int, ctx: Context) {
     sqlight.query(
       sql,
       ctx.connection,
-      [sqlight.text(key), sqlight.int(id)],
+      [sqlight.text(key), sqlight.text(id)],
       profile_decoder(),
     )
 

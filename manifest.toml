@@ -36,6 +36,7 @@ packages = [
   { name = "wisp", version = "1.4.0", build_tools = ["gleam"], requirements = ["directories", "exception", "gleam_crypto", "gleam_erlang", "gleam_http", "gleam_json", "gleam_stdlib", "logging", "marceau", "mist", "simplifile"], otp_app = "wisp", source = "hex", outer_checksum = "ADD438907EEDA25384BCD5893BEBE91EE9E32759E156C7DC5B4FE8E758508DC4" },
   { name = "xmb", version = "1.1.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "xmb", source = "hex", outer_checksum = "4208BA23FB9BAA000FB506A16421BE66EF6BAAB015B1E00EC970FE1CCB40980E" },
   { name = "xmlm", version = "1.0.0", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "xmlm", source = "hex", outer_checksum = "295F483E1A930DC4C45ED0F07C3466C0A7381972C3C2FC64D66BD2FBB307ED6A" },
+  { name = "youid", version = "1.2.0", build_tools = ["gleam"], requirements = ["gleam_crypto", "gleam_erlang", "gleam_stdlib"], otp_app = "youid", source = "hex", outer_checksum = "EF0F693004E221155EE5909C6D3C945DD14F7117DBA882887CF5F45BE399B8CA" },
 ]
 
 [requirements]
@@ -54,3 +55,4 @@ mist = { version = ">= 4.0.2 and < 5.0.0" }
 simplifile = { version = ">= 2.2.0 and < 3.0.0" }
 sqlight = { version = ">= 0.9.1 and < 1.0.0" }
 wisp = { version = ">= 1.4.0 and < 2.0.0" }
+youid = { version = ">= 1.2.0 and < 2.0.0" }

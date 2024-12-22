@@ -4,7 +4,6 @@ import app/issue/outputs/issue.{Issue}
 import app/issue/outputs/paginated_issues
 import app/router
 import gleam/http
-import gleam/int
 import gleam/json
 import gleeunit/should
 import utils
@@ -32,9 +31,9 @@ pub fn create_issue_test() {
     json.decode(testing.string_body(response), issue.decoder())
   data
   |> should.equal(Issue(
-    id: 1,
+    id: data.id,
     name: input.name,
-    creator_id: authorized_profile.user.id,
+    creator_id: authorized_profile.profile.id,
   ))
 }
 
@@ -195,12 +194,11 @@ pub fn find_one_issue_test() {
 
   let response =
     router.handle_request(
-      testing.get("/api/issues/" <> int.to_string(issue.id), [
+      testing.get("/api/issues/" <> issue.id, [
         utils.bearer_header(authorized_profile.auth_tokens.access_token),
       ]),
       t.context,
     )
-
   response.status |> should.equal(200)
   let assert Ok(data) =
     json.decode(testing.string_body(response), issue.decoder())
@@ -219,21 +217,6 @@ pub fn find_one_issue_not_found_test() {
     )
 
   response.status |> should.equal(404)
-}
-
-pub fn find_one_issue_invalid_id_test() {
-  use t <- utils.with_context
-
-  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
-  let response =
-    router.handle_request(
-      testing.get("/api/issues/" <> "Invalid", [
-        utils.bearer_header(authorized_profile.auth_tokens.access_token),
-      ]),
-      t.context,
-    )
-
-  response.status |> should.equal(400)
 }
 
 pub fn find_one_missing_authorization_header_test() {
@@ -265,7 +248,7 @@ pub fn update_one_issue_test() {
   let response =
     router.handle_request(
       testing.patch_json(
-        "/api/issues/" <> int.to_string(issue.id),
+        "/api/issues/" <> issue.id,
         [utils.bearer_header(authorized_profile.auth_tokens.access_token)],
         input,
       ),
@@ -297,25 +280,6 @@ pub fn update_one_issue_not_found_test() {
   response.status |> should.equal(404)
 }
 
-pub fn update_one_issue_invalid_id_test() {
-  use t <- utils.with_context
-
-  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
-  let input = update_issue_input.to_json(UpdateIssueInput(name: "Mikkel"))
-
-  let response =
-    router.handle_request(
-      testing.patch_json(
-        "/api/issues/" <> "Invalid",
-        [utils.bearer_header(authorized_profile.auth_tokens.access_token)],
-        input,
-      ),
-      t.context,
-    )
-
-  response.status |> should.equal(400)
-}
-
 pub fn update_one_missing_authorization_header_test() {
   utils.missing_authorization_header_tester(http.Patch, "/api/issues/1")
 }
@@ -344,7 +308,7 @@ pub fn delete_one_issue_test() {
   let response =
     router.handle_request(
       testing.delete(
-        "/api/issues/" <> int.to_string(issue.id),
+        "/api/issues/" <> issue.id,
         [utils.bearer_header(authorized_profile.auth_tokens.access_token)],
         "",
       ),
@@ -373,24 +337,6 @@ pub fn delete_one_issue_not_found_test() {
     )
 
   response.status |> should.equal(404)
-}
-
-pub fn delete_one_issue_invalid_id_test() {
-  use t <- utils.with_context
-
-  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
-
-  let response =
-    router.handle_request(
-      testing.delete(
-        "/api/issues/" <> "Invalid",
-        [utils.bearer_header(authorized_profile.auth_tokens.access_token)],
-        "",
-      ),
-      t.context,
-    )
-
-  response.status |> should.equal(400)
 }
 
 pub fn delete_one_missing_authorization_header_test() {

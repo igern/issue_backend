@@ -7,7 +7,6 @@ import app/types
 import bucket
 import gleam/http
 import gleam/httpc
-import gleam/int
 import gleam/json
 import gleam/option
 import gleeunit/should
@@ -36,7 +35,6 @@ pub fn create_profile_test() {
   response.status |> should.equal(201)
   let assert Ok(data) =
     json.decode(testing.string_body(response), profile.decoder())
-
   data
   |> should.equal(profile.Profile(
     id: data.id,
@@ -66,9 +64,7 @@ pub fn upload_profile_picture_test() {
   let response =
     router.handle_request(
       utils.post_file(
-        "/api/profiles/"
-          <> authorized_profile.profile.id |> int.to_string()
-          <> "/profile-picture",
+        "/api/profiles/" <> authorized_profile.profile.id <> "/profile-picture",
         [utils.bearer_header(authorized_profile.auth_tokens.access_token)],
         utils.jpg,
       ),
@@ -92,9 +88,7 @@ pub fn upload_profile_picture_can_not_update_other_profile_test() {
   let response =
     router.handle_request(
       utils.post_file(
-        "/api/profiles/"
-          <> authorized_profile2.profile.id |> int.to_string()
-          <> "/profile-picture",
+        "/api/profiles/" <> authorized_profile2.profile.id <> "/profile-picture",
         [utils.bearer_header(authorized_profile1.auth_tokens.access_token)],
         utils.jpg,
       ),
@@ -115,9 +109,7 @@ pub fn upload_profile_picture_invalid_file_type_test() {
   let response =
     router.handle_request(
       utils.post_file(
-        "/api/profiles/"
-          <> authorized_profile.profile.id |> int.to_string()
-          <> "/profile-picture",
+        "/api/profiles/" <> authorized_profile.profile.id <> "/profile-picture",
         [utils.bearer_header(authorized_profile.auth_tokens.access_token)],
         utils.png,
       ),
@@ -130,13 +122,21 @@ pub fn upload_profile_picture_invalid_file_type_test() {
 
 pub fn upload_profile_picture_file_read_error_test() {
   use t <- utils.with_context()
-  profile_service.upload_profile_picture("invalid.jpg", 1, t.context)
+  profile_service.upload_profile_picture(
+    "invalid.jpg",
+    utils.mock_uuidv4,
+    t.context,
+  )
   |> should.equal(Error(response_utils.FileReadError(simplifile.Enoent)))
 }
 
 pub fn upload_profile_picture_profile_not_found_test() {
   use t <- utils.with_context()
-  profile_service.upload_profile_picture(utils.jpg, 1, t.context)
+  profile_service.upload_profile_picture(
+    utils.jpg,
+    utils.mock_uuidv4,
+    t.context,
+  )
   |> should.equal(Error(response_utils.ProfileNotFoundError))
 }
 
@@ -153,7 +153,11 @@ pub fn upload_profile_picture_file_upload_error_test() {
         ),
       ),
     )
-  profile_service.upload_profile_picture(utils.jpg, 1, t.context)
+  profile_service.upload_profile_picture(
+    utils.jpg,
+    utils.mock_uuidv4,
+    t.context,
+  )
   |> should.equal(
     Error(
       response_utils.FileUploadError(httpc.FailedToConnect(

@@ -8,19 +8,25 @@ import app/types.{type Context}
 import gleam/dynamic
 import gleam/list
 import sqlight
+import youid/uuid
 
 fn issue_decoder() {
-  dynamic.tuple3(dynamic.int, dynamic.string, dynamic.int)
+  dynamic.tuple3(dynamic.string, dynamic.string, dynamic.string)
 }
 
-pub fn create(input: CreateIssueInput, creator_id: Int, ctx: Context) {
-  let sql = "insert into issues (name, creator_id) values (?, ?) returning *"
-
+pub fn create(input: CreateIssueInput, creator_id: String, ctx: Context) {
+  let sql =
+    "insert into issues (id, name, creator_id) values (?, ?, ?) returning *"
+  let id = uuid.v4_string()
   let result =
     sqlight.query(
       sql,
       on: ctx.connection,
-      with: [sqlight.text(input.name), sqlight.int(creator_id)],
+      with: [
+        sqlight.text(id),
+        sqlight.text(input.name),
+        sqlight.text(creator_id),
+      ],
       expecting: issue_decoder(),
     )
 
@@ -71,14 +77,14 @@ pub fn find_paginated(input: PaginationInput, ctx: Context) {
   }
 }
 
-pub fn find_one(id: Int, ctx: Context) {
+pub fn find_one(id: String, ctx: Context) {
   let sql = "select * from issues where id = ?"
 
   let result =
     sqlight.query(
       sql,
       on: ctx.connection,
-      with: [sqlight.int(id)],
+      with: [sqlight.text(id)],
       expecting: issue_decoder(),
     )
 
@@ -89,14 +95,14 @@ pub fn find_one(id: Int, ctx: Context) {
   }
 }
 
-pub fn update_one(id: Int, input: UpdateIssueInput, ctx: Context) {
+pub fn update_one(id: String, input: UpdateIssueInput, ctx: Context) {
   let sql = "update issues set name = ? where id = ? returning *"
 
   let result =
     sqlight.query(
       sql,
       on: ctx.connection,
-      with: [sqlight.text(input.name), sqlight.int(id)],
+      with: [sqlight.text(input.name), sqlight.text(id)],
       expecting: issue_decoder(),
     )
 
@@ -107,14 +113,14 @@ pub fn update_one(id: Int, input: UpdateIssueInput, ctx: Context) {
   }
 }
 
-pub fn delete_one(id: Int, ctx: Context) {
+pub fn delete_one(id: String, ctx: Context) {
   let sql = "delete from issues where id = ? returning *"
 
   let result =
     sqlight.query(
       sql,
       on: ctx.connection,
-      with: [sqlight.int(id)],
+      with: [sqlight.text(id)],
       expecting: issue_decoder(),
     )
 

@@ -6,17 +6,21 @@ import app/common/response_utils.{
   RefreshTokenExpiredError, RefreshTokenNotFoundError,
 }
 import app/types.{type Context}
+import app/user/user_service
 import aragorn2
 import birl
 import birl/duration
 import gleam/bit_array
 import gleam/crypto
 import gleam/dynamic
-import gleam/int
 import gleam/order
 import gleam/result
 import gwt
 import sqlight.{ConstraintPrimarykey, SqlightError}
+
+pub fn refresh_token_decoder() {
+  dynamic.tuple3(dynamic.string, dynamic.string, dynamic.string)
+}
 
 pub fn login(
   input: LoginInput,
@@ -29,7 +33,7 @@ pub fn login(
       sql,
       on: ctx.connection,
       with: [sqlight.text(input.email)],
-      expecting: dynamic.tuple3(dynamic.int, dynamic.string, dynamic.string),
+      expecting: user_service.user_decoder(),
     )
   case result {
     Ok([#(user_id, _, password)]) -> {
@@ -62,7 +66,7 @@ pub fn refresh_auth_tokens(
       sql,
       ctx.connection,
       [sqlight.text(input.refresh_token)],
-      dynamic.tuple3(dynamic.string, dynamic.int, dynamic.string),
+      refresh_token_decoder(),
     )
 
   case result {
@@ -77,7 +81,7 @@ pub fn refresh_auth_tokens(
               sql,
               ctx.connection,
               [sqlight.text(token)],
-              dynamic.tuple3(dynamic.string, dynamic.int, dynamic.string),
+              refresh_token_decoder(),
             )
           {
             Ok(_) -> {
@@ -95,7 +99,7 @@ pub fn refresh_auth_tokens(
 }
 
 fn create_refresh_token(
-  user_id: Int,
+  user_id: String,
   ctx: Context,
 ) -> Result(String, ServiceError) {
   let sql =
@@ -109,13 +113,13 @@ fn create_refresh_token(
       on: ctx.connection,
       with: [
         sqlight.text(token),
-        sqlight.int(user_id),
+        sqlight.text(user_id),
         birl.now()
           |> birl.add(duration.months(6))
           |> birl.to_iso8601
           |> sqlight.text,
       ],
-      expecting: dynamic.tuple3(dynamic.string, dynamic.int, dynamic.string),
+      expecting: refresh_token_decoder(),
     )
 
   case result {
@@ -128,11 +132,11 @@ fn create_refresh_token(
 }
 
 fn create_auth_tokens(
-  user_id: Int,
+  user_id: String,
   ctx: Context,
 ) -> Result(AuthTokens, ServiceError) {
   use refresh_token <- result.try(create_refresh_token(user_id, ctx))
-  let access_token = create_access_token(int.to_string(user_id))
+  let access_token = create_access_token(user_id)
   Ok(AuthTokens(refresh_token: refresh_token, access_token: access_token))
 }
 

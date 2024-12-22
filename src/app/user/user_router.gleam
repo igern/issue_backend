@@ -5,7 +5,6 @@ import app/user/inputs/create_user_input
 import app/user/outputs/user
 import app/user/user_service
 import gleam/http.{Delete, Post}
-import gleam/int
 import gleam/json
 import wisp.{type Request, type Response}
 
@@ -35,13 +34,7 @@ fn create_user(req: Request, ctx: Context) {
 
 fn delete_user(req: Request, id: String, ctx: Context) {
   use payload <- auth_guards.require_jwt(req)
-  let assert Ok(user_id) = int.parse(payload.sub)
-  use id <- response_utils.or_response(
-    int.parse(id),
-    response_utils.json_response(400, "invalid id"),
-  )
-
-  case user_id == id {
+  case payload.sub == id {
     False -> response_utils.can_not_delete_other_user_response()
     True -> {
       use result <- response_utils.map_service_errors(user_service.delete_one(

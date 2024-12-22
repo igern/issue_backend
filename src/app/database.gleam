@@ -6,14 +6,14 @@ pub fn init_schemas(connection: Connection) {
 
   let issues_sql =
     "CREATE TABLE IF NOT EXISTS issues (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
-    creator_id INTEGER NOT NULL)
+    creator_id TEXT NOT NULL)
     "
   let assert Ok(Nil) = sqlight.exec(issues_sql, connection)
   let user_sql =
     "CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id TEXT PRIMARY KEY,
     email TEXT NOT NULL,
     password TEXT NOT NULL)
     "
@@ -22,7 +22,7 @@ pub fn init_schemas(connection: Connection) {
   let refresh_token_sql =
     "CREATE TABLE IF NOT EXISTS refresh_tokens (
     token TEXT PRIMARY KEY,
-    userId INTEGER NOT NULL,
+    userId TEXT NOT NULL,
     expiresAt TEXT NOT NULL)
     "
   let assert Ok(Nil) = sqlight.exec(refresh_token_sql, connection)
@@ -30,8 +30,8 @@ pub fn init_schemas(connection: Connection) {
   let profile_sql =
     "
   CREATE TABLE IF NOT EXISTS profiles (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER NOT NULL,
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
   name TEXT NOT NULL,
   profile_picture TEXT,
   FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE

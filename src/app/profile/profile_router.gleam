@@ -7,7 +7,6 @@ import app/types.{type Context}
 import gleam/bit_array
 import gleam/bool
 import gleam/http.{Post}
-import gleam/int
 import gleam/json
 import gleam/list
 import simplifile
@@ -28,10 +27,9 @@ pub fn create_profile(req: Request, ctx: Context) {
   use input <- response_utils.or_decode_error(create_profile_input.from_dynamic(
     json,
   ))
-  let assert Ok(user_id) = int.parse(payload.sub)
   use result <- response_utils.map_service_errors(profile_service.create(
     input,
-    user_id,
+    payload.sub,
     ctx,
   ))
 
@@ -42,11 +40,6 @@ pub fn create_profile(req: Request, ctx: Context) {
 
 pub fn upload_profile_picture(req: Request, ctx: Context, id: String) {
   use profile <- auth_guards.require_profile(req, ctx)
-
-  use id <- response_utils.or_response(
-    int.parse(id),
-    response_utils.json_response(400, "invalid id"),
-  )
 
   case profile.id == id {
     False -> response_utils.can_not_update_other_profile_response()

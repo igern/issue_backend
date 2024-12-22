@@ -331,3 +331,5 @@ pub fn post_file(path: String, headers: List(http.Header), file_path: String) {
 pub const jpg = "test/files/jpg.jpg"
 
 pub const png = "test/files/png.png"
+
+pub const mock_uuidv4 = "C1136D3F-E398-4496-A777-2DBFC882C70A"

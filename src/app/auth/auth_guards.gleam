@@ -3,7 +3,6 @@ import app/common/response_utils
 import app/profile/outputs/profile.{type Profile}
 import app/profile/profile_service
 import app/types.{type Context}
-import gleam/int
 import gleam/list
 import gleam/string
 import gwt
@@ -36,9 +35,8 @@ pub fn require_profile(
   handle_request: fn(Profile) -> Response,
 ) -> Response {
   use payload <- require_jwt(req)
-  let assert Ok(user_id) = int.parse(payload.sub)
   use profile <- response_utils.or_response(
-    profile_service.find_one_from_user_id(user_id, ctx),
+    profile_service.find_one_from_user_id(payload.sub, ctx),
     response_utils.profile_required_response(),
   )
   handle_request(profile)

@@ -4,10 +4,13 @@ import app/profile/inputs/create_profile_input
 import app/profile/outputs/profile
 import app/profile/profile_service
 import app/types.{type Context}
+import gleam/bit_array
+import gleam/bool
 import gleam/http.{Post}
 import gleam/int
 import gleam/json
 import gleam/list
+import simplifile
 import wisp.{type Request, type Response}
 
 pub fn router(req: Request, ctx: Context, handle_request: fn() -> Response) {
@@ -52,6 +55,14 @@ pub fn upload_profile_picture(req: Request, ctx: Context, id: String) {
       use file <- response_utils.or_response(
         list.key_find(formdata.files, "file"),
         response_utils.json_response(400, "missing file"),
+      )
+      use file_bits <- response_utils.or_response(
+        simplifile.read_bits(file.path),
+        response_utils.file_read_error_response(),
+      )
+      use <- bool.guard(
+        bit_array.starts_with(file_bits, <<255, 216, 255>>) |> bool.negate,
+        response_utils.json_response(400, "invalid file type"),
       )
 
       use result <- response_utils.map_service_errors(

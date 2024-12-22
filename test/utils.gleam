@@ -17,11 +17,15 @@ import app/user/outputs/user.{type User}
 import bucket
 import dot_env
 import dot_env/env
+import gleam/bit_array
 import gleam/http
 import gleam/int
 import gleam/json.{type Json}
+import gleam/list
 import gleam/option
+import gleam/string
 import gleeunit/should
+import simplifile
 import sqlight
 import wisp.{type Response}
 import wisp/testing
@@ -285,3 +289,45 @@ pub fn profile_required_tester(method: http.Method, path: String) {
 
   response |> response_equal(response_utils.profile_required_response())
 }
+
+fn append_line(bit_array: BitArray, line: String) {
+  bit_array
+  |> bit_array.append(line |> bit_array.from_string)
+  |> bit_array.append("\r\n" |> bit_array.from_string)
+}
+
+fn append_bytes(bit_array: BitArray, bytes: BitArray) {
+  bit_array
+  |> bit_array.append(bytes)
+  |> bit_array.append("\r\n" |> bit_array.from_string)
+}
+
+pub fn post_file(path: String, headers: List(http.Header), file_path: String) {
+  let boundary = "abcde12345"
+  let assert Ok(file_name) = string.split(file_path, "/") |> list.last
+  let assert Ok(result) = simplifile.read_bits(file_path)
+  let body =
+    <<>>
+    |> append_line("--" <> boundary)
+    |> append_line(
+      "Content-Disposition: form-data; name=\"file\"; filename=\""
+      <> file_name
+      <> "\"",
+    )
+    |> append_line("")
+    |> append_bytes(result)
+    |> append_line("--" <> boundary <> "--")
+  testing.request(
+    http.Post,
+    path,
+    headers
+      |> list.append([
+        #("content-type", "multipart/form-data; boundary=" <> boundary),
+      ]),
+    body,
+  )
+}
+
+pub const jpg = "test/files/jpg.jpg"
+
+pub const png = "test/files/png.png"

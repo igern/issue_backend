@@ -3,6 +3,7 @@ import app/auth/outputs/auth_tokens.{type AuthTokens}
 import app/common/response_utils
 import app/database
 import app/directory/inputs/create_directory_input.{type CreateDirectoryInput}
+import app/directory/outputs/directory.{type Directory}
 import app/issue/inputs/create_issue_input.{
   type CreateIssueInput, CreateIssueInput,
 }
@@ -81,20 +82,25 @@ pub fn with_context(test_case: fn(TestContext) -> Nil) -> Nil {
 
 pub fn next_create_issue_input(
   t: TestContext,
+  directory_id: String,
   handler: fn(TestContext, CreateIssueInput) -> Nil,
 ) {
   handler(
     TestContext(..t, next: t.next + 1),
-    CreateIssueInput(name: int.to_string(t.next)),
+    CreateIssueInput(
+      name: "name" <> int.to_string(t.next),
+      directory_id: directory_id,
+    ),
   )
 }
 
 pub fn create_issue(
   t: TestContext,
   access_token: String,
+  directory_id: String,
   handler: fn(Issue) -> Nil,
 ) {
-  use t, input <- next_create_issue_input(t)
+  use t, input <- next_create_issue_input(t, directory_id)
   let json = create_issue_input.to_json(input)
 
   let response =
@@ -345,4 +351,35 @@ pub fn next_create_directory_input(
       "name_" <> int.to_string(t.next),
     ),
   )
+}
+
+pub fn create_directory(
+  t: TestContext,
+  input: CreateDirectoryInput,
+  access_token: String,
+  handle: fn(Directory) -> Nil,
+) -> Nil {
+  let json = create_directory_input.to_json(input)
+
+  let response =
+    router.handle_request(
+      testing.post_json("/api/directories", [bearer_header(access_token)], json),
+      t.context,
+    )
+
+  response.status |> should.equal(201)
+
+  let assert Ok(directory) =
+    json.decode(testing.string_body(response), directory.decoder())
+  handle(directory)
+}
+
+pub fn next_create_directory(
+  t: TestContext,
+  access_token: String,
+  handle: fn(TestContext, Directory) -> Nil,
+) {
+  use t, input <- next_create_directory_input(t)
+  use directory <- create_directory(t, input, access_token)
+  handle(t, directory)
 }

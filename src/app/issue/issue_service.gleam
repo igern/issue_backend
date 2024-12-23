@@ -7,16 +7,16 @@ import app/issue/outputs/paginated_issues
 import app/types.{type Context}
 import gleam/dynamic
 import gleam/list
-import sqlight
+import sqlight.{ConstraintForeignkey}
 import youid/uuid
 
 fn issue_decoder() {
-  dynamic.tuple3(dynamic.string, dynamic.string, dynamic.string)
+  dynamic.tuple4(dynamic.string, dynamic.string, dynamic.string, dynamic.string)
 }
 
 pub fn create(input: CreateIssueInput, creator_id: String, ctx: Context) {
   let sql =
-    "insert into issues (id, name, creator_id) values (?, ?, ?) returning *"
+    "insert into issues (id, name, creator_id, directory_id) values (?, ?, ?, ?) returning *"
   let id = uuid.v4_string()
   let result =
     sqlight.query(
@@ -26,12 +26,16 @@ pub fn create(input: CreateIssueInput, creator_id: String, ctx: Context) {
         sqlight.text(id),
         sqlight.text(input.name),
         sqlight.text(creator_id),
+        sqlight.text(input.directory_id),
       ],
       expecting: issue_decoder(),
     )
 
   case result {
-    Ok([#(id, name, creator_id)]) -> Ok(Issue(id, name, creator_id))
+    Ok([#(id, name, creator_id, directory_id)]) ->
+      Ok(Issue(id, name, creator_id, directory_id))
+    Error(sqlight.SqlightError(ConstraintForeignkey, _, _)) ->
+      Error(response_utils.DirectoryNotFoundError)
     Error(error) -> Error(DatabaseError(error))
     _ -> panic as "More than one row was returned from an insert."
   }
@@ -60,8 +64,8 @@ pub fn find_paginated(input: PaginationInput, ctx: Context) {
       let assert [total] = totals
       let issues =
         list.map(items_result, fn(issue) {
-          let #(id, name, creator_id) = issue
-          Issue(id, name, creator_id)
+          let #(id, name, creator_id, directory_id) = issue
+          Issue(id, name, creator_id, directory_id)
         })
       let issues_length = list.length(issues)
       let paginated_issues =
@@ -89,7 +93,8 @@ pub fn find_one(id: String, ctx: Context) {
     )
 
   case result {
-    Ok([#(id, name, creator_id)]) -> Ok(Issue(id, name, creator_id))
+    Ok([#(id, name, creator_id, directory_id)]) ->
+      Ok(Issue(id, name, creator_id, directory_id))
     Error(error) -> Error(DatabaseError(error))
     _ -> Error(IssueNotFoundError)
   }
@@ -107,7 +112,8 @@ pub fn update_one(id: String, input: UpdateIssueInput, ctx: Context) {
     )
 
   case result {
-    Ok([#(id, name, creator_id)]) -> Ok(Issue(id, name, creator_id))
+    Ok([#(id, name, creator_id, directory_id)]) ->
+      Ok(Issue(id, name, creator_id, directory_id))
     Error(error) -> Error(DatabaseError(error))
     _ -> Error(IssueNotFoundError)
   }
@@ -125,7 +131,8 @@ pub fn delete_one(id: String, ctx: Context) {
     )
 
   case result {
-    Ok([#(id, name, creator_id)]) -> Ok(Issue(id, name, creator_id))
+    Ok([#(id, name, creator_id, directory_id)]) ->
+      Ok(Issue(id, name, creator_id, directory_id))
     Error(error) -> Error(DatabaseError(error))
     _ -> Error(IssueNotFoundError)
   }

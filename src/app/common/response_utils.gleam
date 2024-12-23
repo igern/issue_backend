@@ -11,6 +11,7 @@ pub fn map_service_errors(
   next: fn(a) -> Response,
 ) -> Response {
   case result {
+    Error(DirectoryNotFoundError) -> directory_not_found_error_response()
     Error(UserNotFoundError) -> user_not_found_error_response()
     Error(ProfileNotFoundError) -> profile_not_found_error_response()
     Error(IssueNotFoundError) -> issue_not_found_error_response()
@@ -35,6 +36,7 @@ pub fn map_service_errors(
 }
 
 pub type ServiceError {
+  DirectoryNotFoundError
   UserNotFoundError
   ProfileNotFoundError
   IssueNotFoundError
@@ -92,6 +94,10 @@ pub fn issue_not_found_error_response() {
 
 pub fn profile_not_found_error_response() {
   json_response(404, "profile not found")
+}
+
+pub fn directory_not_found_error_response() {
+  json_response(404, "directory not found")
 }
 
 pub fn database_error_response() {

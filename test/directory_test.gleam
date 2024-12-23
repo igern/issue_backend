@@ -47,3 +47,69 @@ pub fn create_directory_invalid_jwt_test() {
 pub fn create_directory_profile_required_test() {
   utils.profile_required_tester(http.Post, "/api/directories")
 }
+
+pub fn delete_directory_test() {
+  use t <- utils.with_context
+
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, directory <- utils.next_create_directory(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
+
+  let response =
+    router.handle_request(
+      testing.delete_json(
+        "/api/directories/" <> directory.id,
+        [utils.bearer_header(authorized_profile.auth_tokens.access_token)],
+        json.object([]),
+      ),
+      t.context,
+    )
+
+  response.status |> should.equal(200)
+  let assert Ok(data) =
+    json.decode(testing.string_body(response), directory.decoder())
+
+  data
+  |> should.equal(directory)
+}
+
+pub fn delete_directory_cascade_issues_test() {
+  use t <- utils.with_context
+
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, directory <- utils.next_create_directory(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
+  use t, _ <- utils.next_create_issue(
+    t,
+    authorized_profile.auth_tokens.access_token,
+    directory.id,
+  )
+
+  utils.delete_directory(
+    t,
+    authorized_profile.auth_tokens.access_token,
+    directory.id,
+  )
+  let issues = utils.find_issues(t, authorized_profile.auth_tokens.access_token)
+  issues.total |> should.equal(0)
+}
+
+pub fn delete_directory_missing_authorization_header_test() {
+  utils.missing_authorization_header_tester(http.Delete, "/api/directories/id")
+}
+
+pub fn delete_directory_invalid_bearer_format_test() {
+  utils.invalid_bearer_format_tester(http.Delete, "/api/directories/id")
+}
+
+pub fn delete_directory_invalid_jwt_test() {
+  utils.invalid_jwt_tester(http.Delete, "/api/directories/id")
+}
+
+pub fn delete_directory_profile_required_test() {
+  utils.profile_required_tester(http.Delete, "/api/directories/id")
+}

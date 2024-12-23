@@ -1,4 +1,4 @@
-import app/common/response_utils.{DatabaseError}
+import app/common/response_utils.{DatabaseError, DirectoryNotFoundError}
 import app/directory/inputs/create_directory_input.{type CreateDirectoryInput}
 import app/directory/outputs/directory.{Directory}
 import app/types.{type Context}
@@ -30,5 +30,19 @@ pub fn create(input: CreateDirectoryInput, ctx: Context) {
     Ok([#(id, name, created_at)]) -> Ok(Directory(id, name, created_at))
     Error(error) -> Error(DatabaseError(error))
     _ -> panic as "Should only return one row from an insert"
+  }
+}
+
+pub fn delete_one(id: String, ctx: Context) {
+  let sql = "delete from directories where id = ? returning *"
+
+  let result =
+    sqlight.query(sql, ctx.connection, [sqlight.text(id)], directory_decoder())
+
+  case result {
+    Ok([#(id, name, created_at)]) -> Ok(Directory(id, name, created_at))
+    Error(error) -> Error(DatabaseError(error))
+    Ok([]) -> Error(DirectoryNotFoundError)
+    _ -> panic as "Should only return one row from a delete"
   }
 }

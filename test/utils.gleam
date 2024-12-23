@@ -8,6 +8,7 @@ import app/issue/inputs/create_issue_input.{
   type CreateIssueInput, CreateIssueInput,
 }
 import app/issue/outputs/issue.{type Issue}
+import app/issue/outputs/paginated_issues
 import app/profile/inputs/create_profile_input.{
   type CreateProfileInput, CreateProfileInput,
 }
@@ -94,11 +95,11 @@ pub fn next_create_issue_input(
   )
 }
 
-pub fn create_issue(
+pub fn next_create_issue(
   t: TestContext,
   access_token: String,
   directory_id: String,
-  handler: fn(Issue) -> Nil,
+  handler: fn(TestContext, Issue) -> Nil,
 ) {
   use t, input <- next_create_issue_input(t, directory_id)
   let json = create_issue_input.to_json(input)
@@ -112,7 +113,7 @@ pub fn create_issue(
 
   let assert Ok(issue) =
     json.decode(testing.string_body(response), issue.decoder())
-  handler(issue)
+  handler(t, issue)
 }
 
 pub fn next_create_user_input(
@@ -382,4 +383,34 @@ pub fn next_create_directory(
   use t, input <- next_create_directory_input(t)
   use directory <- create_directory(t, input, access_token)
   handle(t, directory)
+}
+
+pub fn delete_directory(t: TestContext, access_token: String, id: String) {
+  let response =
+    router.handle_request(
+      testing.delete_json(
+        "/api/directories/" <> id,
+        [bearer_header(access_token)],
+        json.object([]),
+      ),
+      t.context,
+    )
+  response.status |> should.equal(200)
+  let assert Ok(data) =
+    json.decode(testing.string_body(response), directory.decoder())
+
+  data
+}
+
+pub fn find_issues(t: TestContext, access_token: String) {
+  let response =
+    router.handle_request(
+      testing.get("/api/issues?skip=0&take=10", [bearer_header(access_token)]),
+      t.context,
+    )
+
+  response.status |> should.equal(200)
+  let assert Ok(data) =
+    json.decode(testing.string_body(response), paginated_issues.decoder())
+  data
 }

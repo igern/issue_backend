@@ -1,5 +1,6 @@
 # issue_backend
 
 ## Backlog
-- add Directory. Where issues are..
+- add update directory
+- add delete directory
 - add more fields to issue

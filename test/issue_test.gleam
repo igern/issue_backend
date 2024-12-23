@@ -106,7 +106,7 @@ pub fn find_issues_1_test() {
     t,
     authorized_profile.auth_tokens.access_token,
   )
-  use issue <- utils.create_issue(
+  use t, issue <- utils.next_create_issue(
     t,
     authorized_profile.auth_tokens.access_token,
     directory.id,
@@ -134,12 +134,12 @@ pub fn find_issues_2_test() {
     t,
     authorized_profile.auth_tokens.access_token,
   )
-  use issue1 <- utils.create_issue(
+  use t, issue1 <- utils.next_create_issue(
     t,
     authorized_profile.auth_tokens.access_token,
     directory.id,
   )
-  use issue2 <- utils.create_issue(
+  use t, issue2 <- utils.next_create_issue(
     t,
     authorized_profile.auth_tokens.access_token,
     directory.id,
@@ -168,17 +168,17 @@ pub fn find_issues_3_test() {
     t,
     authorized_profile.auth_tokens.access_token,
   )
-  use issue1 <- utils.create_issue(
+  use t, issue1 <- utils.next_create_issue(
     t,
     authorized_profile.auth_tokens.access_token,
     directory.id,
   )
-  use issue2 <- utils.create_issue(
+  use t, issue2 <- utils.next_create_issue(
     t,
     authorized_profile.auth_tokens.access_token,
     directory.id,
   )
-  use issue3 <- utils.create_issue(
+  use t, issue3 <- utils.next_create_issue(
     t,
     authorized_profile.auth_tokens.access_token,
     directory.id,
@@ -236,7 +236,7 @@ pub fn find_one_issue_test() {
     t,
     authorized_profile.auth_tokens.access_token,
   )
-  use issue <- utils.create_issue(
+  use t, issue <- utils.next_create_issue(
     t,
     authorized_profile.auth_tokens.access_token,
     directory.id,
@@ -293,7 +293,7 @@ pub fn update_one_issue_test() {
     t,
     authorized_profile.auth_tokens.access_token,
   )
-  use issue <- utils.create_issue(
+  use t, issue <- utils.next_create_issue(
     t,
     authorized_profile.auth_tokens.access_token,
     directory.id,
@@ -359,7 +359,7 @@ pub fn delete_one_issue_test() {
     t,
     authorized_profile.auth_tokens.access_token,
   )
-  use issue <- utils.create_issue(
+  use t, issue <- utils.next_create_issue(
     t,
     authorized_profile.auth_tokens.access_token,
     directory.id,

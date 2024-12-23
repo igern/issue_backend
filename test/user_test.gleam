@@ -31,7 +31,7 @@ pub fn create_user_test() {
 pub fn delete_one_user_test() {
   use t <- utils.with_context
 
-  use t, authorized_user <- utils.create_next_user_and_login(t)
+  use t, authorized_user <- utils.next_create_user_and_login(t)
 
   let response =
     router.handle_request(
@@ -54,7 +54,7 @@ pub fn delete_one_user_test() {
 pub fn delete_one_user_not_found_test() {
   use t <- utils.with_context
 
-  use t, authorized_user <- utils.create_next_user_and_login(t)
+  use t, authorized_user <- utils.next_create_user_and_login(t)
 
   let sql = "delete from users where id = ? returning *"
 
@@ -82,7 +82,7 @@ pub fn delete_one_user_not_found_test() {
 pub fn delete_one_user_with_profile_test() {
   use t <- utils.with_context
 
-  use t, authorized_profil <- utils.create_next_user_and_profile_and_login(t)
+  use t, authorized_profil <- utils.next_create_user_and_profile_and_login(t)
 
   let response =
     router.handle_request(
@@ -116,8 +116,8 @@ pub fn delete_one_user_with_profile_test() {
 pub fn delete_one_user_other_user_test() {
   use t <- utils.with_context
 
-  use t, authorized_profil1 <- utils.create_next_user_and_profile_and_login(t)
-  use t, authorized_profil2 <- utils.create_next_user_and_profile_and_login(t)
+  use t, authorized_profil1 <- utils.next_create_user_and_profile_and_login(t)
+  use t, authorized_profil2 <- utils.next_create_user_and_profile_and_login(t)
 
   let response =
     router.handle_request(

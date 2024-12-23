@@ -46,7 +46,7 @@ pub fn login_invalid_email_test() {
 pub fn login_invalid_password_test() {
   use t <- utils.with_context
 
-  use t, user <- utils.create_next_user(t)
+  use t, user <- utils.next_create_user(t)
 
   let input =
     login_input.to_json(LoginInput(
@@ -66,7 +66,7 @@ pub fn login_invalid_password_test() {
 pub fn refresh_auth_tokens_test() {
   use t <- utils.with_context
 
-  use t, user <- utils.create_next_user_and_login(t)
+  use t, user <- utils.next_create_user_and_login(t)
 
   let input =
     refresh_auth_tokens_input.to_json(RefreshAuthTokensInput(
@@ -113,7 +113,7 @@ pub fn refresh_auth_tokens_not_found_test() {
 
 pub fn refresh_auth_tokens_expired_test() {
   use t <- utils.with_context
-  use t, user <- utils.create_next_user_and_login(t)
+  use t, user <- utils.next_create_user_and_login(t)
 
   let sql = "update refresh_tokens set expiresAt = ? where token = ?"
   let assert Ok(_) =

@@ -17,7 +17,7 @@ import wisp/testing
 pub fn create_profile_test() {
   use t <- utils.with_context
 
-  use t, authorized_user <- utils.create_next_user_and_login(t)
+  use t, authorized_user <- utils.next_create_user_and_login(t)
 
   use t, input <- utils.next_create_profile_input(t)
   let json = create_profile_input.to_json(input)
@@ -59,7 +59,7 @@ pub fn create_profile_invalid_jwt_test() {
 pub fn upload_profile_picture_test() {
   use t <- utils.with_context()
 
-  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
 
   let response =
     router.handle_request(
@@ -82,8 +82,8 @@ pub fn upload_profile_picture_test() {
 pub fn upload_profile_picture_can_not_update_other_profile_test() {
   use t <- utils.with_context()
 
-  use t, authorized_profile1 <- utils.create_next_user_and_profile_and_login(t)
-  use t, authorized_profile2 <- utils.create_next_user_and_profile_and_login(t)
+  use t, authorized_profile1 <- utils.next_create_user_and_profile_and_login(t)
+  use t, authorized_profile2 <- utils.next_create_user_and_profile_and_login(t)
 
   let response =
     router.handle_request(
@@ -104,7 +104,7 @@ pub fn upload_profile_picture_can_not_update_other_profile_test() {
 pub fn upload_profile_picture_invalid_file_type_test() {
   use t <- utils.with_context()
 
-  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
 
   let response =
     router.handle_request(

@@ -13,7 +13,7 @@ import wisp/testing
 pub fn create_issue_test() {
   use t <- utils.with_context
 
-  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
 
   use t, directory <- utils.next_create_directory(
     t,
@@ -46,7 +46,7 @@ pub fn create_issue_test() {
 
 pub fn create_issue_invalid_directory_id_test() {
   use t <- utils.with_context
-  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
 
   use t, input <- utils.next_create_issue_input(t, utils.mock_uuidv4)
   let json = create_issue_input.to_json(input)
@@ -82,7 +82,7 @@ pub fn create_issue_profile_required_test() {
 
 pub fn find_issues_0_test() {
   use t <- utils.with_context
-  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
 
   let response =
     router.handle_request(
@@ -101,7 +101,7 @@ pub fn find_issues_0_test() {
 pub fn find_issues_1_test() {
   use t <- utils.with_context
 
-  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
   use t, directory <- utils.next_create_directory(
     t,
     authorized_profile.auth_tokens.access_token,
@@ -129,7 +129,7 @@ pub fn find_issues_1_test() {
 pub fn find_issues_2_test() {
   use t <- utils.with_context
 
-  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
   use t, directory <- utils.next_create_directory(
     t,
     authorized_profile.auth_tokens.access_token,
@@ -163,7 +163,7 @@ pub fn find_issues_2_test() {
 pub fn find_issues_3_test() {
   use t <- utils.with_context
 
-  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
   use t, directory <- utils.next_create_directory(
     t,
     authorized_profile.auth_tokens.access_token,
@@ -231,7 +231,7 @@ pub fn find_issues_profile_required_test() {
 pub fn find_one_issue_test() {
   use t <- utils.with_context
 
-  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
   use t, directory <- utils.next_create_directory(
     t,
     authorized_profile.auth_tokens.access_token,
@@ -257,7 +257,7 @@ pub fn find_one_issue_test() {
 
 pub fn find_one_issue_not_found_test() {
   use t <- utils.with_context
-  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
   let response =
     router.handle_request(
       testing.get("/api/issues/" <> "1", [
@@ -288,7 +288,7 @@ pub fn find_one_profile_required_test() {
 pub fn update_one_issue_test() {
   use t <- utils.with_context
 
-  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
   use t, directory <- utils.next_create_directory(
     t,
     authorized_profile.auth_tokens.access_token,
@@ -319,7 +319,7 @@ pub fn update_one_issue_test() {
 pub fn update_one_issue_not_found_test() {
   use t <- utils.with_context
 
-  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
   let input = update_issue_input.to_json(UpdateIssueInput(name: "Mikkel"))
 
   let response =
@@ -354,7 +354,7 @@ pub fn update_one_profile_required_test() {
 pub fn delete_one_issue_test() {
   use t <- utils.with_context
 
-  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
   use t, directory <- utils.next_create_directory(
     t,
     authorized_profile.auth_tokens.access_token,
@@ -384,7 +384,7 @@ pub fn delete_one_issue_test() {
 pub fn delete_one_issue_not_found_test() {
   use t <- utils.with_context
 
-  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
 
   let response =
     router.handle_request(

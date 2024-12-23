@@ -144,7 +144,7 @@ pub fn create_user(
   handler(user)
 }
 
-pub fn create_next_user(
+pub fn next_create_user(
   t: TestContext,
   handler: fn(TestContext, User) -> Nil,
 ) -> Nil {
@@ -166,22 +166,22 @@ pub fn login(t: TestContext, input: LoginInput) {
   auth_tokens
 }
 
-pub fn create_next_user_and_login(
+pub fn next_create_user_and_login(
   t: TestContext,
   handler: fn(TestContext, AuthorizedUser) -> Nil,
 ) {
-  use t, user <- create_next_user(t)
+  use t, user <- next_create_user(t)
   let auth_tokens =
     login(t, LoginInput(email: user.email, password: "secret1234"))
   handler(t, AuthorizedUser(user:, auth_tokens:))
 }
 
-pub fn create_next_user_and_profile_and_login(
+pub fn next_create_user_and_profile_and_login(
   t: TestContext,
   handler: fn(TestContext, AuthorizedProfile) -> Nil,
 ) {
-  use t, authorized_user <- create_next_user_and_login(t)
-  use t, profile <- create_next_profile(t, authorized_user)
+  use t, authorized_user <- next_create_user_and_login(t)
+  use t, profile <- next_create_profile(t, authorized_user)
   handler(
     t,
     AuthorizedProfile(
@@ -224,7 +224,7 @@ pub fn create_profile(
   handler(profile)
 }
 
-pub fn create_next_profile(
+pub fn next_create_profile(
   t: TestContext,
   authorized_user: AuthorizedUser,
   handler: fn(TestContext, Profile) -> Nil,
@@ -281,7 +281,7 @@ pub fn invalid_jwt_tester(method: http.Method, path: String) {
 pub fn profile_required_tester(method: http.Method, path: String) {
   use t <- with_context
 
-  use t, authorized_user <- create_next_user_and_login(t)
+  use t, authorized_user <- next_create_user_and_login(t)
 
   let response =
     router.handle_request(

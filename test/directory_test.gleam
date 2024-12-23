@@ -10,7 +10,7 @@ import wisp/testing
 pub fn create_directory_test() {
   use t <- utils.with_context
 
-  use t, authorized_profile <- utils.create_next_user_and_profile_and_login(t)
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
 
   use t, input <- utils.next_create_directory_input(t)
   let json = create_directory_input.to_json(input)

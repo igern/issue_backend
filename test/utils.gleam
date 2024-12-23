@@ -2,6 +2,7 @@ import app/auth/inputs/login_input.{type LoginInput, LoginInput}
 import app/auth/outputs/auth_tokens.{type AuthTokens}
 import app/common/response_utils
 import app/database
+import app/directory/inputs/create_directory_input.{type CreateDirectoryInput}
 import app/issue/inputs/create_issue_input.{
   type CreateIssueInput, CreateIssueInput,
 }
@@ -333,3 +334,15 @@ pub const jpg = "test/files/jpg.jpg"
 pub const png = "test/files/png.png"
 
 pub const mock_uuidv4 = "C1136D3F-E398-4496-A777-2DBFC882C70A"
+
+pub fn next_create_directory_input(
+  t: TestContext,
+  handler: fn(TestContext, CreateDirectoryInput) -> Nil,
+) {
+  handler(
+    TestContext(..t, next: t.next + 1),
+    create_directory_input.CreateDirectoryInput(
+      "name_" <> int.to_string(t.next),
+    ),
+  )
+}

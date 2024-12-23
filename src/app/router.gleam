@@ -1,4 +1,5 @@
 import app/auth/auth_router
+import app/directory/directory_router
 import app/issue/issue_router
 import app/profile/profile_router
 import app/types.{type Context}
@@ -13,6 +14,7 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
   use <- user_router.router(req, ctx)
   use <- auth_router.router(req, ctx)
   use <- profile_router.router(req, ctx)
+  use <- directory_router.router(req, ctx)
 
   case wisp.path_segments(req), req.method {
     ["api"], Get -> {

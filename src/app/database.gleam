@@ -38,4 +38,13 @@ pub fn init_schemas(connection: Connection) {
   )
   "
   let assert Ok(Nil) = sqlight.exec(profile_sql, connection)
+
+  let directory_sql =
+    "
+  CREATE TABLE IF NOT EXISTS directories (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  created_at TEXT NOT NULL)
+  "
+  let assert Ok(Nil) = sqlight.exec(directory_sql, connection)
 }

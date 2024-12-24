@@ -2,7 +2,12 @@ import app/auth/inputs/login_input.{type LoginInput, LoginInput}
 import app/auth/outputs/auth_tokens.{type AuthTokens}
 import app/common/response_utils
 import app/database
-import app/directory/inputs/create_directory_input.{type CreateDirectoryInput}
+import app/directory/inputs/create_directory_input.{
+  type CreateDirectoryInput, CreateDirectoryInput,
+}
+import app/directory/inputs/update_directory_input.{
+  type UpdateDirectoryInput, UpdateDirectoryInput,
+}
 import app/directory/outputs/directory.{type Directory}
 import app/issue/inputs/create_issue_input.{
   type CreateIssueInput, CreateIssueInput,
@@ -348,9 +353,17 @@ pub fn next_create_directory_input(
 ) {
   handler(
     TestContext(..t, next: t.next + 1),
-    create_directory_input.CreateDirectoryInput(
-      "name_" <> int.to_string(t.next),
-    ),
+    CreateDirectoryInput("name_" <> int.to_string(t.next)),
+  )
+}
+
+pub fn next_update_directory_input(
+  t: TestContext,
+  handler: fn(TestContext, UpdateDirectoryInput) -> Nil,
+) {
+  handler(
+    TestContext(..t, next: t.next + 1),
+    UpdateDirectoryInput("name_" <> int.to_string(t.next)),
   )
 }
 

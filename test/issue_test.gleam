@@ -5,6 +5,7 @@ import app/issue/outputs/issue.{Issue}
 import app/issue/outputs/paginated_issues
 import app/router
 import gleam/http
+import gleam/io
 import gleam/json
 import gleam/option
 import gleeunit/should
@@ -337,7 +338,11 @@ pub fn update_one_issue_test() {
     authorized_profile.auth_tokens.access_token,
     directory.id,
   )
-  let input = update_issue_input.to_json(UpdateIssueInput(name: "Mikkel"))
+  let input =
+    update_issue_input.to_json(UpdateIssueInput(
+      name: option.Some("Mikkel"),
+      description: option.Some("Nice"),
+    ))
 
   let response =
     router.handle_request(
@@ -352,14 +357,22 @@ pub fn update_one_issue_test() {
   response.status |> should.equal(200)
   let assert Ok(data) =
     json.decode(testing.string_body(response), issue.decoder())
-  data |> should.equal(Issue(..issue, name: "Mikkel"))
+  data
+  |> should.equal(
+    Issue(..issue, name: "Mikkel", description: option.Some("Nice")),
+  )
 }
 
 pub fn update_one_issue_not_found_test() {
   use t <- utils.with_context
 
   use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
-  let input = update_issue_input.to_json(UpdateIssueInput(name: "Mikkel"))
+
+  let input =
+    update_issue_input.to_json(UpdateIssueInput(
+      name: option.Some("Mikkel"),
+      description: option.Some("Mikkel"),
+    ))
 
   let response =
     router.handle_request(
@@ -372,6 +385,41 @@ pub fn update_one_issue_not_found_test() {
     )
 
   response.status |> should.equal(404)
+}
+
+pub fn update_one_issue_none_test() {
+  use t <- utils.with_context
+
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, directory <- utils.next_create_directory(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
+  use t, issue <- utils.next_create_issue(
+    t,
+    authorized_profile.auth_tokens.access_token,
+    directory.id,
+  )
+  let input =
+    update_issue_input.to_json(UpdateIssueInput(
+      name: option.None,
+      description: option.None,
+    ))
+
+  let response =
+    router.handle_request(
+      testing.patch_json(
+        "/api/issues/" <> issue.id,
+        [utils.bearer_header(authorized_profile.auth_tokens.access_token)],
+        input,
+      ),
+      t.context,
+    )
+  io.debug(response)
+  response.status |> should.equal(200)
+  let assert Ok(data) =
+    json.decode(testing.string_body(response), issue.decoder())
+  data |> should.equal(issue)
 }
 
 pub fn update_one_missing_authorization_header_test() {

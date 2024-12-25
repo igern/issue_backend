@@ -8,6 +8,7 @@ pub fn init_schemas(connection: Connection) {
     "CREATE TABLE IF NOT EXISTS issues (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
+    description TEXT,
     creator_id TEXT NOT NULL,
     directory_id TEXT NOT NULL,
     FOREIGN KEY (directory_id) REFERENCES directories (id) ON DELETE CASCADE)

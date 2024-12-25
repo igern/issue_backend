@@ -11,13 +11,20 @@ import sqlight.{ConstraintForeignkey}
 import youid/uuid
 
 fn issue_decoder() {
-  dynamic.tuple4(dynamic.string, dynamic.string, dynamic.string, dynamic.string)
+  dynamic.tuple5(
+    dynamic.string,
+    dynamic.string,
+    dynamic.optional(dynamic.string),
+    dynamic.string,
+    dynamic.string,
+  )
 }
 
 pub fn create(input: CreateIssueInput, creator_id: String, ctx: Context) {
   let sql =
-    "insert into issues (id, name, creator_id, directory_id) values (?, ?, ?, ?) returning *"
+    "insert into issues (id, name, description, creator_id, directory_id) values (?, ?, ?, ?, ?) returning *"
   let id = uuid.v4_string()
+
   let result =
     sqlight.query(
       sql,
@@ -25,6 +32,7 @@ pub fn create(input: CreateIssueInput, creator_id: String, ctx: Context) {
       with: [
         sqlight.text(id),
         sqlight.text(input.name),
+        sqlight.nullable(sqlight.text, input.description),
         sqlight.text(creator_id),
         sqlight.text(input.directory_id),
       ],
@@ -32,8 +40,8 @@ pub fn create(input: CreateIssueInput, creator_id: String, ctx: Context) {
     )
 
   case result {
-    Ok([#(id, name, creator_id, directory_id)]) ->
-      Ok(Issue(id, name, creator_id, directory_id))
+    Ok([#(id, name, description, creator_id, directory_id)]) ->
+      Ok(Issue(id, name, description, creator_id, directory_id))
     Error(sqlight.SqlightError(ConstraintForeignkey, _, _)) ->
       Error(response_utils.DirectoryNotFoundError)
     Error(error) -> Error(DatabaseError(error))
@@ -64,8 +72,8 @@ pub fn find_paginated(input: PaginationInput, ctx: Context) {
       let assert [total] = totals
       let issues =
         list.map(items_result, fn(issue) {
-          let #(id, name, creator_id, directory_id) = issue
-          Issue(id, name, creator_id, directory_id)
+          let #(id, name, description, creator_id, directory_id) = issue
+          Issue(id, name, description, creator_id, directory_id)
         })
       let issues_length = list.length(issues)
       let paginated_issues =
@@ -93,8 +101,8 @@ pub fn find_one(id: String, ctx: Context) {
     )
 
   case result {
-    Ok([#(id, name, creator_id, directory_id)]) ->
-      Ok(Issue(id, name, creator_id, directory_id))
+    Ok([#(id, name, description, creator_id, directory_id)]) ->
+      Ok(Issue(id, name, description, creator_id, directory_id))
     Error(error) -> Error(DatabaseError(error))
     _ -> Error(IssueNotFoundError)
   }
@@ -112,8 +120,8 @@ pub fn update_one(id: String, input: UpdateIssueInput, ctx: Context) {
     )
 
   case result {
-    Ok([#(id, name, creator_id, directory_id)]) ->
-      Ok(Issue(id, name, creator_id, directory_id))
+    Ok([#(id, name, description, creator_id, directory_id)]) ->
+      Ok(Issue(id, name, description, creator_id, directory_id))
     Error(error) -> Error(DatabaseError(error))
     _ -> Error(IssueNotFoundError)
   }
@@ -131,8 +139,8 @@ pub fn delete_one(id: String, ctx: Context) {
     )
 
   case result {
-    Ok([#(id, name, creator_id, directory_id)]) ->
-      Ok(Issue(id, name, creator_id, directory_id))
+    Ok([#(id, name, description, creator_id, directory_id)]) ->
+      Ok(Issue(id, name, description, creator_id, directory_id))
     Error(error) -> Error(DatabaseError(error))
     _ -> Error(IssueNotFoundError)
   }

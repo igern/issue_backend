@@ -6,6 +6,7 @@ import app/issue/outputs/paginated_issues
 import app/router
 import gleam/http
 import gleam/json
+import gleam/option
 import gleeunit/should
 import utils
 import wisp/testing
@@ -39,6 +40,44 @@ pub fn create_issue_test() {
   |> should.equal(Issue(
     id: data.id,
     name: input.name,
+    description: input.description,
+    creator_id: authorized_profile.profile.id,
+    directory_id: input.directory_id,
+  ))
+}
+
+pub fn create_issue_null_description_test() {
+  use t <- utils.with_context
+
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+
+  use t, directory <- utils.next_create_directory(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
+
+  use t, input <- utils.next_create_issue_input(t, directory.id)
+  let input =
+    create_issue_input.CreateIssueInput(..input, description: option.None)
+  let json = create_issue_input.to_json(input)
+
+  let response =
+    router.handle_request(
+      testing.post_json(
+        "/api/issues",
+        [utils.bearer_header(authorized_profile.auth_tokens.access_token)],
+        json,
+      ),
+      t.context,
+    )
+  response.status |> should.equal(201)
+  let assert Ok(data) =
+    json.decode(testing.string_body(response), issue.decoder())
+  data
+  |> should.equal(Issue(
+    id: data.id,
+    name: input.name,
+    description: input.description,
     creator_id: authorized_profile.profile.id,
     directory_id: input.directory_id,
   ))

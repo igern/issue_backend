@@ -95,6 +95,7 @@ pub fn next_create_issue_input(
     TestContext(..t, next: t.next + 1),
     CreateIssueInput(
       name: "name" <> int.to_string(t.next),
+      description: option.Some("description" <> int.to_string(t.next)),
       directory_id: directory_id,
     ),
   )

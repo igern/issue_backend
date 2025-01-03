@@ -1,7 +1,6 @@
 # issue_backend
 
 ## Backlog
-- add patch issue
 - add team (you can create, update, delete, invite, kick)
 - link directories to teams,
 - update directory permissions (only allowed to crud directories in your team)

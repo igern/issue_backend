@@ -1,7 +1,7 @@
 import gleam/dynamic.{type Dynamic}
 import gleam/json.{type Json}
 import gleam/list
-import gleam/option
+import gleam/option.{None, Some}
 
 pub type UpdateIssueInput {
   UpdateIssueInput(
@@ -16,23 +16,21 @@ pub fn from_dynamic(
   json
   |> dynamic.decode2(
     UpdateIssueInput,
-    dynamic.field("name", dynamic.optional(dynamic.string)),
+    dynamic.optional_field("name", dynamic.string),
     dynamic.optional_field("description", dynamic.optional(dynamic.string)),
   )
 }
 
 pub fn to_json(input: UpdateIssueInput) -> Json {
-  let stuff = [#("name", json.nullable(input.name, json.string))]
-  case input.description {
-    option.Some(description) -> {
-      json.object(
-        list.flatten([
-          [#("description", json.nullable(description, json.string))],
-          stuff,
-        ]),
-      )
-    }
-    _ -> json.object(stuff)
+  let name = case input.name {
+    Some(name) -> [#("name", json.string(name))]
+    None -> []
   }
-  json.object([#("name", json.nullable(input.name, json.string))])
+  let description = case input.description {
+    Some(Some(description)) -> [#("description", json.string(description))]
+    Some(None) -> [#("description", json.null())]
+    None -> []
+  }
+
+  json.object(list.flatten([name, description]))
 }

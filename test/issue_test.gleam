@@ -5,7 +5,6 @@ import app/issue/outputs/issue.{Issue}
 import app/issue/outputs/paginated_issues
 import app/router
 import gleam/http
-import gleam/io
 import gleam/json
 import gleam/option
 import gleeunit/should
@@ -341,7 +340,7 @@ pub fn update_one_issue_test() {
   let input =
     update_issue_input.to_json(UpdateIssueInput(
       name: option.Some("Mikkel"),
-      description: option.Some("Nice"),
+      description: option.Some(option.Some("Nice")),
     ))
 
   let response =
@@ -363,6 +362,42 @@ pub fn update_one_issue_test() {
   )
 }
 
+pub fn update_one_issue_null_test() {
+  use t <- utils.with_context
+
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, directory <- utils.next_create_directory(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
+  use t, issue <- utils.next_create_issue(
+    t,
+    authorized_profile.auth_tokens.access_token,
+    directory.id,
+  )
+  let input =
+    update_issue_input.to_json(UpdateIssueInput(
+      name: option.None,
+      description: option.Some(option.None),
+    ))
+
+  let response =
+    router.handle_request(
+      testing.patch_json(
+        "/api/issues/" <> issue.id,
+        [utils.bearer_header(authorized_profile.auth_tokens.access_token)],
+        input,
+      ),
+      t.context,
+    )
+
+  response.status |> should.equal(200)
+  let assert Ok(data) =
+    json.decode(testing.string_body(response), issue.decoder())
+  data
+  |> should.equal(Issue(..issue, description: option.None))
+}
+
 pub fn update_one_issue_not_found_test() {
   use t <- utils.with_context
 
@@ -371,7 +406,7 @@ pub fn update_one_issue_not_found_test() {
   let input =
     update_issue_input.to_json(UpdateIssueInput(
       name: option.Some("Mikkel"),
-      description: option.Some("Mikkel"),
+      description: option.Some(option.Some("Mikkel")),
     ))
 
   let response =
@@ -415,7 +450,6 @@ pub fn update_one_issue_none_test() {
       ),
       t.context,
     )
-  io.debug(response)
   response.status |> should.equal(200)
   let assert Ok(data) =
     json.decode(testing.string_body(response), issue.decoder())

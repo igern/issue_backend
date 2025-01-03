@@ -1,11 +1,11 @@
 import gleam/dynamic.{type Dynamic}
 import gleam/json.{type Json}
-import gleam/option
+import gleam/option.{type Option}
 
 pub type CreateIssueInput {
   CreateIssueInput(
     name: String,
-    description: option.Option(String),
+    description: Option(String),
     directory_id: String,
   )
 }

@@ -1,14 +1,13 @@
 import app/common/inputs/pagination_input.{type PaginationInput}
 import app/common/response_utils.{DatabaseError, IssueNotFoundError}
+import app/common/sqlight_utils
 import app/issue/inputs/create_issue_input.{type CreateIssueInput}
 import app/issue/inputs/update_issue_input.{type UpdateIssueInput}
 import app/issue/outputs/issue.{Issue}
 import app/issue/outputs/paginated_issues
 import app/types.{type Context}
 import gleam/dynamic
-import gleam/io
 import gleam/list
-import gleam/option
 import gleam/string
 import sqlight.{ConstraintForeignkey}
 import youid/uuid
@@ -111,48 +110,20 @@ pub fn find_one(id: String, ctx: Context) {
   }
 }
 
-fn sqlight_string_set(update: #(String, option.Option(String))) {
-  case update.1 {
-    option.Some(value) -> {
-      let set = update.0 <> " = ?"
-      let value = sqlight.text(value)
-      option.Some(#(set, value))
-    }
-    option.None -> option.None
-  }
-}
-
-fn create_set_and_values(updates: List(option.Option(#(String, sqlight.Value)))) {
-  let updates =
-    list.filter_map(updates, fn(update) {
-      case update {
-        option.Some(update) -> Ok(update)
-        option.None -> Error(Nil)
-      }
-    })
-  let set =
-    list.map(updates, fn(update) { update.0 })
-    |> string.join(", ")
-  let values = list.map(updates, fn(update) { update.1 })
-  case list.length(updates) > 0 {
-    True -> Ok(#(set, values))
-    False -> Error(Nil)
-  }
-}
-
 pub fn update_one(id: String, input: UpdateIssueInput, ctx: Context) {
   let sql = "update issues set $set where id = ? returning *"
-  io.debug(input)
 
   case
-    create_set_and_values([
-      sqlight_string_set(#("name", input.name)),
-      sqlight_string_set(#("description", input.description)),
+    sqlight_utils.sqlight_patch_helper([
+      sqlight_utils.sqlight_string_optional(#("name", input.name)),
+      sqlight_utils.sqlight_string_optional_null(#(
+        "description",
+        input.description,
+      )),
     ])
   {
     Ok(#(set, values)) -> {
       let sql = string.replace(sql, "$set", set)
-      io.debug(sql)
       let result =
         sqlight.query(
           sql,

@@ -50,4 +50,26 @@ pub fn init_schemas(connection: Connection) {
   created_at TEXT NOT NULL)
   "
   let assert Ok(Nil) = sqlight.exec(directory_sql, connection)
+
+  let team_sql =
+    "
+  CREATE TABLE IF NOT EXISTS teams (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  owner_id TEXT NOT NULL,
+  FOREIGN KEY (owner_id) REFERENCES profiles (id) ON DELETE CASCADE)
+  "
+  let assert Ok(Nil) = sqlight.exec(team_sql, connection)
+
+  let team_profiles_sql =
+    "
+  CREATE TABLE IF NOT EXISTS team_profiles (
+  team_id TEXT NOT NULL,
+  profile_id TEXT NOT NULL,
+  PRIMARY KEY (team_id, profile_id),
+  FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE,
+  FOREIGN KEY (profile_id) REFERENCES profiles (id) ON DELETE CASCADE
+  )"
+
+  let assert Ok(Nil) = sqlight.exec(team_profiles_sql, connection)
 }

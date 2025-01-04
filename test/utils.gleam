@@ -19,6 +19,7 @@ import app/profile/inputs/create_profile_input.{
 }
 import app/profile/outputs/profile.{type Profile}
 import app/router
+import app/team/inputs/create_team_input.{type CreateTeamInput, CreateTeamInput}
 import app/types.{type Context, Context}
 import app/user/inputs/create_user_input.{type CreateUserInput, CreateUserInput}
 import app/user/outputs/user.{type User}
@@ -427,4 +428,14 @@ pub fn find_issues(t: TestContext, access_token: String) {
   let assert Ok(data) =
     json.decode(testing.string_body(response), paginated_issues.decoder())
   data
+}
+
+pub fn next_create_team_input(
+  t: TestContext,
+  handler: fn(TestContext, CreateTeamInput) -> Nil,
+) {
+  handler(
+    TestContext(..t, next: t.next + 1),
+    CreateTeamInput(name: "name" <> int.to_string(t.next)),
+  )
 }

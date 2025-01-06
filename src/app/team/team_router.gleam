@@ -36,3 +36,15 @@ fn create_team(req: wisp.Request, ctx: types.Context) {
   |> json.to_string_tree
   |> wisp.json_response(201)
 }
+
+fn delete_team(req: wisp.Request, id: String, ctx: types.Context) {
+  use profile <- auth_guards.require_profile(req, ctx)
+  use team <- response_utils.map_service_errors(team_service.find_one(id, ctx))
+
+  case team.owner_id == profile.id {
+    True -> {
+      todo
+    }
+    False -> response_utils.can_not_delete_other_teams_response()
+  }
+}

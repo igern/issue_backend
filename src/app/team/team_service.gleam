@@ -1,4 +1,4 @@
-import app/common/response_utils
+import app/common/response_utils.{DatabaseError, TeamNotFoundError}
 import app/team/inputs/create_team_input.{type CreateTeamInput}
 import app/team/outputs/team
 import app/types
@@ -27,7 +27,21 @@ pub fn create(input: CreateTeamInput, owner_id: String, ctx: types.Context) {
     Ok([#(id, name, owner_id)]) -> Ok(team.Team(id, name, owner_id))
     Error(sqlight.SqlightError(sqlight.ConstraintForeignkey, _, _)) ->
       Error(response_utils.ProfileNotFoundError)
-    Error(error) -> Error(response_utils.DatabaseError(error))
+    Error(error) -> Error(DatabaseError(error))
+    _ -> panic as "More than one row was returned from an insert."
+  }
+}
+
+pub fn find_one(id: String, ctx: types.Context) {
+  let sql = "select * from teams where id = ?"
+
+  let result =
+    sqlight.query(sql, ctx.connection, [sqlight.text(id)], team_decoder())
+
+  case result {
+    Ok([#(id, name, owner_id)]) -> Ok(team.Team(id, name, owner_id))
+    Error(error) -> Error(DatabaseError(error))
+    Ok([]) -> Error(TeamNotFoundError)
     _ -> panic as "More than one row was returned from an insert."
   }
 }

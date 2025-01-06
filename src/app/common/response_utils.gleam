@@ -11,6 +11,7 @@ pub fn map_service_errors(
   next: fn(a) -> Response,
 ) -> Response {
   case result {
+    Error(TeamNotFoundError) -> directory_not_found_error_response()
     Error(DirectoryNotFoundError) -> directory_not_found_error_response()
     Error(UserNotFoundError) -> user_not_found_error_response()
     Error(ProfileNotFoundError) -> profile_not_found_error_response()
@@ -36,6 +37,7 @@ pub fn map_service_errors(
 }
 
 pub type ServiceError {
+  TeamNotFoundError
   DirectoryNotFoundError
   UserNotFoundError
   ProfileNotFoundError
@@ -80,6 +82,10 @@ pub fn can_not_update_other_profile_response() {
   json_response(403, "can not update other profile")
 }
 
+pub fn can_not_delete_other_teams_response() {
+  json_response(403, "can not delete other teams")
+}
+
 pub fn refresh_token_not_found_error_response() {
   json_response(404, "refresh token not found")
 }
@@ -98,6 +104,10 @@ pub fn profile_not_found_error_response() {
 
 pub fn directory_not_found_error_response() {
   json_response(404, "directory not found")
+}
+
+pub fn team_not_found_error_response() {
+  json_response(404, "team not found")
 }
 
 pub fn database_error_response() {

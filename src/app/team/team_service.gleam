@@ -45,3 +45,17 @@ pub fn find_one(id: String, ctx: types.Context) {
     _ -> panic as "More than one row was returned from an insert."
   }
 }
+
+pub fn delete_one(id: String, ctx: types.Context) {
+  let sql = "delete from teams where id = ? returning *"
+
+  let result =
+    sqlight.query(sql, ctx.connection, [sqlight.text(id)], team_decoder())
+
+  case result {
+    Ok([#(id, name, owner_id)]) -> Ok(team.Team(id, name, owner_id))
+    Error(error) -> Error(DatabaseError(error))
+    Ok([]) -> Error(TeamNotFoundError)
+    _ -> panic as "More than one row was returned from a delete."
+  }
+}

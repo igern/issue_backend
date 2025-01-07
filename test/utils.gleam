@@ -20,6 +20,7 @@ import app/profile/inputs/create_profile_input.{
 import app/profile/outputs/profile.{type Profile}
 import app/router
 import app/team/inputs/create_team_input.{type CreateTeamInput, CreateTeamInput}
+import app/team/outputs/team.{type Team}
 import app/types.{type Context, Context}
 import app/user/inputs/create_user_input.{type CreateUserInput, CreateUserInput}
 import app/user/outputs/user.{type User}
@@ -438,4 +439,35 @@ pub fn next_create_team_input(
     TestContext(..t, next: t.next + 1),
     CreateTeamInput(name: "name" <> int.to_string(t.next)),
   )
+}
+
+pub fn create_team(
+  t: TestContext,
+  input: CreateTeamInput,
+  access_token: String,
+  handle: fn(Team) -> Nil,
+) -> Nil {
+  let json = create_team_input.to_json(input)
+
+  let response =
+    router.handle_request(
+      testing.post_json("/api/teams", [bearer_header(access_token)], json),
+      t.context,
+    )
+
+  response.status |> should.equal(201)
+
+  let assert Ok(team) =
+    json.decode(testing.string_body(response), team.decoder())
+  handle(team)
+}
+
+pub fn next_create_team(
+  t: TestContext,
+  access_token: String,
+  handle: fn(TestContext, Team) -> Nil,
+) {
+  use t, input <- next_create_team_input(t)
+  use team <- create_team(t, input, access_token)
+  handle(t, team)
 }

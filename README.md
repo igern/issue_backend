@@ -1,7 +1,6 @@
 # issue_backend
 
 ## Backlog
-- delete team
 - add to team
 - remove from team
 - link directories to teams,

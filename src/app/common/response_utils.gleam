@@ -11,7 +11,7 @@ pub fn map_service_errors(
   next: fn(a) -> Response,
 ) -> Response {
   case result {
-    Error(TeamNotFoundError) -> directory_not_found_error_response()
+    Error(TeamNotFoundError) -> team_not_found_error_response()
     Error(DirectoryNotFoundError) -> directory_not_found_error_response()
     Error(UserNotFoundError) -> user_not_found_error_response()
     Error(ProfileNotFoundError) -> profile_not_found_error_response()

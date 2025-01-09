@@ -1,5 +1,6 @@
 import app/auth/auth_guards
 import app/common/response_utils
+import app/team/inputs/add_to_team_input
 import app/team/inputs/create_team_input
 import app/team/outputs/team
 import app/team/team_service
@@ -16,6 +17,7 @@ pub fn router(
   case wisp.path_segments(req), req.method {
     ["api", "teams"], http.Post -> create_team(req, ctx)
     ["api", "teams", id], http.Delete -> delete_team(req, id, ctx)
+    ["api", "teams", id], http.Post -> add_to_team(req, id, ctx)
     _, _ -> handle_request()
   }
 }
@@ -54,5 +56,30 @@ fn delete_team(req: wisp.Request, id: String, ctx: types.Context) {
       |> wisp.json_response(200)
     }
     False -> response_utils.can_not_delete_other_teams_response()
+  }
+}
+
+fn add_to_team(req: wisp.Request, id: String, ctx: types.Context) {
+  use profile <- auth_guards.require_profile(req, ctx)
+  use team <- response_utils.map_service_errors(team_service.find_one(id, ctx))
+
+  case team.owner_id == profile.id {
+    True -> {
+      use json <- wisp.require_json(req)
+      use input <- response_utils.or_decode_error(
+        add_to_team_input.from_dynamic(json),
+      )
+
+      use _ <- response_utils.map_service_errors(team_service.add_to_team(
+        id,
+        input,
+        ctx,
+      ))
+
+      json.object([])
+      |> json.to_string_tree
+      |> wisp.json_response(201)
+    }
+    False -> response_utils.can_not_add_to_other_teams_response()
   }
 }

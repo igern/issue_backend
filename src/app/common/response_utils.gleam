@@ -86,6 +86,10 @@ pub fn can_not_delete_other_teams_response() {
   json_response(403, "can not delete other teams")
 }
 
+pub fn can_not_add_to_other_teams_response() {
+  json_response(403, "can not add other teams")
+}
+
 pub fn refresh_token_not_found_error_response() {
   json_response(404, "refresh token not found")
 }

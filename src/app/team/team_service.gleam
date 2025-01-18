@@ -83,6 +83,26 @@ pub fn add_to_team(id: String, input: AddToTeamInput, ctx: types.Context) {
       Error(response_utils.ProfileNotFoundError)
     }
     Error(error) -> Error(DatabaseError(error))
+    _ -> panic as "More than one row was returned from an insert."
+  }
+}
+
+pub fn delete_from_team(team_id: String, profile_id: String, ctx: types.Context) {
+  let sql =
+    "delete from team_profiles where team_id = ? and profile_id = ? returning *"
+
+  let result =
+    sqlight.query(
+      sql,
+      ctx.connection,
+      [sqlight.text(team_id), sqlight.text(profile_id)],
+      team_profile_decoder(),
+    )
+
+  case result {
+    Ok([_]) -> Ok(Nil)
+    Ok([]) -> Error(response_utils.ProfileNotFoundError)
+    Error(error) -> Error(DatabaseError(error))
     _ -> panic as "More than one row was returned from a delete."
   }
 }

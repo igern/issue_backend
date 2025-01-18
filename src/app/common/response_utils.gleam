@@ -37,6 +37,7 @@ pub fn map_service_errors(
 }
 
 pub type ServiceError {
+
   TeamNotFoundError
   DirectoryNotFoundError
   UserNotFoundError
@@ -86,8 +87,8 @@ pub fn can_not_delete_other_teams_response() {
   json_response(403, "can not delete other teams")
 }
 
-pub fn can_not_add_to_other_teams_response() {
-  json_response(403, "can not add other teams")
+pub fn not_team_owner_response() {
+  json_response(403, "not team owner")
 }
 
 pub fn refresh_token_not_found_error_response() {

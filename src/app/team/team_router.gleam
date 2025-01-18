@@ -18,6 +18,8 @@ pub fn router(
     ["api", "teams"], http.Post -> create_team(req, ctx)
     ["api", "teams", id], http.Delete -> delete_team(req, id, ctx)
     ["api", "teams", id], http.Post -> add_to_team(req, id, ctx)
+    ["api", "teams", team_id, "profiles", profile_id], http.Delete ->
+      delete_from_team(req, team_id, profile_id, ctx)
     _, _ -> handle_request()
   }
 }
@@ -80,6 +82,34 @@ fn add_to_team(req: wisp.Request, id: String, ctx: types.Context) {
       |> json.to_string_tree
       |> wisp.json_response(201)
     }
-    False -> response_utils.can_not_add_to_other_teams_response()
+    False -> response_utils.not_team_owner_response()
+  }
+}
+
+fn delete_from_team(
+  req: wisp.Request,
+  team_id: String,
+  profile_id: String,
+  ctx: types.Context,
+) {
+  use profile <- auth_guards.require_profile(req, ctx)
+  use team <- response_utils.map_service_errors(team_service.find_one(
+    team_id,
+    ctx,
+  ))
+
+  case team.owner_id == profile.id {
+    True -> {
+      use _ <- response_utils.map_service_errors(team_service.delete_from_team(
+        team_id,
+        profile_id,
+        ctx,
+      ))
+
+      json.object([])
+      |> json.to_string_tree
+      |> wisp.json_response(200)
+    }
+    False -> response_utils.not_team_owner_response()
   }
 }

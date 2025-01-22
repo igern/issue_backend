@@ -2,8 +2,7 @@ import app/common/response_utils.{DatabaseError, UserNotFoundError}
 import app/types.{type Context}
 import app/user/inputs/create_user_input.{type CreateUserInput}
 import app/user/outputs/user.{User}
-import aragorn2
-import gleam/bit_array
+import argus
 import gleam/dynamic
 import sqlight
 import youid/uuid
@@ -14,10 +13,7 @@ pub fn user_decoder() {
 
 pub fn create(input: CreateUserInput, ctx: Context) {
   let assert Ok(hash) =
-    aragorn2.hash_password(
-      aragorn2.hasher(),
-      bit_array.from_string(input.password),
-    )
+    argus.hash(argus.hasher(), input.password, argus.gen_salt())
 
   let sql =
     "insert into users (id, email, password) values (?, ?, ?) returning *"
@@ -26,7 +22,11 @@ pub fn create(input: CreateUserInput, ctx: Context) {
     sqlight.query(
       sql,
       on: ctx.connection,
-      with: [sqlight.text(id), sqlight.text(input.email), sqlight.text(hash)],
+      with: [
+        sqlight.text(id),
+        sqlight.text(input.email),
+        sqlight.text(hash.encoded_hash),
+      ],
       expecting: user_decoder(),
     )
   {

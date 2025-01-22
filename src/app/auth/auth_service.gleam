@@ -7,7 +7,7 @@ import app/common/response_utils.{
 }
 import app/types.{type Context}
 import app/user/user_service
-import aragorn2
+import argus
 import birl
 import birl/duration
 import gleam/bit_array
@@ -37,14 +37,8 @@ pub fn login(
     )
   case result {
     Ok([#(user_id, _, password)]) -> {
-      case
-        aragorn2.verify_password(
-          aragorn2.hasher(),
-          bit_array.from_string(input.password),
-          bit_array.from_string(password),
-        )
-      {
-        Ok(Nil) -> {
+      case argus.verify(password, input.password) {
+        Ok(True) -> {
           create_auth_tokens(user_id, ctx)
         }
         _ -> Error(InvalidCredentialsError)

@@ -4,7 +4,6 @@ import app/common/response_utils
 import app/router
 import birl
 import gleam/dynamic
-import gleam/io
 import gleeunit/should
 import sqlight
 import utils
@@ -23,7 +22,6 @@ pub fn login_test() {
       testing.post_json("/api/auth/login", [], input),
       t.context,
     )
-  io.debug(response)
   response.status |> should.equal(201)
 }
 

@@ -1,4 +1,5 @@
 import gleam/dynamic.{type Dynamic}
+import gleam/dynamic/decode
 import gleam/json.{type Json}
 import gleam/option.{type Option}
 
@@ -10,16 +11,17 @@ pub type CreateIssueInput {
   )
 }
 
+fn create_issue_input_decoder() -> decode.Decoder(CreateIssueInput) {
+  use name <- decode.field("name", decode.string)
+  use description <- decode.field("description", decode.optional(decode.string))
+  use directory_id <- decode.field("directory_id", decode.string)
+  decode.success(CreateIssueInput(name:, description:, directory_id:))
+}
+
 pub fn from_dynamic(
   json: Dynamic,
-) -> Result(CreateIssueInput, dynamic.DecodeErrors) {
-  json
-  |> dynamic.decode3(
-    CreateIssueInput,
-    dynamic.field("name", dynamic.string),
-    dynamic.field("description", dynamic.optional(dynamic.string)),
-    dynamic.field("directory_id", dynamic.string),
-  )
+) -> Result(CreateIssueInput, List(decode.DecodeError)) {
+  decode.run(json, create_issue_input_decoder())
 }
 
 pub fn to_json(input: CreateIssueInput) -> Json {

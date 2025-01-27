@@ -1,4 +1,5 @@
 import gleam/dynamic.{type Dynamic}
+import gleam/dynamic/decode
 import gleam/json.{type Json}
 import gleam/list
 import gleam/option.{None, Some}
@@ -10,15 +11,24 @@ pub type UpdateIssueInput {
   )
 }
 
+fn update_issue_input_decoder() -> decode.Decoder(UpdateIssueInput) {
+  use name <- decode.optional_field(
+    "name",
+    option.None,
+    decode.optional(decode.string),
+  )
+  use description <- decode.optional_field(
+    "description",
+    option.None,
+    decode.optional(decode.string) |> decode.map(option.Some),
+  )
+  decode.success(UpdateIssueInput(name:, description:))
+}
+
 pub fn from_dynamic(
   json: Dynamic,
-) -> Result(UpdateIssueInput, dynamic.DecodeErrors) {
-  json
-  |> dynamic.decode2(
-    UpdateIssueInput,
-    dynamic.optional_field("name", dynamic.string),
-    dynamic.optional_field("description", dynamic.optional(dynamic.string)),
-  )
+) -> Result(UpdateIssueInput, List(decode.DecodeError)) {
+  decode.run(json, update_issue_input_decoder())
 }
 
 pub fn to_json(input: UpdateIssueInput) -> Json {

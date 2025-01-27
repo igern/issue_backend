@@ -1,17 +1,21 @@
 import gleam/dynamic.{type Dynamic}
+import gleam/dynamic/decode
 import gleam/json.{type Json}
 
 pub type LoginInput {
   LoginInput(email: String, password: String)
 }
 
-pub fn from_dynamic(json: Dynamic) -> Result(LoginInput, dynamic.DecodeErrors) {
-  json
-  |> dynamic.decode2(
-    LoginInput,
-    dynamic.field("email", dynamic.string),
-    dynamic.field("password", dynamic.string),
-  )
+fn login_input_decoder() -> decode.Decoder(LoginInput) {
+  use email <- decode.field("email", decode.string)
+  use password <- decode.field("password", decode.string)
+  decode.success(LoginInput(email:, password:))
+}
+
+pub fn from_dynamic(
+  json: Dynamic,
+) -> Result(LoginInput, List(decode.DecodeError)) {
+  decode.run(json, login_input_decoder())
 }
 
 pub fn to_json(input: LoginInput) -> Json {

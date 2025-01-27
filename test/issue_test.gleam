@@ -390,7 +390,6 @@ pub fn update_one_issue_null_test() {
       ),
       t.context,
     )
-
   response.status |> should.equal(200)
   let assert Ok(data) =
     json.decode(testing.string_body(response), issue.decoder())

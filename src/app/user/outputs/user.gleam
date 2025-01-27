@@ -1,16 +1,14 @@
-import gleam/dynamic
+import gleam/dynamic/decode
 import gleam/json
 
 pub type User {
   User(id: String, email: String)
 }
 
-pub fn decoder() {
-  dynamic.decode2(
-    User,
-    dynamic.field("id", dynamic.string),
-    dynamic.field("email", dynamic.string),
-  )
+pub fn decoder() -> decode.Decoder(User) {
+  use id <- decode.field("id", decode.string)
+  use email <- decode.field("email", decode.string)
+  decode.success(User(id:, email:))
 }
 
 pub fn to_json(user: User) {

@@ -27,7 +27,7 @@ pub fn create_directory_test() {
 
   response.status |> should.equal(201)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), directory.decoder())
+    json.parse(testing.string_body(response), directory.decoder())
 
   data
   |> should.equal(directory.Directory(data.id, input.name, data.created_at))
@@ -75,7 +75,7 @@ pub fn update_directory_test() {
 
   response.status |> should.equal(200)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), directory.decoder())
+    json.parse(testing.string_body(response), directory.decoder())
   data |> should.equal(directory.Directory(..directory, name: input.name))
 }
 
@@ -116,7 +116,7 @@ pub fn delete_directory_test() {
 
   response.status |> should.equal(200)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), directory.decoder())
+    json.parse(testing.string_body(response), directory.decoder())
 
   data
   |> should.equal(directory)

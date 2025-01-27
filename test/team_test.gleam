@@ -29,7 +29,7 @@ pub fn create_team_test() {
 
   response.status |> should.equal(201)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), team.decoder())
+    json.parse(testing.string_body(response), team.decoder())
   data
   |> should.equal(team.Team(
     id: data.id,
@@ -76,7 +76,7 @@ pub fn delete_team_test() {
 
   response.status |> should.equal(200)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), team.decoder())
+    json.parse(testing.string_body(response), team.decoder())
   data
   |> should.equal(team)
 }

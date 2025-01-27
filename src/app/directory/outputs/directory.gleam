@@ -1,21 +1,22 @@
 import gleam/dynamic.{type Dynamic}
+import gleam/dynamic/decode
 import gleam/json
 
 pub type Directory {
   Directory(id: String, name: String, created_at: String)
 }
 
-pub fn decoder() {
-  dynamic.decode3(
-    Directory,
-    dynamic.field("id", dynamic.string),
-    dynamic.field("name", dynamic.string),
-    dynamic.field("created_at", dynamic.string),
-  )
+pub fn decoder() -> decode.Decoder(Directory) {
+  use id <- decode.field("id", decode.string)
+  use name <- decode.field("name", decode.string)
+  use created_at <- decode.field("created_at", decode.string)
+  decode.success(Directory(id:, name:, created_at:))
 }
 
-pub fn from_dynamic(json: Dynamic) -> Result(Directory, dynamic.DecodeErrors) {
-  json |> decoder()
+pub fn from_dynamic(
+  json: Dynamic,
+) -> Result(Directory, List(decode.DecodeError)) {
+  json |> decode.run(decoder())
 }
 
 pub fn to_json(directory: Directory) {

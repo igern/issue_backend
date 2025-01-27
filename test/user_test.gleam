@@ -24,7 +24,7 @@ pub fn create_user_test() {
   response.status |> should.equal(201)
 
   let assert Ok(data) =
-    json.decode(testing.string_body(response), user.decoder())
+    json.parse(testing.string_body(response), user.decoder())
   data |> should.equal(User(id: data.id, email: input.email))
 }
 

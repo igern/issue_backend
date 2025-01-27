@@ -1,22 +1,21 @@
 import app/issue/outputs/issue.{type Issue}
 import gleam/dynamic.{type Dynamic}
+import gleam/dynamic/decode
 import gleam/json
 
 pub type PaginatedIssues {
   PaginatedIssues(total: Int, has_more: Bool, items: List(Issue))
 }
 
-pub fn decoder() {
-  dynamic.decode3(
-    PaginatedIssues,
-    dynamic.field("total", dynamic.int),
-    dynamic.field("has_more", dynamic.bool),
-    dynamic.field("items", dynamic.list(issue.decoder())),
-  )
+pub fn decoder() -> decode.Decoder(PaginatedIssues) {
+  use total <- decode.field("total", decode.int)
+  use has_more <- decode.field("has_more", decode.bool)
+  use items <- decode.field("items", decode.list(issue.decoder()))
+  decode.success(PaginatedIssues(total:, has_more:, items:))
 }
 
 pub fn from_dynamic(json: Dynamic) {
-  json |> decoder()
+  decode.run(json, decoder())
 }
 
 pub fn to_json(paginated_issues: PaginatedIssues) {

@@ -1,4 +1,5 @@
 import gleam/dynamic.{type Dynamic}
+import gleam/dynamic/decode
 import gleam/json
 import gleam/option.{type Option}
 
@@ -11,18 +12,19 @@ pub type Profile {
   )
 }
 
-pub fn decoder() {
-  dynamic.decode4(
-    Profile,
-    dynamic.field("id", dynamic.string),
-    dynamic.field("user_id", dynamic.string),
-    dynamic.field("name", dynamic.string),
-    dynamic.field("profile_picture", dynamic.optional(dynamic.string)),
+pub fn decoder() -> decode.Decoder(Profile) {
+  use id <- decode.field("id", decode.string)
+  use user_id <- decode.field("user_id", decode.string)
+  use name <- decode.field("name", decode.string)
+  use profile_picture <- decode.field(
+    "profile_picture",
+    decode.optional(decode.string),
   )
+  decode.success(Profile(id:, user_id:, name:, profile_picture:))
 }
 
-pub fn from_dynamic(json: Dynamic) -> Result(Profile, dynamic.DecodeErrors) {
-  json |> decoder()
+pub fn from_dynamic(json: Dynamic) {
+  decode.run(json, decoder())
 }
 
 pub fn to_json(profile: Profile) {

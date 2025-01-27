@@ -35,7 +35,7 @@ pub fn create_issue_test() {
     )
   response.status |> should.equal(201)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), issue.decoder())
+    json.parse(testing.string_body(response), issue.decoder())
   data
   |> should.equal(Issue(
     id: data.id,
@@ -72,7 +72,7 @@ pub fn create_issue_null_description_test() {
     )
   response.status |> should.equal(201)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), issue.decoder())
+    json.parse(testing.string_body(response), issue.decoder())
   data
   |> should.equal(Issue(
     id: data.id,
@@ -133,7 +133,7 @@ pub fn find_issues_0_test() {
 
   response.status |> should.equal(200)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), paginated_issues.decoder())
+    json.parse(testing.string_body(response), paginated_issues.decoder())
   data |> should.equal(paginated_issues.PaginatedIssues(0, False, []))
 }
 
@@ -161,7 +161,7 @@ pub fn find_issues_1_test() {
 
   response.status |> should.equal(200)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), paginated_issues.decoder())
+    json.parse(testing.string_body(response), paginated_issues.decoder())
   data |> should.equal(paginated_issues.PaginatedIssues(1, False, [issue]))
 }
 
@@ -194,7 +194,7 @@ pub fn find_issues_2_test() {
 
   response.status |> should.equal(200)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), paginated_issues.decoder())
+    json.parse(testing.string_body(response), paginated_issues.decoder())
   data
   |> should.equal(paginated_issues.PaginatedIssues(2, False, [issue1, issue2]))
 }
@@ -233,7 +233,7 @@ pub fn find_issues_3_test() {
 
   response.status |> should.equal(200)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), paginated_issues.decoder())
+    json.parse(testing.string_body(response), paginated_issues.decoder())
   data |> should.equal(paginated_issues.PaginatedIssues(3, True, [issue1]))
 
   let response =
@@ -246,7 +246,7 @@ pub fn find_issues_3_test() {
 
   response.status |> should.equal(200)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), paginated_issues.decoder())
+    json.parse(testing.string_body(response), paginated_issues.decoder())
   data
   |> should.equal(paginated_issues.PaginatedIssues(3, False, [issue2, issue3]))
 }
@@ -290,7 +290,7 @@ pub fn find_one_issue_test() {
     )
   response.status |> should.equal(200)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), issue.decoder())
+    json.parse(testing.string_body(response), issue.decoder())
   data |> should.equal(issue)
 }
 
@@ -355,7 +355,7 @@ pub fn update_one_issue_test() {
 
   response.status |> should.equal(200)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), issue.decoder())
+    json.parse(testing.string_body(response), issue.decoder())
   data
   |> should.equal(
     Issue(..issue, name: "Mikkel", description: option.Some("Nice")),
@@ -392,7 +392,7 @@ pub fn update_one_issue_null_test() {
     )
   response.status |> should.equal(200)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), issue.decoder())
+    json.parse(testing.string_body(response), issue.decoder())
   data
   |> should.equal(Issue(..issue, description: option.None))
 }
@@ -451,7 +451,7 @@ pub fn update_one_issue_none_test() {
     )
   response.status |> should.equal(200)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), issue.decoder())
+    json.parse(testing.string_body(response), issue.decoder())
   data |> should.equal(issue)
 }
 
@@ -497,7 +497,7 @@ pub fn delete_one_issue_test() {
 
   response.status |> should.equal(200)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), issue.decoder())
+    json.parse(testing.string_body(response), issue.decoder())
   data |> should.equal(issue)
 }
 

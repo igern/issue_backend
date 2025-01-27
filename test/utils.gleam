@@ -121,7 +121,7 @@ pub fn next_create_issue(
   response.status |> should.equal(201)
 
   let assert Ok(issue) =
-    json.decode(testing.string_body(response), issue.decoder())
+    json.parse(testing.string_body(response), issue.decoder())
   handler(t, issue)
 }
 
@@ -150,7 +150,7 @@ pub fn create_user(
   response.status |> should.equal(201)
 
   let assert Ok(user) =
-    json.decode(testing.string_body(response), user.decoder())
+    json.parse(testing.string_body(response), user.decoder())
   handler(user)
 }
 
@@ -172,7 +172,7 @@ pub fn login(t: TestContext, input: LoginInput) {
 
   response.status |> should.equal(201)
   let assert Ok(auth_tokens) =
-    json.decode(testing.string_body(response), auth_tokens.decoder())
+    json.parse(testing.string_body(response), auth_tokens.decoder())
   auth_tokens
 }
 
@@ -230,7 +230,7 @@ pub fn create_profile(
     )
 
   let assert Ok(profile) =
-    json.decode(testing.string_body(response), profile.decoder())
+    json.parse(testing.string_body(response), profile.decoder())
   handler(profile)
 }
 
@@ -388,7 +388,7 @@ pub fn create_directory(
   response.status |> should.equal(201)
 
   let assert Ok(directory) =
-    json.decode(testing.string_body(response), directory.decoder())
+    json.parse(testing.string_body(response), directory.decoder())
   handle(directory)
 }
 
@@ -414,7 +414,7 @@ pub fn delete_directory(t: TestContext, access_token: String, id: String) {
     )
   response.status |> should.equal(200)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), directory.decoder())
+    json.parse(testing.string_body(response), directory.decoder())
 
   data
 }
@@ -428,7 +428,7 @@ pub fn find_issues(t: TestContext, access_token: String) {
 
   response.status |> should.equal(200)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), paginated_issues.decoder())
+    json.parse(testing.string_body(response), paginated_issues.decoder())
   data
 }
 
@@ -459,7 +459,7 @@ pub fn create_team(
   response.status |> should.equal(201)
 
   let assert Ok(team) =
-    json.decode(testing.string_body(response), team.decoder())
+    json.parse(testing.string_body(response), team.decoder())
   handle(team)
 }
 

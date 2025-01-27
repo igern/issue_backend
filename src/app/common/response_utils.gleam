@@ -1,4 +1,3 @@
-import gleam/dynamic
 import gleam/dynamic/decode
 import gleam/httpc
 import gleam/json
@@ -143,24 +142,6 @@ pub fn or_decode_error(
   result: Result(value, List(decode.DecodeError)),
   next: fn(value) -> Response,
 ) {
-  case result {
-    Ok(value) -> next(value)
-    Error(decode_errors) -> {
-      let assert [first_error, ..] = decode_errors
-      let message = case first_error.path {
-        [] ->
-          "expected: " <> first_error.expected <> " got: " <> first_error.found
-        _ -> "missing " <> string.concat(first_error.path)
-      }
-      json_response(400, message)
-    }
-  }
-}
-
-pub fn or_decode_errors(
-  result: Result(value, dynamic.DecodeErrors),
-  next: fn(value) -> Response,
-) -> Response {
   case result {
     Ok(value) -> next(value)
     Error(decode_errors) -> {

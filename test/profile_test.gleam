@@ -34,7 +34,7 @@ pub fn create_profile_test() {
 
   response.status |> should.equal(201)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), profile.decoder())
+    json.parse(testing.string_body(response), profile.decoder())
   data
   |> should.equal(profile.Profile(
     id: data.id,
@@ -73,7 +73,7 @@ pub fn upload_profile_picture_test() {
 
   response.status |> should.equal(201)
   let assert Ok(data) =
-    json.decode(testing.string_body(response), profile.decoder())
+    json.parse(testing.string_body(response), profile.decoder())
 
   data.profile_picture |> should.be_some
   Nil

@@ -40,6 +40,26 @@ pub fn create(team_id: String, input: CreateDirectoryInput, ctx: Context) {
   }
 }
 
+pub fn find_one(directory_id: String, ctx: Context) {
+  let sql = "select * from directories where id = ?"
+
+  let result =
+    sqlight.query(
+      sql,
+      ctx.connection,
+      [sqlight.text(directory_id)],
+      directory_decoder(),
+    )
+
+  case result {
+    Ok([#(id, name, team_id, created_at)]) ->
+      Ok(Directory(id, name, team_id, created_at))
+    Error(error) -> Error(DatabaseError(error))
+    Ok([]) -> Error(DirectoryNotFoundError)
+    _ -> panic as "Should only return one row"
+  }
+}
+
 pub fn delete_one(id: String, ctx: Context) {
   let sql = "delete from directories where id = ? returning *"
 

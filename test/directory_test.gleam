@@ -119,6 +119,34 @@ pub fn update_directory_test() {
   )
 }
 
+pub fn update_directory_not_member_of_team_test() {
+  use t <- utils.with_context
+
+  use t, profile1 <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(t, profile1.auth_tokens.access_token)
+  use t, directory <- utils.next_create_directory(
+    t,
+    team.id,
+    profile1.auth_tokens.access_token,
+  )
+  use t, profile2 <- utils.next_create_user_and_profile_and_login(t)
+
+  use t, input <- utils.next_update_directory_input(t)
+  let json = update_directory_input.to_json(input)
+
+  let response =
+    router.handle_request(
+      testing.patch_json(
+        "/api/directories/" <> directory.id,
+        [utils.bearer_header(profile2.auth_tokens.access_token)],
+        json,
+      ),
+      t.context,
+    )
+
+  response |> utils.equal(response_utils.not_member_of_team_response())
+}
+
 pub fn update_directory_missing_authorization_header_test() {
   utils.missing_authorization_header_tester(http.Patch, "/api/directories/1")
 }
@@ -165,6 +193,34 @@ pub fn delete_directory_test() {
     |> json.to_string_tree
     |> wisp.json_response(200),
   )
+}
+
+pub fn delete_directory_not_member_of_team_test() {
+  use t <- utils.with_context
+
+  use t, authorized_profile1 <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    authorized_profile1.auth_tokens.access_token,
+  )
+  use t, directory <- utils.next_create_directory(
+    t,
+    team.id,
+    authorized_profile1.auth_tokens.access_token,
+  )
+  use t, authorized_profile2 <- utils.next_create_user_and_profile_and_login(t)
+
+  let response =
+    router.handle_request(
+      testing.delete_json(
+        "/api/directories/" <> directory.id,
+        [utils.bearer_header(authorized_profile2.auth_tokens.access_token)],
+        json.object([]),
+      ),
+      t.context,
+    )
+
+  response |> utils.equal(response_utils.not_member_of_team_response())
 }
 
 pub fn delete_directory_cascade_issues_test() {

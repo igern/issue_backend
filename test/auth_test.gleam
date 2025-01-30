@@ -4,9 +4,9 @@ import app/common/response_utils
 import app/router
 import birl
 import gleam/dynamic
-import gleeunit/should
 import sqlight
 import utils
+import wisp
 import wisp/testing
 
 pub fn login_test() {
@@ -22,7 +22,9 @@ pub fn login_test() {
       testing.post_json("/api/auth/login", [], input),
       t.context,
     )
-  response.status |> should.equal(201)
+
+  response
+  |> utils.equal(wisp.response(201) |> wisp.set_body(response.body))
 }
 
 pub fn login_invalid_email_test() {
@@ -39,7 +41,7 @@ pub fn login_invalid_email_test() {
       t.context,
     )
 
-  response |> should.equal(response_utils.invalid_credentials_response())
+  response |> utils.equal(response_utils.invalid_credentials_response())
 }
 
 pub fn login_invalid_password_test() {
@@ -59,7 +61,7 @@ pub fn login_invalid_password_test() {
       t.context,
     )
 
-  response |> should.equal(response_utils.invalid_credentials_response())
+  response |> utils.equal(response_utils.invalid_credentials_response())
 }
 
 pub fn refresh_auth_tokens_test() {
@@ -77,7 +79,8 @@ pub fn refresh_auth_tokens_test() {
       testing.post_json("/api/auth/refresh_auth_tokens", [], input),
       t.context,
     )
-  response.status |> should.equal(201)
+
+  response |> utils.equal(wisp.response(201) |> wisp.set_body(response.body))
 
   let sql = "select * from refresh_tokens where token = ?"
 
@@ -107,7 +110,7 @@ pub fn refresh_auth_tokens_not_found_test() {
     )
 
   response
-  |> should.equal(response_utils.refresh_token_not_found_error_response())
+  |> utils.equal(response_utils.refresh_token_not_found_error_response())
 }
 
 pub fn refresh_auth_tokens_expired_test() {
@@ -138,5 +141,5 @@ pub fn refresh_auth_tokens_expired_test() {
     )
 
   response
-  |> should.equal(response_utils.refresh_token_expired_error_response())
+  |> utils.equal(response_utils.refresh_token_expired_error_response())
 }

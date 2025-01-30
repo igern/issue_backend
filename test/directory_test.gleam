@@ -6,6 +6,7 @@ import gleam/http
 import gleam/json
 import gleeunit/should
 import utils
+import wisp
 import wisp/testing
 
 pub fn create_directory_test() {
@@ -71,12 +72,12 @@ pub fn update_directory_test() {
       t.context,
     )
 
-  response.status |> should.equal(200)
-
-  response.status |> should.equal(200)
-  let assert Ok(data) =
-    json.parse(testing.string_body(response), directory.decoder())
-  data |> should.equal(directory.Directory(..directory, name: input.name))
+  response
+  |> utils.equal(
+    directory.to_json(directory.Directory(..directory, name: input.name))
+    |> json.to_string_tree
+    |> wisp.json_response(200),
+  )
 }
 
 pub fn update_directory_missing_authorization_header_test() {
@@ -114,12 +115,12 @@ pub fn delete_directory_test() {
       t.context,
     )
 
-  response.status |> should.equal(200)
-  let assert Ok(data) =
-    json.parse(testing.string_body(response), directory.decoder())
-
-  data
-  |> should.equal(directory)
+  response
+  |> utils.equal(
+    directory.to_json(directory)
+    |> json.to_string_tree
+    |> wisp.json_response(200),
+  )
 }
 
 pub fn delete_directory_cascade_issues_test() {

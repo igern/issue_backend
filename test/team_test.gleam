@@ -97,7 +97,7 @@ pub fn delete_team_not_found_test() {
     )
 
   response
-  |> utils.response_equal(response_utils.team_not_found_error_response())
+  |> utils.equal(response_utils.team_not_found_error_response())
 }
 
 pub fn delete_team_can_not_delete_other_teams_test() {
@@ -122,7 +122,7 @@ pub fn delete_team_can_not_delete_other_teams_test() {
     )
 
   response
-  |> utils.response_equal(response_utils.can_not_delete_other_teams_response())
+  |> utils.equal(response_utils.can_not_delete_other_teams_response())
 }
 
 pub fn delete_team_missing_authorization_header_test() {
@@ -189,7 +189,7 @@ pub fn add_to_team_profile_not_found_test() {
     )
 
   response
-  |> utils.response_equal(response_utils.profile_not_found_error_response())
+  |> utils.equal(response_utils.profile_not_found_error_response())
 }
 
 pub fn add_to_team_not_team_owner_test() {
@@ -215,7 +215,7 @@ pub fn add_to_team_not_team_owner_test() {
       t.context,
     )
 
-  response |> utils.response_equal(response_utils.not_team_owner_response())
+  response |> utils.equal(response_utils.not_team_owner_response())
 }
 
 pub fn add_to_team_missing_authorization_header_test() {
@@ -278,7 +278,7 @@ pub fn delete_from_team_team_not_found_test() {
       t.context,
     )
   response
-  |> utils.response_equal(response_utils.team_not_found_error_response())
+  |> utils.equal(response_utils.team_not_found_error_response())
 }
 
 pub fn delete_from_team_profile_not_found_test() {
@@ -301,7 +301,7 @@ pub fn delete_from_team_profile_not_found_test() {
     )
 
   response
-  |> utils.response_equal(response_utils.profile_not_found_error_response())
+  |> utils.equal(response_utils.profile_not_found_error_response())
 }
 
 pub fn delete_from_team_not_team_owner_test() {
@@ -330,7 +330,7 @@ pub fn delete_from_team_not_team_owner_test() {
       ),
       t.context,
     )
-  response |> utils.response_equal(response_utils.not_team_owner_response())
+  response |> utils.equal(response_utils.not_team_owner_response())
 }
 
 pub fn delete_from_team_missing_authorization_header_test() {
@@ -369,7 +369,7 @@ pub fn find_team_test() {
       t.context,
     )
 
-  utils.response_equal(
+  utils.equal(
     response,
     team.to_json(team) |> json.to_string_tree |> wisp.json_response(200),
   )
@@ -393,7 +393,7 @@ pub fn find_team_not_member_test() {
       t.context,
     )
 
-  utils.response_equal(response, response_utils.not_member_of_team_response())
+  utils.equal(response, response_utils.not_member_of_team_response())
 }
 
 pub fn find_team_invalid_team_test() {
@@ -409,7 +409,7 @@ pub fn find_team_invalid_team_test() {
       t.context,
     )
 
-  utils.response_equal(response, response_utils.not_member_of_team_response())
+  utils.equal(response, response_utils.not_member_of_team_response())
 }
 
 pub fn find_team_as_member_test() {
@@ -436,7 +436,7 @@ pub fn find_team_as_member_test() {
       t.context,
     )
 
-  utils.response_equal(
+  utils.equal(
     response,
     team.to_json(team) |> json.to_string_tree |> wisp.json_response(200),
   )

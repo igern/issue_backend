@@ -100,7 +100,7 @@ pub fn create_issue_invalid_directory_id_test() {
       t.context,
     )
   response
-  |> utils.response_equal(response_utils.directory_not_found_error_response())
+  |> utils.equal(response_utils.directory_not_found_error_response())
 }
 
 pub fn create_issue_missing_authorization_header_test() {

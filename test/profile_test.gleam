@@ -96,9 +96,7 @@ pub fn upload_profile_picture_can_not_update_other_profile_test() {
     )
 
   response
-  |> utils.response_equal(
-    response_utils.can_not_update_other_profile_response(),
-  )
+  |> utils.equal(response_utils.can_not_update_other_profile_response())
 }
 
 pub fn upload_profile_picture_invalid_file_type_test() {
@@ -117,7 +115,7 @@ pub fn upload_profile_picture_invalid_file_type_test() {
     )
 
   response
-  |> utils.response_equal(response_utils.json_response(400, "invalid file type"))
+  |> utils.equal(response_utils.json_response(400, "invalid file type"))
 }
 
 pub fn upload_profile_picture_file_read_error_test() {

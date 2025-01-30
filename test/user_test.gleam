@@ -44,7 +44,7 @@ pub fn delete_one_user_test() {
     )
 
   response
-  |> utils.response_equal(
+  |> utils.equal(
     user.to_json(authorized_user.user)
     |> json.to_string_tree()
     |> wisp.json_response(200),
@@ -76,7 +76,7 @@ pub fn delete_one_user_not_found_test() {
     )
 
   response
-  |> utils.response_equal(response_utils.user_not_found_error_response())
+  |> utils.equal(response_utils.user_not_found_error_response())
 }
 
 pub fn delete_one_user_with_profile_test() {
@@ -105,7 +105,7 @@ pub fn delete_one_user_with_profile_test() {
   result |> should.equal(Ok([]))
 
   response
-  |> utils.response_equal(
+  |> utils.equal(
     authorized_profil.user
     |> user.to_json()
     |> json.to_string_tree()
@@ -130,7 +130,7 @@ pub fn delete_one_user_other_user_test() {
     )
 
   response
-  |> utils.response_equal(response_utils.can_not_delete_other_user_response())
+  |> utils.equal(response_utils.can_not_delete_other_user_response())
 }
 
 pub fn delete_one_user_missing_authorization_header_test() {

@@ -248,13 +248,9 @@ pub fn bearer_header(access_token: String) {
   #("authorization", "Bearer " <> access_token)
 }
 
-pub fn response_equal(response1: Response, response2: Response) {
-  response1.status |> should.equal(response2.status)
-  testing.string_body(response1)
-  |> should.equal(
-    response2
-    |> testing.string_body,
-  )
+pub fn equal(response1: Response, response2: Response) {
+  #(response1.status, testing.string_body(response1))
+  |> should.equal(#(response2.status, testing.string_body(response2)))
 }
 
 pub fn missing_authorization_header_tester(method: http.Method, path: String) {
@@ -263,7 +259,7 @@ pub fn missing_authorization_header_tester(method: http.Method, path: String) {
     router.handle_request(testing.request(method, path, [], <<>>), t.context)
 
   response
-  |> response_equal(response_utils.missing_authorization_header_response())
+  |> equal(response_utils.missing_authorization_header_response())
 }
 
 pub fn invalid_bearer_format_tester(method: http.Method, path: String) {
@@ -274,7 +270,7 @@ pub fn invalid_bearer_format_tester(method: http.Method, path: String) {
       t.context,
     )
   response
-  |> response_equal(response_utils.invalid_bearer_format_response())
+  |> equal(response_utils.invalid_bearer_format_response())
 }
 
 pub fn invalid_jwt_tester(method: http.Method, path: String) {
@@ -285,7 +281,7 @@ pub fn invalid_jwt_tester(method: http.Method, path: String) {
       t.context,
     )
 
-  response |> response_equal(response_utils.invalid_jwt_response())
+  response |> equal(response_utils.invalid_jwt_response())
 }
 
 pub fn profile_required_tester(method: http.Method, path: String) {
@@ -304,7 +300,7 @@ pub fn profile_required_tester(method: http.Method, path: String) {
       t.context,
     )
 
-  response |> response_equal(response_utils.profile_required_response())
+  response |> equal(response_utils.profile_required_response())
 }
 
 fn append_line(bit_array: BitArray, line: String) {

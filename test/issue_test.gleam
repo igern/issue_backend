@@ -15,9 +15,13 @@ pub fn create_issue_test() {
   use t <- utils.with_context
 
   use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
-
+  use t, team <- utils.next_create_team(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
   use t, directory <- utils.next_create_directory(
     t,
+    team.id,
     authorized_profile.auth_tokens.access_token,
   )
 
@@ -50,9 +54,14 @@ pub fn create_issue_null_description_test() {
   use t <- utils.with_context
 
   use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
 
   use t, directory <- utils.next_create_directory(
     t,
+    team.id,
     authorized_profile.auth_tokens.access_token,
   )
 
@@ -141,8 +150,13 @@ pub fn find_issues_1_test() {
   use t <- utils.with_context
 
   use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
   use t, directory <- utils.next_create_directory(
     t,
+    team.id,
     authorized_profile.auth_tokens.access_token,
   )
   use t, issue <- utils.next_create_issue(
@@ -169,8 +183,13 @@ pub fn find_issues_2_test() {
   use t <- utils.with_context
 
   use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
   use t, directory <- utils.next_create_directory(
     t,
+    team.id,
     authorized_profile.auth_tokens.access_token,
   )
   use t, issue1 <- utils.next_create_issue(
@@ -203,8 +222,13 @@ pub fn find_issues_3_test() {
   use t <- utils.with_context
 
   use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
   use t, directory <- utils.next_create_directory(
     t,
+    team.id,
     authorized_profile.auth_tokens.access_token,
   )
   use t, issue1 <- utils.next_create_issue(
@@ -271,8 +295,13 @@ pub fn find_one_issue_test() {
   use t <- utils.with_context
 
   use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
   use t, directory <- utils.next_create_directory(
     t,
+    team.id,
     authorized_profile.auth_tokens.access_token,
   )
   use t, issue <- utils.next_create_issue(
@@ -328,8 +357,13 @@ pub fn update_one_issue_test() {
   use t <- utils.with_context
 
   use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
   use t, directory <- utils.next_create_directory(
     t,
+    team.id,
     authorized_profile.auth_tokens.access_token,
   )
   use t, issue <- utils.next_create_issue(
@@ -366,8 +400,13 @@ pub fn update_one_issue_null_test() {
   use t <- utils.with_context
 
   use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
   use t, directory <- utils.next_create_directory(
     t,
+    team.id,
     authorized_profile.auth_tokens.access_token,
   )
   use t, issue <- utils.next_create_issue(
@@ -425,8 +464,13 @@ pub fn update_one_issue_none_test() {
   use t <- utils.with_context
 
   use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
   use t, directory <- utils.next_create_directory(
     t,
+    team.id,
     authorized_profile.auth_tokens.access_token,
   )
   use t, issue <- utils.next_create_issue(
@@ -475,8 +519,13 @@ pub fn delete_one_issue_test() {
   use t <- utils.with_context
 
   use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
   use t, directory <- utils.next_create_directory(
     t,
+    team.id,
     authorized_profile.auth_tokens.access_token,
   )
   use t, issue <- utils.next_create_issue(

@@ -369,6 +369,7 @@ pub fn next_update_directory_input(
 
 pub fn create_directory(
   t: TestContext,
+  team_id: String,
   input: CreateDirectoryInput,
   access_token: String,
   handle: fn(Directory) -> Nil,
@@ -377,7 +378,11 @@ pub fn create_directory(
 
   let response =
     router.handle_request(
-      testing.post_json("/api/directories", [bearer_header(access_token)], json),
+      testing.post_json(
+        "/api/teams/" <> team_id <> "/directories",
+        [bearer_header(access_token)],
+        json,
+      ),
       t.context,
     )
 
@@ -390,11 +395,12 @@ pub fn create_directory(
 
 pub fn next_create_directory(
   t: TestContext,
+  team_id: String,
   access_token: String,
   handle: fn(TestContext, Directory) -> Nil,
 ) {
   use t, input <- next_create_directory_input(t)
-  use directory <- create_directory(t, input, access_token)
+  use directory <- create_directory(t, team_id, input, access_token)
   handle(t, directory)
 }
 

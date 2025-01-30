@@ -47,7 +47,9 @@ pub fn init_schemas(connection: Connection) {
   CREATE TABLE IF NOT EXISTS directories (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
-  created_at TEXT NOT NULL)
+  team_id TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE)
   "
   let assert Ok(Nil) = sqlight.exec(directory_sql, connection)
 

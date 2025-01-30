@@ -1,3 +1,4 @@
+import app/common/response_utils
 import app/directory/inputs/create_directory_input
 import app/directory/inputs/update_directory_input
 import app/directory/outputs/directory
@@ -13,13 +14,17 @@ pub fn create_directory_test() {
   use t <- utils.with_context
 
   use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
 
   use t, input <- utils.next_create_directory_input(t)
   let json = create_directory_input.to_json(input)
   let response =
     router.handle_request(
       testing.post_json(
-        "/api/directories",
+        "/api/teams/" <> team.id <> "/directories",
         [utils.bearer_header(authorized_profile.auth_tokens.access_token)],
         json,
       ),
@@ -31,31 +36,65 @@ pub fn create_directory_test() {
     json.parse(testing.string_body(response), directory.decoder())
 
   data
-  |> should.equal(directory.Directory(data.id, input.name, data.created_at))
+  |> should.equal(directory.Directory(
+    data.id,
+    input.name,
+    team.id,
+    data.created_at,
+  ))
+}
+
+pub fn create_directory_not_member_of_team_test() {
+  use t <- utils.with_context
+
+  use t, authorized_profile1 <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    authorized_profile1.auth_tokens.access_token,
+  )
+  use t, authorized_profile2 <- utils.next_create_user_and_profile_and_login(t)
+
+  use t, input <- utils.next_create_directory_input(t)
+  let json = create_directory_input.to_json(input)
+  let response =
+    router.handle_request(
+      testing.post_json(
+        "/api/teams/" <> team.id <> "/directories",
+        [utils.bearer_header(authorized_profile2.auth_tokens.access_token)],
+        json,
+      ),
+      t.context,
+    )
+  response |> utils.equal(response_utils.not_member_of_team_response())
 }
 
 pub fn create_directory_missing_authorization_header_test() {
-  utils.missing_authorization_header_tester(http.Post, "/api/directories")
+  utils.missing_authorization_header_tester(
+    http.Post,
+    "/api/teams/1/directories",
+  )
 }
 
 pub fn create_directory_invalid_bearer_format_test() {
-  utils.invalid_bearer_format_tester(http.Post, "/api/directories")
+  utils.invalid_bearer_format_tester(http.Post, "/api/teams/1/directories")
 }
 
 pub fn create_directory_invalid_jwt_test() {
-  utils.invalid_jwt_tester(http.Post, "/api/directories")
+  utils.invalid_jwt_tester(http.Post, "/api/teams/1/directories")
 }
 
 pub fn create_directory_profile_required_test() {
-  utils.profile_required_tester(http.Post, "/api/directories")
+  utils.profile_required_tester(http.Post, "/api/teams/1/directories")
 }
 
 pub fn update_directory_test() {
   use t <- utils.with_context
 
   use t, profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(t, profile.auth_tokens.access_token)
   use t, directory <- utils.next_create_directory(
     t,
+    team.id,
     profile.auth_tokens.access_token,
   )
 
@@ -100,8 +139,13 @@ pub fn delete_directory_test() {
   use t <- utils.with_context
 
   use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
   use t, directory <- utils.next_create_directory(
     t,
+    team.id,
     authorized_profile.auth_tokens.access_token,
   )
 
@@ -127,8 +171,14 @@ pub fn delete_directory_cascade_issues_test() {
   use t <- utils.with_context
 
   use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
+
   use t, directory <- utils.next_create_directory(
     t,
+    team.id,
     authorized_profile.auth_tokens.access_token,
   )
   use t, _ <- utils.next_create_issue(

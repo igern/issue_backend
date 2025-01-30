@@ -9,12 +9,12 @@ import sqlight
 import youid/uuid
 
 pub fn directory_decoder() {
-  dynamic.tuple3(dynamic.string, dynamic.string, dynamic.string)
+  dynamic.tuple4(dynamic.string, dynamic.string, dynamic.string, dynamic.string)
 }
 
-pub fn create(input: CreateDirectoryInput, ctx: Context) {
+pub fn create(team_id: String, input: CreateDirectoryInput, ctx: Context) {
   let sql =
-    "insert into directories (id, name, created_at) values(?, ?, ?) returning *"
+    "insert into directories (id, name, team_id, created_at) values(?, ?, ?, ?) returning *"
 
   let id = uuid.v4_string()
   let created_at = birl.now() |> birl.to_iso8601
@@ -23,12 +23,18 @@ pub fn create(input: CreateDirectoryInput, ctx: Context) {
     sqlight.query(
       sql,
       ctx.connection,
-      [sqlight.text(id), sqlight.text(input.name), sqlight.text(created_at)],
+      [
+        sqlight.text(id),
+        sqlight.text(input.name),
+        sqlight.text(team_id),
+        sqlight.text(created_at),
+      ],
       directory_decoder(),
     )
 
   case result {
-    Ok([#(id, name, created_at)]) -> Ok(Directory(id, name, created_at))
+    Ok([#(id, name, team_id, created_at)]) ->
+      Ok(Directory(id, name, team_id, created_at))
     Error(error) -> Error(DatabaseError(error))
     _ -> panic as "Should only return one row from an insert"
   }
@@ -41,7 +47,8 @@ pub fn delete_one(id: String, ctx: Context) {
     sqlight.query(sql, ctx.connection, [sqlight.text(id)], directory_decoder())
 
   case result {
-    Ok([#(id, name, created_at)]) -> Ok(Directory(id, name, created_at))
+    Ok([#(id, name, team_id, created_at)]) ->
+      Ok(Directory(id, name, team_id, created_at))
     Error(error) -> Error(DatabaseError(error))
     Ok([]) -> Error(DirectoryNotFoundError)
     _ -> panic as "Should only return one row from a delete"
@@ -60,7 +67,8 @@ pub fn update_one(id: String, input: UpdateDirectoryInput, ctx: Context) {
     )
 
   case result {
-    Ok([#(id, name, created_at)]) -> Ok(Directory(id, name, created_at))
+    Ok([#(id, name, team_id, created_at)]) ->
+      Ok(Directory(id, name, team_id, created_at))
     Error(error) -> Error(DatabaseError(error))
     Ok([]) -> Error(DirectoryNotFoundError)
     _ -> panic as "Should only return one row from a delete"

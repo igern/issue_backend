@@ -2,8 +2,10 @@ import app/common/response_utils.{DatabaseError, TeamNotFoundError}
 import app/team/inputs/add_to_team_input.{type AddToTeamInput}
 import app/team/inputs/create_team_input.{type CreateTeamInput}
 import app/team/outputs/team
+import app/team/outputs/team_profile.{TeamProfile}
 import app/types
 import gleam/dynamic
+import gleam/list
 import sqlight
 import youid/uuid
 
@@ -104,5 +106,29 @@ pub fn delete_from_team(team_id: String, profile_id: String, ctx: types.Context)
     Ok([]) -> Error(response_utils.ProfileNotFoundError)
     Error(error) -> Error(DatabaseError(error))
     _ -> panic as "More than one row was returned from a delete."
+  }
+}
+
+pub fn find_team_profiles_from_team(team_id: String, ctx: types.Context) {
+  let sql = "select * from team_profiles where team_id = ?"
+
+  let result =
+    sqlight.query(
+      sql,
+      ctx.connection,
+      [sqlight.text(team_id)],
+      team_profile_decoder(),
+    )
+
+  case result {
+    Ok(team_profiles) -> {
+      let team_profiles =
+        list.map(team_profiles, fn(team_profile) {
+          let #(team_id, profile_id) = team_profile
+          TeamProfile(team_id, profile_id)
+        })
+      Ok(team_profiles)
+    }
+    Error(error) -> Error(DatabaseError(error))
   }
 }

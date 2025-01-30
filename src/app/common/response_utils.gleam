@@ -91,6 +91,10 @@ pub fn not_team_owner_response() {
   json_response(403, "not team owner")
 }
 
+pub fn not_member_of_team_response() {
+  json_response(403, "not member of team")
+}
+
 pub fn refresh_token_not_found_error_response() {
   json_response(404, "refresh token not found")
 }

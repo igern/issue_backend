@@ -7,6 +7,7 @@ import app/team/team_service
 import app/types
 import gleam/http
 import gleam/json
+import gleam/list
 import wisp
 
 pub fn router(
@@ -16,6 +17,7 @@ pub fn router(
 ) {
   case wisp.path_segments(req), req.method {
     ["api", "teams"], http.Post -> create_team(req, ctx)
+    ["api", "teams", id], http.Get -> find_team(req, id, ctx)
     ["api", "teams", id], http.Delete -> delete_team(req, id, ctx)
     ["api", "teams", id], http.Post -> add_to_team(req, id, ctx)
     ["api", "teams", team_id, "profiles", profile_id], http.Delete ->
@@ -36,6 +38,13 @@ fn create_team(req: wisp.Request, ctx: types.Context) {
     profile.id,
     ctx,
   ))
+
+  let _ =
+    team_service.add_to_team(
+      result.id,
+      add_to_team_input.AddToTeamInput(profile.id),
+      ctx,
+    )
 
   team.to_json(result)
   |> json.to_string_tree
@@ -111,5 +120,27 @@ fn delete_from_team(
       |> wisp.json_response(200)
     }
     False -> response_utils.not_team_owner_response()
+  }
+}
+
+fn find_team(req: wisp.Request, id: String, ctx: types.Context) {
+  use profile <- auth_guards.require_profile(req, ctx)
+  use team_profiles <- response_utils.map_service_errors(
+    team_service.find_team_profiles_from_team(id, ctx),
+  )
+
+  case
+    list.find(team_profiles, fn(team_profile) {
+      team_profile.profile_id == profile.id
+    })
+  {
+    Ok(_) -> {
+      use team <- response_utils.map_service_errors(team_service.find_one(
+        id,
+        ctx,
+      ))
+      team.to_json(team) |> json.to_string_tree |> wisp.json_response(200)
+    }
+    Error(_) -> response_utils.not_member_of_team_response()
   }
 }

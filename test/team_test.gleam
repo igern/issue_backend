@@ -7,6 +7,7 @@ import gleam/http
 import gleam/json
 import gleeunit/should
 import utils
+import wisp
 import wisp/testing
 
 pub fn create_team_test() {
@@ -349,4 +350,110 @@ pub fn delete_from_team_invalid_jwt_test() {
 
 pub fn delete_from_team_profile_required_test() {
   utils.profile_required_tester(http.Delete, "/api/teams/1/profiles/1")
+}
+
+pub fn find_team_test() {
+  use t <- utils.with_context
+
+  use t, auth_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    auth_profile.auth_tokens.access_token,
+  )
+
+  let response =
+    router.handle_request(
+      testing.get("/api/teams/" <> team.id, [
+        utils.bearer_header(auth_profile.auth_tokens.access_token),
+      ]),
+      t.context,
+    )
+
+  utils.response_equal(
+    response,
+    team.to_json(team) |> json.to_string_tree |> wisp.json_response(200),
+  )
+}
+
+pub fn find_team_not_member_test() {
+  use t <- utils.with_context
+
+  use t, auth_profile1 <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    auth_profile1.auth_tokens.access_token,
+  )
+  use t, auth_profile2 <- utils.next_create_user_and_profile_and_login(t)
+
+  let response =
+    router.handle_request(
+      testing.get("/api/teams/" <> team.id, [
+        utils.bearer_header(auth_profile2.auth_tokens.access_token),
+      ]),
+      t.context,
+    )
+
+  utils.response_equal(response, response_utils.not_member_of_team_response())
+}
+
+pub fn find_team_invalid_team_test() {
+  use t <- utils.with_context
+
+  use t, auth_profile <- utils.next_create_user_and_profile_and_login(t)
+
+  let response =
+    router.handle_request(
+      testing.get("/api/teams/" <> utils.mock_uuidv4, [
+        utils.bearer_header(auth_profile.auth_tokens.access_token),
+      ]),
+      t.context,
+    )
+
+  utils.response_equal(response, response_utils.not_member_of_team_response())
+}
+
+pub fn find_team_as_member_test() {
+  use t <- utils.with_context
+
+  use t, auth_profile1 <- utils.next_create_user_and_profile_and_login(t)
+  use t, auth_profile2 <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    auth_profile1.auth_tokens.access_token,
+  )
+  use <- utils.add_to_team(
+    t,
+    team.id,
+    AddToTeamInput(auth_profile2.profile.id),
+    auth_profile1.auth_tokens.access_token,
+  )
+
+  let response =
+    router.handle_request(
+      testing.get("/api/teams/" <> team.id, [
+        utils.bearer_header(auth_profile2.auth_tokens.access_token),
+      ]),
+      t.context,
+    )
+
+  utils.response_equal(
+    response,
+    team.to_json(team) |> json.to_string_tree |> wisp.json_response(200),
+  )
+}
+
+pub fn find_team_missing_authorization_header_test() {
+  utils.missing_authorization_header_tester(http.Get, "/api/teams/1")
+}
+
+pub fn find_team_invalid_bearer_format_test() {
+  utils.invalid_bearer_format_tester(http.Get, "/api/teams/1")
+}
+
+pub fn find_team_invalid_jwt_test() {
+  utils.invalid_jwt_tester(http.Get, "/api/teams/1")
+}
+
+pub fn find_team_profile_required_test() {
+  utils.profile_required_tester(http.Get, "/api/teams/1")
 }

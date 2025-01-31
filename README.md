@@ -2,7 +2,6 @@
 
 ## Backlog
 - add find_team_profiles endpoint
-- update issue permission (only allowed to crud issues in directories in your team)
 
 ## Rainy Day Backlog
 - test team_profiles getting deleted when the team or profile gets deleted.

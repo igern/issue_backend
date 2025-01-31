@@ -2,6 +2,7 @@
 
 ## Backlog
 - add find_team_profiles endpoint
+- make sure you can't kick the creator of a team
 
 ## Rainy Day Backlog
 - test team_profiles getting deleted when the team or profile gets deleted.

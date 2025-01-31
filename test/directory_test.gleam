@@ -87,6 +87,78 @@ pub fn create_directory_profile_required_test() {
   utils.profile_required_tester(http.Post, "/api/teams/1/directories")
 }
 
+pub fn find_one_directory_test() {
+  use t <- utils.with_context
+
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
+  use t, directory <- utils.next_create_directory(
+    t,
+    team.id,
+    authorized_profile.auth_tokens.access_token,
+  )
+
+  let response =
+    router.handle_request(
+      testing.get("/api/directories/" <> directory.id, [
+        utils.bearer_header(authorized_profile.auth_tokens.access_token),
+      ]),
+      t.context,
+    )
+
+  response
+  |> utils.equal(
+    directory.to_json(directory)
+    |> json.to_string_tree
+    |> wisp.json_response(200),
+  )
+}
+
+pub fn find_one_directory_not_member_of_team_test() {
+  use t <- utils.with_context
+
+  use t, authorized_profile1 <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    authorized_profile1.auth_tokens.access_token,
+  )
+  use t, directory <- utils.next_create_directory(
+    t,
+    team.id,
+    authorized_profile1.auth_tokens.access_token,
+  )
+  use t, authorized_profile2 <- utils.next_create_user_and_profile_and_login(t)
+
+  let response =
+    router.handle_request(
+      testing.get("/api/directories/" <> directory.id, [
+        utils.bearer_header(authorized_profile2.auth_tokens.access_token),
+      ]),
+      t.context,
+    )
+
+  response |> utils.equal(response_utils.not_member_of_team_response())
+}
+
+pub fn find_one_directory_missing_authorization_header_test() {
+  utils.missing_authorization_header_tester(http.Get, "/api/directories/id")
+}
+
+pub fn find_one_directory_invalid_bearer_format_test() {
+  utils.invalid_bearer_format_tester(http.Get, "/api/directories/id")
+}
+
+pub fn find_one_directory_invalid_jwt_test() {
+  utils.invalid_jwt_tester(http.Get, "/api/directories/id")
+}
+
+pub fn find_one_directory_profile_required_test() {
+  utils.profile_required_tester(http.Get, "/api/directories/id")
+}
+
 pub fn update_directory_test() {
   use t <- utils.with_context
 

@@ -1,7 +1,7 @@
 # issue_backend
 
 ## Backlog
-- add find_directory endpoint
+- add find_team_profiles endpoint
 - update issue permission (only allowed to crud issues in directories in your team)
 
 ## Rainy Day Backlog

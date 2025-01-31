@@ -15,6 +15,7 @@ pub fn router(req: Request, ctx: Context, handle_request: fn() -> Response) {
   case wisp.path_segments(req), req.method {
     ["api", "teams", id, "directories"], http.Post ->
       create_directory(req, id, ctx)
+    ["api", "directories", id], http.Get -> find_one(req, id, ctx)
     ["api", "directories", id], http.Patch -> update_directory(req, id, ctx)
     ["api", "directories", id], http.Delete -> delete_directory(req, id, ctx)
     _, _ -> handle_request()
@@ -52,6 +53,30 @@ fn create_directory(req: Request, team_id: String, ctx: Context) {
   }
 }
 
+fn find_one(req: Request, directory_id: String, ctx: Context) {
+  use profile <- auth_guards.require_profile(req, ctx)
+
+  use directory <- response_utils.map_service_errors(directory_service.find_one(
+    directory_id,
+    ctx,
+  ))
+
+  use team_profiles <- response_utils.map_service_errors(
+    team_service.find_team_profiles_from_team(directory.team_id, ctx),
+  )
+
+  use _ <- response_utils.or_response(
+    list.find(team_profiles, fn(team_profile) {
+      team_profile.profile_id == profile.id
+    }),
+    response_utils.not_member_of_team_response(),
+  )
+
+  directory.to_json(directory)
+  |> json.to_string_tree()
+  |> wisp.json_response(200)
+}
+
 fn update_directory(req: Request, directory_id: String, ctx: Context) {
   use profile <- auth_guards.require_profile(req, ctx)
 
@@ -64,27 +89,27 @@ fn update_directory(req: Request, directory_id: String, ctx: Context) {
     team_service.find_team_profiles_from_team(directory.team_id, ctx),
   )
 
-  case
+  use _ <- response_utils.or_response(
     list.find(team_profiles, fn(team_profile) {
       team_profile.profile_id == profile.id
-    })
-  {
-    Ok(_) -> {
-      use json <- wisp.require_json(req)
-      use input <- response_utils.or_decode_error(
-        update_directory_input.from_dynamic(json),
-      )
+    }),
+    response_utils.not_member_of_team_response(),
+  )
 
-      use result <- response_utils.map_service_errors(
-        directory_service.update_one(directory_id, input, ctx),
-      )
+  use json <- wisp.require_json(req)
+  use input <- response_utils.or_decode_error(
+    update_directory_input.from_dynamic(json),
+  )
 
-      directory.to_json(result)
-      |> json.to_string_tree()
-      |> wisp.json_response(200)
-    }
-    Error(_) -> response_utils.not_member_of_team_response()
-  }
+  use result <- response_utils.map_service_errors(directory_service.update_one(
+    directory_id,
+    input,
+    ctx,
+  ))
+
+  directory.to_json(result)
+  |> json.to_string_tree()
+  |> wisp.json_response(200)
 }
 
 fn delete_directory(req: Request, directory_id: String, ctx: Context) {
@@ -99,20 +124,19 @@ fn delete_directory(req: Request, directory_id: String, ctx: Context) {
     team_service.find_team_profiles_from_team(directory.team_id, ctx),
   )
 
-  case
+  use _ <- response_utils.or_response(
     list.find(team_profiles, fn(team_profile) {
       team_profile.profile_id == profile.id
-    })
-  {
-    Ok(_) -> {
-      use result <- response_utils.map_service_errors(
-        directory_service.delete_one(directory_id, ctx),
-      )
+    }),
+    response_utils.not_member_of_team_response(),
+  )
 
-      directory.to_json(result)
-      |> json.to_string_tree()
-      |> wisp.json_response(200)
-    }
-    Error(_) -> response_utils.not_member_of_team_response()
-  }
+  use result <- response_utils.map_service_errors(directory_service.delete_one(
+    directory_id,
+    ctx,
+  ))
+
+  directory.to_json(result)
+  |> json.to_string_tree()
+  |> wisp.json_response(200)
 }

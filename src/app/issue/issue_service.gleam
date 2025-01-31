@@ -12,7 +12,7 @@ import gleam/string
 import sqlight.{ConstraintForeignkey}
 import youid/uuid
 
-fn issue_decoder() {
+pub fn issue_decoder() {
   dynamic.tuple5(
     dynamic.string,
     dynamic.string,

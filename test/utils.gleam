@@ -423,10 +423,13 @@ pub fn delete_directory(t: TestContext, access_token: String, id: String) {
   data
 }
 
-pub fn find_issues(t: TestContext, access_token: String) {
+pub fn find_issues(t: TestContext, directory_id: String, access_token: String) {
   let response =
     router.handle_request(
-      testing.get("/api/issues?skip=0&take=10", [bearer_header(access_token)]),
+      testing.get(
+        "/api/directories/" <> directory_id <> "/issues?skip=0&take=10",
+        [bearer_header(access_token)],
+      ),
       t.context,
     )
 

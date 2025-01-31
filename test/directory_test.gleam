@@ -2,10 +2,12 @@ import app/common/response_utils
 import app/directory/inputs/create_directory_input
 import app/directory/inputs/update_directory_input
 import app/directory/outputs/directory
+import app/issue/issue_service
 import app/router
 import gleam/http
 import gleam/json
 import gleeunit/should
+import sqlight
 import utils
 import wisp
 import wisp/testing
@@ -320,8 +322,16 @@ pub fn delete_directory_cascade_issues_test() {
     authorized_profile.auth_tokens.access_token,
     directory.id,
   )
-  let issues = utils.find_issues(t, authorized_profile.auth_tokens.access_token)
-  issues.total |> should.equal(0)
+
+  let issues =
+    sqlight.query(
+      "select * from issues where directory_id = ?",
+      on: t.context.connection,
+      with: [sqlight.text(directory.id)],
+      expecting: issue_service.issue_decoder(),
+    )
+
+  issues |> should.equal(Ok([]))
 }
 
 pub fn delete_directory_missing_authorization_header_test() {

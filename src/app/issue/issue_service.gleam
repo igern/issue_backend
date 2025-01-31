@@ -22,7 +22,12 @@ fn issue_decoder() {
   )
 }
 
-pub fn create(input: CreateIssueInput, creator_id: String, ctx: Context) {
+pub fn create(
+  directory_id: String,
+  creator_id: String,
+  input: CreateIssueInput,
+  ctx: Context,
+) {
   let sql =
     "insert into issues (id, name, description, creator_id, directory_id) values (?, ?, ?, ?, ?) returning *"
   let id = uuid.v4_string()
@@ -36,7 +41,7 @@ pub fn create(input: CreateIssueInput, creator_id: String, ctx: Context) {
         sqlight.text(input.name),
         sqlight.nullable(sqlight.text, input.description),
         sqlight.text(creator_id),
-        sqlight.text(input.directory_id),
+        sqlight.text(directory_id),
       ],
       expecting: issue_decoder(),
     )

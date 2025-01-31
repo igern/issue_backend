@@ -18,7 +18,8 @@ import wisp.{type Request, type Response}
 
 pub fn router(req: Request, ctx: Context, handle_request: fn() -> Response) {
   case wisp.path_segments(req), req.method {
-    ["api", "issues"], Post -> create_issue(req, ctx)
+    ["api", "directories", directory_id, "issues"], Post ->
+      create_issue(req, directory_id, ctx)
     ["api", "issues"], Get -> find_issues(req, ctx)
     ["api", "issues", id], Get -> find_issue(req, id, ctx)
     ["api", "issues", id], Patch -> update_issue(req, id, ctx)
@@ -27,15 +28,16 @@ pub fn router(req: Request, ctx: Context, handle_request: fn() -> Response) {
   }
 }
 
-fn create_issue(req: Request, ctx: Context) {
+fn create_issue(req: Request, directory_id: String, ctx: Context) {
   use profile <- auth_guards.require_profile(req, ctx)
   use json <- wisp.require_json(req)
   use input <- response_utils.or_decode_error(create_issue_input.from_dynamic(
     json,
   ))
   use result <- response_utils.map_service_errors(issue_service.create(
-    input,
+    directory_id,
     profile.id,
+    input,
     ctx,
   ))
 

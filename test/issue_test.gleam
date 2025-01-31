@@ -25,13 +25,13 @@ pub fn create_issue_test() {
     authorized_profile.auth_tokens.access_token,
   )
 
-  use t, input <- utils.next_create_issue_input(t, directory.id)
+  use t, input <- utils.next_create_issue_input(t)
   let json = create_issue_input.to_json(input)
 
   let response =
     router.handle_request(
       testing.post_json(
-        "/api/issues",
+        "/api/directories/" <> directory.id <> "/issues",
         [utils.bearer_header(authorized_profile.auth_tokens.access_token)],
         json,
       ),
@@ -46,7 +46,7 @@ pub fn create_issue_test() {
     name: input.name,
     description: input.description,
     creator_id: authorized_profile.profile.id,
-    directory_id: input.directory_id,
+    directory_id: directory.id,
   ))
 }
 
@@ -65,7 +65,7 @@ pub fn create_issue_null_description_test() {
     authorized_profile.auth_tokens.access_token,
   )
 
-  use t, input <- utils.next_create_issue_input(t, directory.id)
+  use t, input <- utils.next_create_issue_input(t)
   let input =
     create_issue_input.CreateIssueInput(..input, description: option.None)
   let json = create_issue_input.to_json(input)
@@ -73,7 +73,7 @@ pub fn create_issue_null_description_test() {
   let response =
     router.handle_request(
       testing.post_json(
-        "/api/issues",
+        "/api/directories/" <> directory.id <> "/issues",
         [utils.bearer_header(authorized_profile.auth_tokens.access_token)],
         json,
       ),
@@ -88,7 +88,7 @@ pub fn create_issue_null_description_test() {
     name: input.name,
     description: input.description,
     creator_id: authorized_profile.profile.id,
-    directory_id: input.directory_id,
+    directory_id: directory.id,
   ))
 }
 
@@ -96,13 +96,13 @@ pub fn create_issue_invalid_directory_id_test() {
   use t <- utils.with_context
   use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
 
-  use t, input <- utils.next_create_issue_input(t, utils.mock_uuidv4)
+  use t, input <- utils.next_create_issue_input(t)
   let json = create_issue_input.to_json(input)
 
   let response =
     router.handle_request(
       testing.post_json(
-        "/api/issues",
+        "/api/directories/" <> utils.mock_uuidv4 <> "/issues",
         [utils.bearer_header(authorized_profile.auth_tokens.access_token)],
         json,
       ),
@@ -113,19 +113,22 @@ pub fn create_issue_invalid_directory_id_test() {
 }
 
 pub fn create_issue_missing_authorization_header_test() {
-  utils.missing_authorization_header_tester(http.Post, "/api/issues")
+  utils.missing_authorization_header_tester(
+    http.Post,
+    "/api/directories/1/issues",
+  )
 }
 
 pub fn create_issue_invalid_bearer_format_test() {
-  utils.invalid_bearer_format_tester(http.Post, "/api/issues")
+  utils.invalid_bearer_format_tester(http.Post, "/api/directories/1/issues")
 }
 
 pub fn create_issue_invalid_jwt_test() {
-  utils.invalid_jwt_tester(http.Post, "/api/issues")
+  utils.invalid_jwt_tester(http.Post, "/api/directories/1/issues")
 }
 
 pub fn create_issue_profile_required_test() {
-  utils.profile_required_tester(http.Post, "/api/issues")
+  utils.profile_required_tester(http.Post, "/api/directories/1/issues")
 }
 
 pub fn find_issues_0_test() {

@@ -91,7 +91,6 @@ pub fn with_context(test_case: fn(TestContext) -> Nil) -> Nil {
 
 pub fn next_create_issue_input(
   t: TestContext,
-  directory_id: String,
   handler: fn(TestContext, CreateIssueInput) -> Nil,
 ) {
   handler(
@@ -99,7 +98,6 @@ pub fn next_create_issue_input(
     CreateIssueInput(
       name: "name" <> int.to_string(t.next),
       description: option.Some("description" <> int.to_string(t.next)),
-      directory_id: directory_id,
     ),
   )
 }
@@ -110,12 +108,16 @@ pub fn next_create_issue(
   directory_id: String,
   handler: fn(TestContext, Issue) -> Nil,
 ) {
-  use t, input <- next_create_issue_input(t, directory_id)
+  use t, input <- next_create_issue_input(t)
   let json = create_issue_input.to_json(input)
 
   let response =
     router.handle_request(
-      testing.post_json("/api/issues", [bearer_header(access_token)], json),
+      testing.post_json(
+        "/api/directories/" <> directory_id <> "/issues",
+        [bearer_header(access_token)],
+        json,
+      ),
       t.context,
     )
   response.status |> should.equal(201)

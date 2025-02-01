@@ -6,6 +6,7 @@ import app/team/outputs/team
 import app/team/outputs/team_profile
 import app/team/team_service
 import app/types
+import gleam/bool
 import gleam/http
 import gleam/json
 import gleam/list
@@ -105,25 +106,30 @@ fn delete_profile_from_team(
   ctx: types.Context,
 ) {
   use profile <- auth_guards.require_profile(req, ctx)
+
   use team <- response_utils.map_service_errors(team_service.find_one(
     team_id,
     ctx,
   ))
 
-  case team.owner_id == profile.id {
-    True -> {
-      use _ <- response_utils.map_service_errors(team_service.delete_from_team(
-        team_id,
-        profile_id,
-        ctx,
-      ))
+  use <- bool.guard(
+    team.owner_id != profile.id,
+    response_utils.not_team_owner_response(),
+  )
+  use <- bool.guard(
+    team.owner_id == profile_id,
+    response_utils.cannot_kick_team_owner_of_team(),
+  )
 
-      json.object([])
-      |> json.to_string_tree
-      |> wisp.json_response(200)
-    }
-    False -> response_utils.not_team_owner_response()
-  }
+  use _ <- response_utils.map_service_errors(team_service.delete_from_team(
+    team_id,
+    profile_id,
+    ctx,
+  ))
+
+  json.object([])
+  |> json.to_string_tree
+  |> wisp.json_response(200)
 }
 
 fn find_team(req: wisp.Request, id: String, ctx: types.Context) {

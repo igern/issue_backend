@@ -2,7 +2,6 @@
 
 ## Backlog
 - add find_directories in team endpoint
-- make sure you can't kick the creator of a team
 - setup frontend dev setup
 
 ## Rainy Day Backlog

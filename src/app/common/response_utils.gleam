@@ -59,6 +59,10 @@ pub fn refresh_token_expired_error_response() {
   json_response(400, "refresh token expired")
 }
 
+pub fn cannot_kick_team_owner_of_team() {
+  json_response(400, "cannot kick team owner of team")
+}
+
 pub fn missing_authorization_header_response() {
   json_response(401, "missing authorization header")
 }

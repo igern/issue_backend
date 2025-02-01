@@ -334,6 +334,27 @@ pub fn delete_from_team_not_team_owner_test() {
   response |> utils.equal(response_utils.not_team_owner_response())
 }
 
+pub fn delete_from_team_cannot_kick_team_owner_test() {
+  use t <- utils.with_context
+
+  use t, auth_profile1 <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    auth_profile1.auth_tokens.access_token,
+  )
+
+  let response =
+    router.handle_request(
+      testing.delete_json(
+        "/api/teams/" <> team.id <> "/profiles/" <> auth_profile1.profile.id,
+        [utils.bearer_header(auth_profile1.auth_tokens.access_token)],
+        json.object([]),
+      ),
+      t.context,
+    )
+  response |> utils.equal(response_utils.cannot_kick_team_owner_of_team())
+}
+
 pub fn delete_from_team_missing_authorization_header_test() {
   utils.missing_authorization_header_tester(
     http.Delete,

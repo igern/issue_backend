@@ -3,6 +3,7 @@ import app/router
 import app/team/inputs/add_to_team_input.{AddToTeamInput}
 import app/team/inputs/create_team_input
 import app/team/outputs/team
+import app/team/outputs/team_profile
 import gleam/http
 import gleam/json
 import gleeunit/should
@@ -456,4 +457,84 @@ pub fn find_team_invalid_jwt_test() {
 
 pub fn find_team_profile_required_test() {
   utils.profile_required_tester(http.Get, "/api/teams/1")
+}
+
+pub fn find_profiles_from_team_test() {
+  use t <- utils.with_context
+
+  use t, auth_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    auth_profile.auth_tokens.access_token,
+  )
+
+  let response =
+    router.handle_request(
+      testing.get("/api/teams/" <> team.id <> "/profiles", [
+        utils.bearer_header(auth_profile.auth_tokens.access_token),
+      ]),
+      t.context,
+    )
+
+  utils.equal(
+    response,
+    json.array(
+      [team_profile.TeamProfile(team.id, auth_profile.profile.id)],
+      team_profile.to_json,
+    )
+      |> json.to_string_tree
+      |> wisp.json_response(200),
+  )
+}
+
+pub fn find_profiles_from_team_not_member_of_team_test() {
+  use t <- utils.with_context
+
+  use t, auth_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    auth_profile.auth_tokens.access_token,
+  )
+
+  use t, auth_profile2 <- utils.next_create_user_and_profile_and_login(t)
+  let response =
+    router.handle_request(
+      testing.get("/api/teams/" <> team.id <> "/profiles", [
+        utils.bearer_header(auth_profile2.auth_tokens.access_token),
+      ]),
+      t.context,
+    )
+
+  utils.equal(response, response_utils.not_member_of_team_response())
+}
+
+pub fn find_profiles_from_team_team_not_found_test() {
+  use t <- utils.with_context
+
+  use t, auth_profile <- utils.next_create_user_and_profile_and_login(t)
+  let response =
+    router.handle_request(
+      testing.get("/api/teams/" <> utils.mock_uuidv4 <> "/profiles", [
+        utils.bearer_header(auth_profile.auth_tokens.access_token),
+      ]),
+      t.context,
+    )
+
+  utils.equal(response, response_utils.not_member_of_team_response())
+}
+
+pub fn find_profiles_tom_team_missing_authorization_header_test() {
+  utils.missing_authorization_header_tester(http.Get, "/api/teams/1/profiles")
+}
+
+pub fn find_profiles_tom_team_invalid_bearer_format_test() {
+  utils.invalid_bearer_format_tester(http.Get, "/api/teams/1/profiles")
+}
+
+pub fn find_profiles_tom_team_invalid_jwt_test() {
+  utils.invalid_jwt_tester(http.Get, "/api/teams/1/profiles")
+}
+
+pub fn find_profiles_tom_team_profile_required_test() {
+  utils.profile_required_tester(http.Get, "/api/teams/1/profiles")
 }

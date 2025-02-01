@@ -3,6 +3,7 @@ import app/common/response_utils
 import app/team/inputs/add_to_team_input
 import app/team/inputs/create_team_input
 import app/team/outputs/team
+import app/team/outputs/team_profile
 import app/team/team_service
 import app/types
 import gleam/http
@@ -20,8 +21,10 @@ pub fn router(
     ["api", "teams", id], http.Get -> find_team(req, id, ctx)
     ["api", "teams", id], http.Delete -> delete_team(req, id, ctx)
     ["api", "teams", id], http.Post -> add_to_team(req, id, ctx)
+    ["api", "teams", team_id, "profiles"], http.Get ->
+      find_profiles_from_team(req, team_id, ctx)
     ["api", "teams", team_id, "profiles", profile_id], http.Delete ->
-      delete_from_team(req, team_id, profile_id, ctx)
+      delete_profile_from_team(req, team_id, profile_id, ctx)
     _, _ -> handle_request()
   }
 }
@@ -95,7 +98,7 @@ fn add_to_team(req: wisp.Request, id: String, ctx: types.Context) {
   }
 }
 
-fn delete_from_team(
+fn delete_profile_from_team(
   req: wisp.Request,
   team_id: String,
   profile_id: String,
@@ -143,4 +146,26 @@ fn find_team(req: wisp.Request, id: String, ctx: types.Context) {
     }
     Error(_) -> response_utils.not_member_of_team_response()
   }
+}
+
+fn find_profiles_from_team(
+  req: wisp.Request,
+  team_id: String,
+  ctx: types.Context,
+) {
+  use profile <- auth_guards.require_profile(req, ctx)
+  use team_profiles <- response_utils.map_service_errors(
+    team_service.find_team_profiles_from_team(team_id, ctx),
+  )
+
+  use _ <- response_utils.or_response(
+    list.find(team_profiles, fn(team_profile) {
+      team_profile.profile_id == profile.id
+    }),
+    response_utils.not_member_of_team_response(),
+  )
+
+  json.array(team_profiles, team_profile.to_json)
+  |> json.to_string_tree
+  |> wisp.json_response(200)
 }

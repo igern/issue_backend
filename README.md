@@ -1,7 +1,6 @@
 # issue_backend
 
 ## Backlog
-- add find_directories in team endpoint
 - setup frontend dev setup
 
 ## Rainy Day Backlog

@@ -349,3 +349,74 @@ pub fn delete_directory_invalid_jwt_test() {
 pub fn delete_directory_profile_required_test() {
   utils.profile_required_tester(http.Delete, "/api/directories/id")
 }
+
+pub fn find_directories_test() {
+  use t <- utils.with_context
+
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
+  use t, directory1 <- utils.next_create_directory(
+    t,
+    team.id,
+    authorized_profile.auth_tokens.access_token,
+  )
+  use t, directory2 <- utils.next_create_directory(
+    t,
+    team.id,
+    authorized_profile.auth_tokens.access_token,
+  )
+
+  let response =
+    router.handle_request(
+      testing.get("/api/teams/" <> team.id <> "/directories", [
+        utils.bearer_header(authorized_profile.auth_tokens.access_token),
+      ]),
+      t.context,
+    )
+
+  response
+  |> utils.equal(
+    json.array([directory1, directory2], directory.to_json)
+    |> json.to_string_tree
+    |> wisp.json_response(200),
+  )
+}
+
+pub fn find_directories_team_not_exists_test() {
+  use t <- utils.with_context
+
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+
+  let response =
+    router.handle_request(
+      testing.get("/api/teams/" <> utils.mock_uuidv4 <> "/directories", [
+        utils.bearer_header(authorized_profile.auth_tokens.access_token),
+      ]),
+      t.context,
+    )
+
+  response
+  |> utils.equal(response_utils.not_member_of_team_response())
+}
+
+pub fn find_directories_missing_authorization_header_test() {
+  utils.missing_authorization_header_tester(
+    http.Get,
+    "/api/teams/1/directories",
+  )
+}
+
+pub fn find_directories_invalid_bearer_format_test() {
+  utils.invalid_bearer_format_tester(http.Get, "/api/teams/1/directories")
+}
+
+pub fn find_directories_invalid_jwt_test() {
+  utils.invalid_jwt_tester(http.Get, "/api/teams/1/directories")
+}
+
+pub fn find_directories_profile_required_test() {
+  utils.profile_required_tester(http.Get, "/api/teams/1/directories")
+}

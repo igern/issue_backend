@@ -5,6 +5,7 @@ import app/directory/outputs/directory.{Directory}
 import app/types.{type Context}
 import birl
 import gleam/dynamic
+import gleam/list
 import sqlight
 import youid/uuid
 
@@ -92,5 +93,29 @@ pub fn update_one(id: String, input: UpdateDirectoryInput, ctx: Context) {
     Error(error) -> Error(DatabaseError(error))
     Ok([]) -> Error(DirectoryNotFoundError)
     _ -> panic as "Should only return one row from a delete"
+  }
+}
+
+pub fn find_from_team(team_id: String, ctx: Context) {
+  let sql = "select * from directories where team_id = ?"
+
+  let result =
+    sqlight.query(
+      sql,
+      ctx.connection,
+      [sqlight.text(team_id)],
+      directory_decoder(),
+    )
+
+  case result {
+    Ok(directories) -> {
+      let directories =
+        list.map(directories, fn(directory) {
+          let #(id, name, team_id, created_at) = directory
+          Directory(id, name, team_id, created_at)
+        })
+      Ok(directories)
+    }
+    Error(error) -> Error(DatabaseError(error))
   }
 }

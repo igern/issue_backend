@@ -4,13 +4,17 @@ import app/directory/inputs/update_directory_input.{type UpdateDirectoryInput}
 import app/directory/outputs/directory.{Directory}
 import app/types.{type Context}
 import birl
-import gleam/dynamic
+import gleam/dynamic/decode
 import gleam/list
 import sqlight
 import youid/uuid
 
 pub fn directory_decoder() {
-  dynamic.tuple4(dynamic.string, dynamic.string, dynamic.string, dynamic.string)
+  use id <- decode.field(0, decode.string)
+  use name <- decode.field(1, decode.string)
+  use team_id <- decode.field(2, decode.string)
+  use created_at <- decode.field(3, decode.string)
+  decode.success(#(id, name, team_id, created_at))
 }
 
 pub fn create(team_id: String, input: CreateDirectoryInput, ctx: Context) {

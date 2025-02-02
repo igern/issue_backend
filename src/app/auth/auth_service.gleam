@@ -12,14 +12,17 @@ import birl
 import birl/duration
 import gleam/bit_array
 import gleam/crypto
-import gleam/dynamic
+import gleam/dynamic/decode
 import gleam/order
 import gleam/result
 import gwt
 import sqlight.{ConstraintPrimarykey, SqlightError}
 
 pub fn refresh_token_decoder() {
-  dynamic.tuple3(dynamic.string, dynamic.string, dynamic.string)
+  use token <- decode.field(0, decode.string)
+  use user_id <- decode.field(1, decode.string)
+  use expires_at <- decode.field(2, decode.string)
+  decode.success(#(token, user_id, expires_at))
 }
 
 pub fn login(

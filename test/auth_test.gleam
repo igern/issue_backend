@@ -1,9 +1,9 @@
+import app/auth/auth_service
 import app/auth/inputs/login_input.{LoginInput}
 import app/auth/inputs/refresh_auth_tokens_input.{RefreshAuthTokensInput}
 import app/common/response_utils
 import app/router
 import birl
-import gleam/dynamic
 import sqlight
 import utils
 import wisp
@@ -89,7 +89,7 @@ pub fn refresh_auth_tokens_test() {
       sql,
       t.context.connection,
       [sqlight.text(user.auth_tokens.refresh_token)],
-      dynamic.tuple3(dynamic.string, dynamic.int, dynamic.string),
+      auth_service.refresh_token_decoder(),
     )
 
   Nil
@@ -126,7 +126,7 @@ pub fn refresh_auth_tokens_expired_test() {
         sqlight.text(birl.now() |> birl.to_iso8601),
         sqlight.text(user.auth_tokens.refresh_token),
       ],
-      expecting: dynamic.tuple3(dynamic.string, dynamic.int, dynamic.string),
+      expecting: auth_service.refresh_token_decoder(),
     )
 
   let input =

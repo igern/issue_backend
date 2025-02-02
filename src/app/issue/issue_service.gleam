@@ -6,20 +6,19 @@ import app/issue/inputs/update_issue_input.{type UpdateIssueInput}
 import app/issue/outputs/issue.{Issue}
 import app/issue/outputs/paginated_issues
 import app/types.{type Context}
-import gleam/dynamic
+import gleam/dynamic/decode
 import gleam/list
 import gleam/string
 import sqlight.{ConstraintForeignkey}
 import youid/uuid
 
 pub fn issue_decoder() {
-  dynamic.tuple5(
-    dynamic.string,
-    dynamic.string,
-    dynamic.optional(dynamic.string),
-    dynamic.string,
-    dynamic.string,
-  )
+  use id <- decode.field(0, decode.string)
+  use name <- decode.field(1, decode.string)
+  use description <- decode.field(2, decode.optional(decode.string))
+  use creator_id <- decode.field(3, decode.string)
+  use directory_id <- decode.field(4, decode.string)
+  decode.success(#(id, name, description, creator_id, directory_id))
 }
 
 pub fn create(
@@ -67,13 +66,12 @@ pub fn find_paginated(input: PaginationInput, ctx: Context) {
       with: [sqlight.int(input.take), sqlight.int(input.skip)],
       expecting: issue_decoder(),
     )
-  let total_result =
-    sqlight.query(
-      total_sql,
-      ctx.connection,
-      [],
-      dynamic.element(0, dynamic.int),
-    )
+
+  let count_decoder = {
+    use total <- decode.field(0, decode.int)
+    decode.success(total)
+  }
+  let total_result = sqlight.query(total_sql, ctx.connection, [], count_decoder)
   case items_result, total_result {
     Ok(items_result), Ok(totals) -> {
       let assert [total] = totals

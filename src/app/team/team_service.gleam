@@ -4,17 +4,22 @@ import app/team/inputs/create_team_input.{type CreateTeamInput}
 import app/team/outputs/team
 import app/team/outputs/team_profile.{TeamProfile}
 import app/types
-import gleam/dynamic
+import gleam/dynamic/decode
 import gleam/list
 import sqlight
 import youid/uuid
 
 fn team_decoder() {
-  dynamic.tuple3(dynamic.string, dynamic.string, dynamic.string)
+  use id <- decode.field(0, decode.string)
+  use name <- decode.field(1, decode.string)
+  use owner_id <- decode.field(2, decode.string)
+  decode.success(#(id, name, owner_id))
 }
 
 fn team_profile_decoder() {
-  dynamic.tuple2(dynamic.string, dynamic.string)
+  use team_id <- decode.field(0, decode.string)
+  use profile_id <- decode.field(1, decode.string)
+  decode.success(#(team_id, profile_id))
 }
 
 pub fn create(input: CreateTeamInput, owner_id: String, ctx: types.Context) {

@@ -5,19 +5,18 @@ import app/profile/inputs/create_profile_input.{type CreateProfileInput}
 import app/profile/outputs/profile.{Profile}
 import app/storage/storage
 import app/types.{type Context}
-import gleam/dynamic
+import gleam/dynamic/decode
 import gleam/result
 import simplifile
 import sqlight
 import youid/uuid
 
 pub fn profile_decoder() {
-  dynamic.tuple4(
-    dynamic.string,
-    dynamic.string,
-    dynamic.string,
-    dynamic.optional(dynamic.string),
-  )
+  use id <- decode.field(0, decode.string)
+  use user_id <- decode.field(1, decode.string)
+  use name <- decode.field(2, decode.string)
+  use profile_picture <- decode.field(3, decode.optional(decode.string))
+  decode.success(#(id, user_id, name, profile_picture))
 }
 
 pub fn create(input: CreateProfileInput, user_id: String, ctx: Context) {

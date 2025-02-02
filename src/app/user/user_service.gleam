@@ -3,12 +3,15 @@ import app/types.{type Context}
 import app/user/inputs/create_user_input.{type CreateUserInput}
 import app/user/outputs/user.{User}
 import argus
-import gleam/dynamic
+import gleam/dynamic/decode
 import sqlight
 import youid/uuid
 
 pub fn user_decoder() {
-  dynamic.tuple3(dynamic.string, dynamic.string, dynamic.string)
+  use id <- decode.field(0, decode.string)
+  use email <- decode.field(1, decode.string)
+  use password <- decode.field(2, decode.string)
+  decode.success(#(id, email, password))
 }
 
 pub fn create(input: CreateUserInput, ctx: Context) {

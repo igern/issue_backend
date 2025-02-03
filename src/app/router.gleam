@@ -1,6 +1,7 @@
 import app/auth/auth_router
 import app/directory/directory_router
 import app/issue/issue_router
+import app/pages/pages
 import app/profile/profile_router
 import app/team/team_router
 import app/types.{type Context}
@@ -17,13 +18,18 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
   use <- profile_router.router(req, ctx)
   use <- directory_router.router(req, ctx)
   use <- team_router.router(req, ctx)
+  use <- pages.router(req, ctx)
 
   case wisp.path_segments(req), req.method {
+    [], Get -> wisp.redirect("/login")
     ["api"], Get -> {
       json.object([#("version", json.string("1.0.0"))])
       |> json.to_string_tree()
       |> wisp.json_response(200)
     }
+    ["favicon.ico"], Get ->
+      wisp.response(200)
+      |> wisp.set_body(wisp.File("src/assets/search-problem.png"))
     _, _ ->
       json.object([
         #("code", json.int(404)),

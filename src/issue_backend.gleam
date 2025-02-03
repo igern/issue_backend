@@ -8,11 +8,14 @@ import gleam/erlang/process
 import gleam/http
 import gleam/option
 import mist
+import radiate
 import sqlight
 import wisp
 import wisp/wisp_mist
 
 pub fn main() {
+  let _ = radiate.new() |> radiate.add_dir("src") |> radiate.start()
+
   wisp.configure_logger()
   let secret_key_base = wisp.random_string(64)
 

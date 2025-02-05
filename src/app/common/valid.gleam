@@ -38,6 +38,7 @@ pub fn or_validation_error(
 }
 
 pub fn checks_to_validated(input: a, checks: List(#(String, Check))) {
+  let assert [_, ..] = checks as "Minimum 1 check required"
   let checks =
     list.fold(checks, [], fn(arr, current) {
       let #(field, check) = current
@@ -58,6 +59,13 @@ pub fn checks_to_validated(input: a, checks: List(#(String, Check))) {
 
       Error(Invalid(input, errors))
     }
+  }
+}
+
+pub fn validate_min(input: Int, min: Int) -> Check {
+  case input >= min {
+    True -> Check(option.None)
+    False -> Check(option.Some("must be atleast " <> int.to_string(min)))
   }
 }
 
@@ -89,5 +97,25 @@ pub fn validate_min_length(input: String, min_length: Int) {
       Check(option.Some(
         "must be atleast " <> int.to_string(min_length) <> " characters long",
       ))
+  }
+}
+
+pub fn validate_optional_min_length(
+  input: option.Option(String),
+  min_length: Int,
+) {
+  case input {
+    option.Some(input) -> {
+      case string.length(input) >= min_length {
+        True -> Check(option.None)
+        False ->
+          Check(option.Some(
+            "must be atleast "
+            <> int.to_string(min_length)
+            <> " characters long",
+          ))
+      }
+    }
+    option.None -> Check(option.None)
   }
 }

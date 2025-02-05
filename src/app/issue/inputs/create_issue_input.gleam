@@ -1,3 +1,4 @@
+import app/common/valid
 import gleam/dynamic.{type Dynamic}
 import gleam/dynamic/decode
 import gleam/json.{type Json}
@@ -24,4 +25,10 @@ pub fn to_json(input: CreateIssueInput) -> Json {
     #("name", json.string(input.name)),
     #("description", json.nullable(input.description, json.string)),
   ])
+}
+
+pub fn validate(input: CreateIssueInput) {
+  let valid_name = valid.validate_min_length(input.name, 2)
+
+  valid.checks_to_validated(input, [#("name", valid_name)])
 }

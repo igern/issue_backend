@@ -1,6 +1,7 @@
 import app/common/inputs/pagination_input.{type PaginationInput}
 import app/common/response_utils.{DatabaseError, IssueNotFoundError}
 import app/common/sqlight_utils
+import app/common/valid
 import app/issue/inputs/create_issue_input.{type CreateIssueInput}
 import app/issue/inputs/update_issue_input.{type UpdateIssueInput}
 import app/issue/outputs/issue.{Issue}
@@ -24,9 +25,10 @@ pub fn issue_decoder() {
 pub fn create(
   directory_id: String,
   creator_id: String,
-  input: CreateIssueInput,
+  input: valid.Valid(CreateIssueInput),
   ctx: Context,
 ) {
+  let input = valid.inner(input)
   let sql =
     "insert into issues (id, name, description, creator_id, directory_id) values (?, ?, ?, ?, ?) returning *"
   let id = uuid.v4_string()
@@ -55,7 +57,8 @@ pub fn create(
   }
 }
 
-pub fn find_paginated(input: PaginationInput, ctx: Context) {
+pub fn find_paginated(input: valid.Valid(PaginationInput), ctx: Context) {
+  let input = valid.inner(input)
   let items_sql = "select * from issues limit ? offset ?"
   let total_sql = "select count(*) from issues"
 
@@ -113,7 +116,12 @@ pub fn find_one(id: String, ctx: Context) {
   }
 }
 
-pub fn update_one(id: String, input: UpdateIssueInput, ctx: Context) {
+pub fn update_one(
+  id: String,
+  input: valid.Valid(UpdateIssueInput),
+  ctx: Context,
+) {
+  let input = valid.inner(input)
   let sql = "update issues set $set where id = ? returning *"
 
   case

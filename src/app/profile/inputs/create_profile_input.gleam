@@ -1,3 +1,4 @@
+import app/common/valid
 import gleam/dynamic.{type Dynamic}
 import gleam/dynamic/decode
 import gleam/json.{type Json}
@@ -19,4 +20,12 @@ pub fn from_dynamic(
 
 pub fn to_json(input: CreateProfileInput) -> Json {
   json.object([#("name", json.string(input.name))])
+}
+
+pub fn validate(
+  input: CreateProfileInput,
+) -> valid.Validated(CreateProfileInput) {
+  let valid_name = valid.validate_min_length(input.name, 2)
+
+  valid.checks_to_validated(input, [#("name", valid_name)])
 }

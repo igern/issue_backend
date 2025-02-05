@@ -1,6 +1,7 @@
 import app/common/response_utils.{
   DatabaseError, FileReadError, ProfileNotFoundError,
 }
+import app/common/valid
 import app/profile/inputs/create_profile_input.{type CreateProfileInput}
 import app/profile/outputs/profile.{Profile}
 import app/storage/storage
@@ -19,7 +20,12 @@ pub fn profile_decoder() {
   decode.success(#(id, user_id, name, profile_picture))
 }
 
-pub fn create(input: CreateProfileInput, user_id: String, ctx: Context) {
+pub fn create(
+  input: valid.Valid(CreateProfileInput),
+  user_id: String,
+  ctx: Context,
+) {
+  let input = valid.inner(input)
   let sql =
     "insert into profiles (id, user_id, name) values (?, ?, ?) returning *"
   let id = uuid.v4_string()

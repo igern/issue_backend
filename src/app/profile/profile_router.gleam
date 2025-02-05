@@ -1,5 +1,6 @@
 import app/auth/auth_guards
 import app/common/response_utils
+import app/common/valid
 import app/profile/inputs/create_profile_input
 import app/profile/outputs/profile
 import app/profile/profile_service
@@ -27,6 +28,9 @@ pub fn create_profile(req: Request, ctx: Context) {
   use input <- response_utils.or_decode_error(create_profile_input.from_dynamic(
     json,
   ))
+
+  use input <- valid.or_validation_error(create_profile_input.validate(input))
+
   use result <- response_utils.map_service_errors(profile_service.create(
     input,
     payload.sub,

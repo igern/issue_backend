@@ -40,6 +40,31 @@ pub fn create_team_test() {
   ))
 }
 
+pub fn create_team_validate_name_test() {
+  use t <- utils.with_context
+
+  use t, auth_profile <- utils.next_create_user_and_profile_and_login(t)
+
+  let input = create_team_input.CreateTeamInput(name: "k")
+  let json = create_team_input.to_json(input)
+
+  let response =
+    router.handle_request(
+      testing.post_json(
+        "/api/teams",
+        [utils.bearer_header(auth_profile.auth_tokens.access_token)],
+        json,
+      ),
+      t.context,
+    )
+
+  response
+  |> utils.equal(response_utils.json_response(
+    400,
+    "name: must be atleast 2 characters long",
+  ))
+}
+
 pub fn create_team_missing_authorization_header_test() {
   utils.missing_authorization_header_tester(http.Post, "/api/teams")
 }

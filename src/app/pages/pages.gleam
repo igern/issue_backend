@@ -1,4 +1,5 @@
 import app/common/response_utils
+import app/common/valid
 import app/pages/create_profile
 import app/pages/login
 import app/types.{type Context}
@@ -26,10 +27,9 @@ fn create_user(req: wisp.Request, ctx: Context) {
     json,
   ))
 
-  use result <- response_utils.map_service_errors(user_service.create(
-    input,
-    ctx,
-  ))
+  use input <- valid.or_validation_error(create_user_input.validate(input))
+
+  use _ <- response_utils.map_service_errors(user_service.create(input, ctx))
 
   wisp.redirect("/login")
 }

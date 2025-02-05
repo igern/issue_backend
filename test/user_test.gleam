@@ -42,6 +42,37 @@ pub fn create_user_unique_email_test() {
   response |> utils.equal(response_utils.email_already_exists_error_response())
 }
 
+pub fn create_user_validate_email_test() {
+  use t <- utils.with_context
+
+  use t, input <- utils.next_create_user_input(t)
+  let input = create_user_input.CreateUserInput(..input, email: "invalid")
+  let json = create_user_input.to_json(input)
+
+  let response =
+    router.handle_request(testing.post_json("api/users", [], json), t.context)
+
+  response
+  |> utils.equal(response_utils.json_response(400, "email: invalid"))
+}
+
+pub fn create_user_validate_password_test() {
+  use t <- utils.with_context
+
+  use t, input <- utils.next_create_user_input(t)
+  let input = create_user_input.CreateUserInput(..input, password: "invalid")
+  let json = create_user_input.to_json(input)
+
+  let response =
+    router.handle_request(testing.post_json("api/users", [], json), t.context)
+
+  response
+  |> utils.equal(response_utils.json_response(
+    400,
+    "password: must be atleast 8 character",
+  ))
+}
+
 pub fn delete_one_user_test() {
   use t <- utils.with_context
 

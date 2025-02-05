@@ -1,5 +1,6 @@
 import app/auth/auth_guards
 import app/common/response_utils
+import app/common/valid
 import app/team/inputs/add_to_team_input
 import app/team/inputs/create_team_input
 import app/team/outputs/team
@@ -36,6 +37,8 @@ fn create_team(req: wisp.Request, ctx: types.Context) {
   use input <- response_utils.or_decode_error(create_team_input.from_dynamic(
     json,
   ))
+
+  use input <- valid.or_validation_error(create_team_input.validate(input))
 
   use result <- response_utils.map_service_errors(team_service.create(
     input,

@@ -1,5 +1,6 @@
 import app/auth/auth_guards
 import app/common/response_utils
+import app/common/valid
 import app/types.{type Context}
 import app/user/inputs/create_user_input
 import app/user/outputs/user
@@ -22,8 +23,12 @@ fn create_user(req: Request, ctx: Context) {
     json,
   ))
 
-  use result <- response_utils.map_service_errors(user_service.create(
+  use valided_input <- valid.or_validation_error(create_user_input.validate(
     input,
+  ))
+
+  use result <- response_utils.map_service_errors(user_service.create(
+    valided_input,
     ctx,
   ))
 

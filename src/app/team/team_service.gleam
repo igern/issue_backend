@@ -1,4 +1,5 @@
 import app/common/response_utils.{DatabaseError, TeamNotFoundError}
+import app/common/valid
 import app/team/inputs/add_to_team_input.{type AddToTeamInput}
 import app/team/inputs/create_team_input.{type CreateTeamInput}
 import app/team/outputs/team
@@ -22,7 +23,12 @@ fn team_profile_decoder() {
   decode.success(#(team_id, profile_id))
 }
 
-pub fn create(input: CreateTeamInput, owner_id: String, ctx: types.Context) {
+pub fn create(
+  input: valid.Valid(CreateTeamInput),
+  owner_id: String,
+  ctx: types.Context,
+) {
+  let input = valid.inner(input)
   let sql =
     "insert into teams (id, name, owner_id) values (?, ?, ?) returning *"
   let id = uuid.v4_string()

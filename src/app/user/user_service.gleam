@@ -1,4 +1,5 @@
 import app/common/response_utils.{DatabaseError, UserNotFoundError}
+import app/common/valid.{type Valid}
 import app/types.{type Context}
 import app/user/inputs/create_user_input.{type CreateUserInput}
 import app/user/outputs/user.{User}
@@ -14,7 +15,8 @@ pub fn user_decoder() {
   decode.success(#(id, email, password))
 }
 
-pub fn create(input: CreateUserInput, ctx: Context) {
+pub fn create(input: Valid(CreateUserInput), ctx: Context) {
+  let input = valid.inner(input)
   let assert Ok(hash) =
     argus.hash(argus.hasher(), input.password, argus.gen_salt())
 

@@ -17,7 +17,7 @@ pub fn init_schemas(connection: Connection) {
   let user_sql =
     "CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
-    email TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL)
     "
   let assert Ok(Nil) = sqlight.exec(user_sql, connection)

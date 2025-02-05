@@ -1,4 +1,5 @@
-FROM ghcr.io/gleam-lang/gleam:v1.7.0-erlang-alpine
+FROM ghcr.io/gleam-lang/gleam:v1.7.0-erlang
+RUN apt-get update && apt-get install --yes build-essential
 
 # Add project code
 COPY . /build/

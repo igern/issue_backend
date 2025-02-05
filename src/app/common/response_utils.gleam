@@ -11,6 +11,7 @@ pub fn map_service_errors(
   next: fn(a) -> Response,
 ) -> Response {
   case result {
+    Error(EmailAlreadyExistsError) -> email_already_exists_error_response()
     Error(TeamNotFoundError) -> team_not_found_error_response()
     Error(DirectoryNotFoundError) -> directory_not_found_error_response()
     Error(UserNotFoundError) -> user_not_found_error_response()
@@ -37,7 +38,7 @@ pub fn map_service_errors(
 }
 
 pub type ServiceError {
-
+  EmailAlreadyExistsError
   TeamNotFoundError
   DirectoryNotFoundError
   UserNotFoundError
@@ -49,6 +50,10 @@ pub type ServiceError {
   DatabaseError(sqlight.Error)
   FileReadError(simplifile.FileError)
   FileUploadError(httpc.HttpError)
+}
+
+pub fn email_already_exists_error_response() {
+  json_response(400, "email already exists error")
 }
 
 pub fn invalid_credentials_response() {

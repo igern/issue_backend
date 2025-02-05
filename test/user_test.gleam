@@ -28,6 +28,20 @@ pub fn create_user_test() {
   data |> should.equal(User(id: data.id, email: input.email))
 }
 
+pub fn create_user_unique_email_test() {
+  use t <- utils.with_context
+
+  use t, input <- utils.next_create_user_input(t)
+  use _ <- utils.create_user(t, input)
+
+  let json = create_user_input.to_json(input)
+
+  let response =
+    router.handle_request(testing.post_json("api/users", [], json), t.context)
+
+  response |> utils.equal(response_utils.email_already_exists_error_response())
+}
+
 pub fn delete_one_user_test() {
   use t <- utils.with_context
 

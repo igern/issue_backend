@@ -4,7 +4,7 @@ import lustre/element
 import lustre/element/html
 import wisp
 
-pub fn login() {
+pub fn create_profile() {
   let html =
     html.html([], [
       html.script(
@@ -16,9 +16,9 @@ pub fn login() {
         [attribute.src("https://unpkg.com/htmx.org/dist/ext/json-enc.js")],
         "",
       ),
-      html.title([], "Hello there"),
-      html.body([], [
-        html.form([attribute.class("gap-2")], [
+      html.title([], "Opret Profil"),
+      html.body([attribute.attribute("hx-boost", "true")], [
+        html.form([], [
           html.input([
             attribute.type_("text"),
             attribute.name("email"),
@@ -32,19 +32,14 @@ pub fn login() {
           html.button(
             [
               attribute.type_("submit"),
-              attribute.attribute("hx-post", "/api/auth/login"),
+              attribute.attribute("hx-post", "/user"),
               attribute.attribute("hx-ext", "json-enc"),
+              attribute.attribute("hx-target", "body"),
+              attribute.attribute("hx-push-url", "true"),
             ],
-            [html.text("Login")],
+            [html.text("Opret Bruger")],
           ),
         ]),
-        html.a(
-          [
-            attribute.attribute("hx-boost", "true"),
-            attribute.href("/create-profile"),
-          ],
-          [html.text("Opret Profil")],
-        ),
       ]),
     ])
 

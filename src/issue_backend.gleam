@@ -8,18 +8,16 @@ import gleam/erlang/process
 import gleam/http
 import gleam/option
 import mist
-import radiate
 import sqlight
 import wisp
 import wisp/wisp_mist
 
 pub fn main() {
-  let _ = radiate.new() |> radiate.add_dir("src") |> radiate.start()
-
   wisp.configure_logger()
   let secret_key_base = wisp.random_string(64)
 
   dot_env.load_default()
+
   let assert Ok(host) = env.get_string("STORAGE_HOST")
   let assert Ok(access) = env.get_string("STORAGE_ACCESS")
   let assert Ok(secret) = env.get_string("STORAGE_SECRET")
@@ -35,11 +33,11 @@ pub fn main() {
       secret_access_key: secret,
     )
 
-  let assert Ok(bucket) = env.get_string("STORAGE_BUCKET")
-
-  use connection <- sqlight.with_connection(":memory:")
+  let assert Ok(db) = env.get_string("DATABASE_PATH")
+  use connection <- sqlight.with_connection(db)
   let assert Ok(Nil) = database.init_schemas(connection)
 
+  let assert Ok(bucket) = env.get_string("STORAGE_BUCKET")
   let context =
     Context(
       connection: connection,
@@ -52,7 +50,8 @@ pub fn main() {
     handler
     |> wisp_mist.handler(secret_key_base)
     |> mist.new
-    |> mist.port(3000)
+    |> mist.bind("0.0.0.0")
+    |> mist.port(8080)
     |> mist.start_http
 
   process.sleep_forever()

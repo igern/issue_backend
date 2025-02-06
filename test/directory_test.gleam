@@ -46,6 +46,34 @@ pub fn create_directory_test() {
   ))
 }
 
+pub fn create_directory_validate_name_test() {
+  use t <- utils.with_context
+
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
+
+  let input = create_directory_input.CreateDirectoryInput(name: "")
+  let json = create_directory_input.to_json(input)
+  let response =
+    router.handle_request(
+      testing.post_json(
+        "/api/teams/" <> team.id <> "/directories",
+        [utils.bearer_header(authorized_profile.auth_tokens.access_token)],
+        json,
+      ),
+      t.context,
+    )
+
+  response
+  |> utils.equal(response_utils.json_response(
+    400,
+    "name: must be atleast 2 characters long",
+  ))
+}
+
 pub fn create_directory_not_member_of_team_test() {
   use t <- utils.with_context
 
@@ -191,6 +219,37 @@ pub fn update_directory_test() {
     |> json.to_string_tree
     |> wisp.json_response(200),
   )
+}
+
+pub fn update_directory_validate_name_test() {
+  use t <- utils.with_context
+
+  use t, profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(t, profile.auth_tokens.access_token)
+  use t, directory <- utils.next_create_directory(
+    t,
+    team.id,
+    profile.auth_tokens.access_token,
+  )
+
+  let input = update_directory_input.UpdateDirectoryInput(name: "")
+  let json = update_directory_input.to_json(input)
+
+  let response =
+    router.handle_request(
+      testing.patch_json(
+        "/api/directories/" <> directory.id,
+        [utils.bearer_header(profile.auth_tokens.access_token)],
+        json,
+      ),
+      t.context,
+    )
+
+  response
+  |> utils.equal(response_utils.json_response(
+    400,
+    "name: must be atleast 2 characters long",
+  ))
 }
 
 pub fn update_directory_not_member_of_team_test() {

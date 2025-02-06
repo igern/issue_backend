@@ -1,4 +1,5 @@
 import app/common/response_utils.{DatabaseError, DirectoryNotFoundError}
+import app/common/valid
 import app/directory/inputs/create_directory_input.{type CreateDirectoryInput}
 import app/directory/inputs/update_directory_input.{type UpdateDirectoryInput}
 import app/directory/outputs/directory.{Directory}
@@ -17,7 +18,12 @@ pub fn directory_decoder() {
   decode.success(#(id, name, team_id, created_at))
 }
 
-pub fn create(team_id: String, input: CreateDirectoryInput, ctx: Context) {
+pub fn create(
+  team_id: String,
+  input: valid.Valid(CreateDirectoryInput),
+  ctx: Context,
+) {
+  let input = valid.inner(input)
   let sql =
     "insert into directories (id, name, team_id, created_at) values(?, ?, ?, ?) returning *"
 
@@ -80,7 +86,12 @@ pub fn delete_one(id: String, ctx: Context) {
   }
 }
 
-pub fn update_one(id: String, input: UpdateDirectoryInput, ctx: Context) {
+pub fn update_one(
+  id: String,
+  input: valid.Valid(UpdateDirectoryInput),
+  ctx: Context,
+) {
+  let input = valid.inner(input)
   let sql = "update directories set name = ? where id = ? returning *"
 
   let result =

@@ -27,6 +27,40 @@ pub fn login_test() {
   |> utils.equal(wisp.response(201) |> wisp.set_body(response.body))
 }
 
+pub fn login_validate_email_test() {
+  use t <- utils.with_context
+
+  let input =
+    login_input.to_json(LoginInput(email: "invalid", password: "secret1234"))
+
+  let response =
+    router.handle_request(
+      testing.post_json("/api/auth/login", [], input),
+      t.context,
+    )
+
+  response
+  |> utils.equal(response_utils.json_response(400, "email: invalid"))
+}
+
+pub fn login_validate_password_test() {
+  use t <- utils.with_context
+
+  let input = login_input.to_json(LoginInput(email: "@", password: "short"))
+
+  let response =
+    router.handle_request(
+      testing.post_json("/api/auth/login", [], input),
+      t.context,
+    )
+
+  response
+  |> utils.equal(response_utils.json_response(
+    400,
+    "password: must be atleast 8 character",
+  ))
+}
+
 pub fn login_invalid_email_test() {
   use t <- utils.with_context
   let input =

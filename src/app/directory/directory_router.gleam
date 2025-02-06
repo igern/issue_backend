@@ -1,5 +1,6 @@
 import app/auth/auth_guards
 import app/common/response_utils
+import app/common/valid
 import app/directory/directory_service
 import app/directory/inputs/create_directory_input
 import app/directory/inputs/update_directory_input
@@ -41,6 +42,9 @@ fn create_directory(req: Request, team_id: String, ctx: Context) {
       use input <- response_utils.or_decode_error(
         create_directory_input.from_dynamic(json),
       )
+      use input <- valid.or_validation_error(create_directory_input.validate(
+        input,
+      ))
       use result <- response_utils.map_service_errors(directory_service.create(
         team_id,
         input,
@@ -125,6 +129,8 @@ fn update_directory(req: Request, directory_id: String, ctx: Context) {
   use input <- response_utils.or_decode_error(
     update_directory_input.from_dynamic(json),
   )
+
+  use input <- valid.or_validation_error(update_directory_input.validate(input))
 
   use result <- response_utils.map_service_errors(directory_service.update_one(
     directory_id,

@@ -3,6 +3,7 @@ import app/auth/inputs/login_input
 import app/auth/inputs/refresh_auth_tokens_input
 import app/auth/outputs/auth_tokens
 import app/common/response_utils
+import app/common/valid
 import app/types.{type Context}
 import gleam/http.{Post}
 import gleam/json
@@ -20,6 +21,7 @@ pub fn router(req: Request, ctx: Context, handle_request: fn() -> Response) {
 fn login(req: Request, ctx: Context) {
   use json <- wisp.require_json(req)
   use input <- response_utils.or_decode_error(login_input.from_dynamic(json))
+  use input <- valid.or_validation_error(login_input.validate(input))
 
   use result <- response_utils.map_service_errors(auth_service.login(input, ctx))
 

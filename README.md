@@ -1,7 +1,7 @@
 # issue_backend
 
 ## Backlog
-- add input validation
+- frontend: create user -> login -> create profile
 
 ## Rainy Day Backlog
 - test team_profiles getting deleted when the team or profile gets deleted.

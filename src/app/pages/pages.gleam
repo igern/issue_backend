@@ -42,6 +42,7 @@ fn create_user(req: wisp.Request, ctx: Context) {
 fn login(req: wisp.Request, ctx: Context) {
   use json <- wisp.require_json(req)
   use input <- response_utils.or_decode_error(login_input.from_dynamic(json))
+  use input <- valid.or_validation_error(login_input.validate(input))
 
   use result <- response_utils.map_service_errors(auth_service.login(input, ctx))
 

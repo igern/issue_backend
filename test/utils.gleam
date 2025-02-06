@@ -31,7 +31,7 @@ import dot_env/env
 import gleam/bit_array
 import gleam/http
 import gleam/int
-import gleam/json.{type Json}
+import gleam/json
 import gleam/list
 import gleam/option
 import gleam/string
@@ -51,10 +51,6 @@ pub type AuthorizedUser {
 
 pub type AuthorizedProfile {
   AuthorizedProfile(profile: Profile, user: User, auth_tokens: AuthTokens)
-}
-
-pub fn to_body(json: Json) {
-  wisp.Text(json.to_string_tree(json))
 }
 
 pub fn with_context(test_case: fn(TestContext) -> Nil) -> Nil {

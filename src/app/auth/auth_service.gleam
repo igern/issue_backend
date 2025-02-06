@@ -5,6 +5,7 @@ import app/common/response_utils.{
   type ServiceError, DatabaseError, InvalidCredentialsError,
   RefreshTokenExpiredError, RefreshTokenNotFoundError,
 }
+import app/common/valid
 import app/types.{type Context}
 import app/user/user_service
 import argus
@@ -26,9 +27,10 @@ pub fn refresh_token_decoder() {
 }
 
 pub fn login(
-  input: LoginInput,
+  input: valid.Valid(LoginInput),
   ctx: Context,
 ) -> Result(AuthTokens, ServiceError) {
+  let input = valid.inner(input)
   let sql = "select * from users where email = ?"
 
   let result =

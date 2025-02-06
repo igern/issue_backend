@@ -32,8 +32,10 @@ pub fn login() {
           html.button(
             [
               attribute.type_("submit"),
-              attribute.attribute("hx-post", "/api/auth/login"),
+              attribute.attribute("hx-post", "/login"),
               attribute.attribute("hx-ext", "json-enc"),
+              attribute.attribute("hx-target", "body"),
+              attribute.attribute("hx-push-url", "true"),
             ],
             [html.text("Login")],
           ),

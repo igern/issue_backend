@@ -21,7 +21,7 @@ pub fn router(req: Request, ctx: Context, handle_request: fn() -> Response) {
 fn login(req: Request, ctx: Context) {
   use json <- wisp.require_json(req)
   use input <- response_utils.or_decode_error(login_input.from_dynamic(json))
-  use input <- valid.or_validation_error(login_input.validate(input))
+  use input <- valid.or_bad_request_response(login_input.validate(input))
 
   use result <- response_utils.map_service_errors(auth_service.login(input, ctx))
 

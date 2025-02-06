@@ -95,7 +95,7 @@ fn create_issue(req: Request, directory_id: String, ctx: Context) {
   use input <- response_utils.or_decode_error(create_issue_input.from_dynamic(
     json,
   ))
-  use input <- valid.or_validation_error(create_issue_input.validate(input))
+  use input <- valid.or_bad_request_response(create_issue_input.validate(input))
   use result <- response_utils.map_service_errors(issue_service.create(
     directory_id,
     profile.id,
@@ -126,7 +126,7 @@ fn find_issues(req: Request, directory_id: String, ctx: Context) {
     parse_pagination_input(req.query),
     response_utils.json_response(400, "invalid pagination input"),
   )
-  use input <- valid.or_validation_error(pagination_input.validate(input))
+  use input <- valid.or_bad_request_response(pagination_input.validate(input))
 
   use result <- response_utils.map_service_errors(issue_service.find_paginated(
     input,
@@ -156,7 +156,7 @@ fn update_issue(req: Request, id: String, ctx: Context) {
     json,
   ))
 
-  use input <- valid.or_validation_error(update_issue_input.validate(input))
+  use input <- valid.or_bad_request_response(update_issue_input.validate(input))
 
   use result <- response_utils.map_service_errors(issue_service.update_one(
     id,

@@ -13,26 +13,37 @@ pub opaque type Valid(a) {
   Valid(a)
 }
 
-pub opaque type Invalid(a) {
-  Invalid(a, List(String))
-}
-
 pub fn inner(valid: Valid(a)) -> a {
   let Valid(inner) = valid
   inner
+}
+
+pub opaque type Invalid(a) {
+  Invalid(a, List(#(String, String)))
+}
+
+pub fn errors(invalid: Invalid(a)) -> #(a, List(#(String, String))) {
+  let Invalid(inner, errors) = invalid
+  #(inner, errors)
 }
 
 pub opaque type Check {
   Check(option.Option(String))
 }
 
-pub fn or_validation_error(
+pub fn or_bad_request_response(
   validated_input: Validated(a),
   valid_callback: fn(Valid(a)) -> wisp.Response,
 ) {
   case validated_input {
-    Error(Invalid(_, errors)) ->
-      response_utils.json_response(400, string.join(errors, ", "))
+    Error(Invalid(_, errors)) -> {
+      list.map(errors, fn(error) {
+        let #(field, message) = error
+        field <> ": " <> message
+      })
+      |> string.join(", ")
+      |> response_utils.json_response(400, _)
+    }
     Ok(Valid(input)) -> valid_callback(Valid(input))
   }
 }
@@ -50,15 +61,7 @@ pub fn checks_to_validated(input: a, checks: List(#(String, Check))) {
 
   case list.length(checks) {
     0 -> Ok(Valid(input))
-    _ -> {
-      let errors =
-        list.map(checks, fn(check) {
-          let #(field, error) = check
-          field <> ": " <> error
-        })
-
-      Error(Invalid(input, errors))
-    }
+    _ -> Error(Invalid(input, checks))
   }
 }
 
@@ -72,7 +75,7 @@ pub fn validate_min(input: Int, min: Int) -> Check {
 pub fn validate_email(input: String) -> Check {
   case string.contains(input, "@") {
     True -> Check(option.None)
-    False -> Check(option.Some("invalid"))
+    False -> Check(option.Some("invalid email"))
   }
 }
 

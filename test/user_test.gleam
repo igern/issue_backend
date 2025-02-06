@@ -53,7 +53,7 @@ pub fn create_user_validate_email_test() {
     router.handle_request(testing.post_json("api/users", [], json), t.context)
 
   response
-  |> utils.equal(response_utils.json_response(400, "email: invalid"))
+  |> utils.equal(response_utils.json_response(400, "email: invalid email"))
 }
 
 pub fn create_user_validate_password_test() {

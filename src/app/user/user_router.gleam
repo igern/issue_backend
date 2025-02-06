@@ -23,7 +23,7 @@ fn create_user(req: Request, ctx: Context) {
     json,
   ))
 
-  use valided_input <- valid.or_validation_error(create_user_input.validate(
+  use valided_input <- valid.or_bad_request_response(create_user_input.validate(
     input,
   ))
 

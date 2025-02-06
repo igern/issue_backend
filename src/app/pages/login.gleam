@@ -43,7 +43,7 @@ pub fn login() {
         html.a(
           [
             attribute.attribute("hx-boost", "true"),
-            attribute.href("/create-profile"),
+            attribute.href("/create-user"),
           ],
           [html.text("Opret Profil")],
         ),

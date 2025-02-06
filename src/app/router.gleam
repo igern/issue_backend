@@ -27,9 +27,6 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
       |> json.to_string_tree()
       |> wisp.json_response(200)
     }
-    ["favicon.ico"], Get ->
-      wisp.response(200)
-      |> wisp.set_body(wisp.File("src/assets/search-problem.png"))
     _, _ ->
       json.object([
         #("code", json.int(404)),
@@ -48,6 +45,7 @@ pub fn middleware(
   use <- wisp.log_request(req)
   use <- wisp.rescue_crashes
   use req <- wisp.handle_head(req)
+  use <- wisp.serve_static(req, "/static", "src/public")
 
   handle_request(req)
 }

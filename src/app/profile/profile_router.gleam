@@ -29,7 +29,9 @@ pub fn create_profile(req: Request, ctx: Context) {
     json,
   ))
 
-  use input <- valid.or_validation_error(create_profile_input.validate(input))
+  use input <- valid.or_bad_request_response(create_profile_input.validate(
+    input,
+  ))
 
   use result <- response_utils.map_service_errors(profile_service.create(
     input,

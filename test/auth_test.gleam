@@ -40,7 +40,7 @@ pub fn login_validate_email_test() {
     )
 
   response
-  |> utils.equal(response_utils.json_response(400, "email: invalid"))
+  |> utils.equal(response_utils.json_response(400, "email: invalid email"))
 }
 
 pub fn login_validate_password_test() {

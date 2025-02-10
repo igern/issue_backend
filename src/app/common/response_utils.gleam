@@ -1,7 +1,10 @@
+import gleam/bytes_tree
 import gleam/dynamic/decode
 import gleam/httpc
 import gleam/json
 import gleam/string
+import lustre/element
+import lustre/internals/vdom
 import simplifile
 import sqlight
 import wisp.{type Response}
@@ -173,4 +176,14 @@ pub fn json_response(code: Int, message: String) {
   json.object([#("code", json.int(code)), #("message", json.string(message))])
   |> json.to_string_tree()
   |> wisp.json_response(code)
+}
+
+pub fn html(html: vdom.Element(a)) {
+  wisp.response(200)
+  |> wisp.set_body(
+    html
+    |> element.to_document_string_builder
+    |> bytes_tree.from_string_tree
+    |> wisp.Bytes,
+  )
 }

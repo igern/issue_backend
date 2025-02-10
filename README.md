@@ -2,6 +2,7 @@
 
 ## Backlog
 - frontend: create user -> login -> create profile
+- add userId unique on profiles table
 
 ## Rainy Day Backlog
 - test team_profiles getting deleted when the team or profile gets deleted.

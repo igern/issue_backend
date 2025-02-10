@@ -4,7 +4,7 @@ import lustre/element
 import lustre/element/html
 import wisp
 
-pub fn login() {
+pub fn login_page() {
   let html =
     html.html([], [
       html.script(

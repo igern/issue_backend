@@ -15,6 +15,20 @@ pub fn user_decoder() {
   decode.success(#(id, email, password))
 }
 
+pub fn find_one_from_email(email: String, ctx: Context) {
+  let sql = "select * from users where email = ?"
+
+  let result =
+    sqlight.query(sql, ctx.connection, [sqlight.text(email)], user_decoder())
+
+  case result {
+    Ok([#(id, email, _)]) -> Ok(User(id, email))
+    Ok([]) -> Error(response_utils.UserNotFoundError)
+    Error(error) -> Error(DatabaseError(error))
+    _ -> panic as "More than one row was returned from a find_one"
+  }
+}
+
 pub fn create(input: Valid(CreateUserInput), ctx: Context) {
   let input = valid.inner(input)
   let assert Ok(hash) =

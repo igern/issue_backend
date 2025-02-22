@@ -42,6 +42,11 @@ pub fn init_schemas(connection: Connection) {
   "
   let assert Ok(Nil) = sqlight.exec(profile_sql, connection)
 
+  let profile_user_id_unique_index_sql =
+    "CREATE UNIQUE INDEX profile_user_id ON profiles(user_id)"
+
+  let assert Ok(Nil) =
+    sqlight.exec(profile_user_id_unique_index_sql, connection)
   let directory_sql =
     "
   CREATE TABLE IF NOT EXISTS directories (

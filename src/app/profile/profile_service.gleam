@@ -1,5 +1,5 @@
 import app/common/response_utils.{
-  DatabaseError, FileReadError, ProfileNotFoundError,
+  DatabaseError, FileReadError, ProfileNotFoundError, UserAlreadyHasProfileError,
 }
 import app/common/valid
 import app/profile/inputs/create_profile_input.{type CreateProfileInput}
@@ -41,6 +41,11 @@ pub fn create(
   case result {
     Ok([#(id, user_id, name, profile_picture)]) ->
       Ok(Profile(id, user_id, name, profile_picture))
+    Error(sqlight.SqlightError(
+      sqlight.ConstraintUnique,
+      "UNIQUE constraint failed: profiles.user_id",
+      _,
+    )) -> Error(UserAlreadyHasProfileError)
     Error(error) -> Error(DatabaseError(error))
     _ -> panic as "Should only return one row from an insert"
   }

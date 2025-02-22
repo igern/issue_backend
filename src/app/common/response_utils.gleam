@@ -14,6 +14,8 @@ pub fn map_service_errors(
   next: fn(a) -> Response,
 ) -> Response {
   case result {
+    Error(UserAlreadyHasProfileError) ->
+      user_already_has_profile_error_response()
     Error(EmailAlreadyExistsError) -> email_already_exists_error_response()
     Error(TeamNotFoundError) -> team_not_found_error_response()
     Error(DirectoryNotFoundError) -> directory_not_found_error_response()
@@ -41,6 +43,7 @@ pub fn map_service_errors(
 }
 
 pub type ServiceError {
+  UserAlreadyHasProfileError
   EmailAlreadyExistsError
   TeamNotFoundError
   DirectoryNotFoundError
@@ -129,6 +132,10 @@ pub fn directory_not_found_error_response() {
 
 pub fn team_not_found_error_response() {
   json_response(404, "team not found")
+}
+
+pub fn user_already_has_profile_error_response() {
+  json_response(404, "user already has profile")
 }
 
 pub fn database_error_response() {

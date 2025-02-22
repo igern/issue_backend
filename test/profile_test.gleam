@@ -69,6 +69,29 @@ pub fn create_profile_validate_name_test() {
   ))
 }
 
+pub fn create_profile_unique_user_id_test() {
+  use t <- utils.with_context
+
+  use t, authorized_user <- utils.next_create_user_and_login(t)
+
+  use t, input <- utils.next_create_profile_input(t)
+  use _ <- utils.create_profile(t, authorized_user, input)
+  let json = create_profile_input.to_json(input)
+
+  let response =
+    router.handle_request(
+      testing.post_json(
+        "/api/profiles",
+        [utils.bearer_header(authorized_user.auth_tokens.access_token)],
+        json,
+      ),
+      t.context,
+    )
+
+  response
+  |> utils.equal(response_utils.user_already_has_profile_error_response())
+}
+
 pub fn create_profile_missing_authorization_header_test() {
   utils.missing_authorization_header_tester(http.Post, "/api/profiles")
 }

@@ -19,6 +19,7 @@ pub fn router(req: Request, ctx: Context, handle_request: fn() -> Response) {
   case wisp.path_segments(req), req.method {
     ["create-profile"], http.Get ->
       create_profile_page.create_profile_page(option.None, False)
+    ["create-profile"], http.Post -> create_profile(req, ctx)
     ["api", "profiles"], Post -> post_api_profiles(req, ctx)
     ["api", "profiles", id, "profile-picture"], Post ->
       upload_profile_picture(req, ctx, id)
@@ -38,6 +39,7 @@ pub fn create_profile(req: wisp.Request, ctx: Context) {
   case input {
     Ok(input) -> {
       case profile_service.create(input, payload.sub, ctx) {
+        Ok(profile) -> wisp.redirect("/teams")
         _ -> panic as "Unknown"
       }
     }

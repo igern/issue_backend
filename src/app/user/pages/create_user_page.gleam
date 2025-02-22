@@ -42,7 +42,10 @@ pub fn create_user_page(
             },
             case autovalidate {
               True ->
-                attribute.attribute("hx-trigger", "change, keyup delay:200ms")
+                attribute.attribute(
+                  "hx-trigger",
+                  "change, keyup delay:200ms changed",
+                )
               False -> attribute.none()
             },
           ]),
@@ -75,7 +78,10 @@ pub fn create_user_page(
                     "/create-user-input/validate/password",
                   ),
                   attribute.attribute("hx-target", "next .error"),
-                  attribute.attribute("hx-trigger", "change, keyup delay:200ms"),
+                  attribute.attribute(
+                    "hx-trigger",
+                    "change, keyup delay:200ms changed",
+                  ),
                 ]
                 False -> []
               },

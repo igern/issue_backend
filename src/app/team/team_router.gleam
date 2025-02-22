@@ -5,6 +5,7 @@ import app/team/inputs/add_to_team_input
 import app/team/inputs/create_team_input
 import app/team/outputs/team
 import app/team/outputs/team_profile
+import app/team/pages/teams_page
 import app/team/team_service
 import app/types
 import gleam/bool
@@ -19,6 +20,7 @@ pub fn router(
   handle_request: fn() -> wisp.Response,
 ) {
   case wisp.path_segments(req), req.method {
+    ["teams"], http.Get -> teams_page.teams_page()
     ["api", "teams"], http.Post -> create_team(req, ctx)
     ["api", "teams", id], http.Get -> find_team(req, id, ctx)
     ["api", "teams", id], http.Delete -> delete_team(req, id, ctx)

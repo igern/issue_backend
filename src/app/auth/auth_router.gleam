@@ -55,5 +55,8 @@ fn login(req: wisp.Request, ctx: Context) {
 
   use result <- response_utils.map_service_errors(auth_service.login(input, ctx))
 
-  wisp.redirect("/index")
+  wisp.ok()
+  |> wisp.set_header("X-Access-Token", result.access_token)
+  |> wisp.set_header("X-Refresh-Token", result.refresh_token)
+  |> wisp.set_header("HX-Redirect", "/teams")
 }

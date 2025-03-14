@@ -3,7 +3,6 @@ import app/common/response_utils
 import app/common/valid
 import app/profile/inputs/create_profile_input
 import app/profile/outputs/profile
-import app/profile/pages/create_profile_page
 import app/profile/profile_service
 import app/types.{type Context}
 import gleam/bit_array
@@ -11,47 +10,19 @@ import gleam/bool
 import gleam/http.{Post}
 import gleam/json
 import gleam/list
-import gleam/option
 import simplifile
 import wisp.{type Request, type Response}
 
 pub fn router(req: Request, ctx: Context, handle_request: fn() -> Response) {
   case wisp.path_segments(req), req.method {
-    ["create-profile"], http.Get ->
-      create_profile_page.create_profile_page(option.None, False)
-    ["create-profile"], http.Post -> create_profile(req, ctx)
-    ["api", "profiles"], Post -> post_api_profiles(req, ctx)
+    ["api", "profiles"], Post -> create_profile(req, ctx)
     ["api", "profiles", id, "profile-picture"], Post ->
       upload_profile_picture(req, ctx, id)
     _, _ -> handle_request()
   }
 }
 
-pub fn create_profile(req: wisp.Request, ctx: Context) {
-  use payload <- auth_guards.require_jwt(req)
-  use json <- wisp.require_json(req)
-  use input <- response_utils.or_decode_error(create_profile_input.from_dynamic(
-    json,
-  ))
-
-  let input = create_profile_input.validate(input)
-
-  case input {
-    Ok(input) -> {
-      case profile_service.create(input, payload.sub, ctx) {
-        Ok(profile) -> wisp.redirect("/teams")
-        _ -> panic as "Unknown"
-      }
-    }
-    Error(invalid) ->
-      create_profile_page.create_profile_page(
-        option.Some(valid.errors(invalid)),
-        True,
-      )
-  }
-}
-
-pub fn post_api_profiles(req: Request, ctx: Context) {
+pub fn create_profile(req: Request, ctx: Context) {
   use payload <- auth_guards.require_jwt(req)
   use json <- wisp.require_json(req)
   use input <- response_utils.or_decode_error(create_profile_input.from_dynamic(

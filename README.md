@@ -1,7 +1,6 @@
 # issue_backend
 
 ## Backlog
-
 - frontend: create user -> login -> create profile
 
 ## Rainy Day Backlog

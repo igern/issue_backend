@@ -12,6 +12,7 @@ import gleam/option
 import gleeunit/should
 import simplifile
 import utils
+import wisp
 import wisp/testing
 
 pub fn create_profile_test() {
@@ -102,6 +103,59 @@ pub fn create_profile_invalid_bearer_format_test() {
 
 pub fn create_profile_invalid_jwt_test() {
   utils.invalid_jwt_tester(http.Post, "/api/profiles")
+}
+
+pub fn find_one_profile_test() {
+  use t <- utils.with_context
+
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+
+  let response =
+    router.handle_request(
+      testing.get("/api/profiles/" <> authorized_profile.profile.id, [
+        utils.bearer_header(authorized_profile.auth_tokens.access_token),
+      ]),
+      t.context,
+    )
+  response
+  |> utils.equal(
+    profile.to_json(authorized_profile.profile)
+    |> json.to_string_tree()
+    |> wisp.json_response(200),
+  )
+}
+
+pub fn find_one_profile_forbidden_test() {
+  use t <- utils.with_context
+
+  use t, authorized_profile1 <- utils.next_create_user_and_profile_and_login(t)
+  use t, authorized_profile2 <- utils.next_create_user_and_profile_and_login(t)
+
+  let response =
+    router.handle_request(
+      testing.get("/api/profiles/" <> authorized_profile1.profile.id, [
+        utils.bearer_header(authorized_profile2.auth_tokens.access_token),
+      ]),
+      t.context,
+    )
+  response
+  |> utils.equal(response_utils.json_response(400, "forbidden"))
+}
+
+pub fn find_one_profile_missing_authorization_header_test() {
+  utils.missing_authorization_header_tester(http.Get, "/api/profiles/1")
+}
+
+pub fn find_one_profile_invalid_bearer_format_test() {
+  utils.invalid_bearer_format_tester(http.Get, "/api/profiles/1")
+}
+
+pub fn find_one_profile_invalid_jwt_test() {
+  utils.invalid_jwt_tester(http.Get, "/api/profiles/1")
+}
+
+pub fn find_one_profile_profile_required_test() {
+  utils.profile_required_tester(http.Get, "/api/profiles/1")
 }
 
 pub fn upload_profile_picture_test() {

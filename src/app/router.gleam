@@ -5,6 +5,7 @@ import app/profile/profile_router
 import app/team/team_router
 import app/types.{type Context}
 import app/user/user_router
+import cors_builder
 import gleam/http.{Get}
 import gleam/json
 import wisp.{type Request, type Response}
@@ -35,11 +36,20 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
   }
 }
 
+fn cors() {
+  cors_builder.new()
+  |> cors_builder.allow_origin("*")
+  |> cors_builder.allow_method(http.Post)
+  |> cors_builder.allow_header("content-type")
+  |> cors_builder.allow_header("authorization")
+}
+
 pub fn middleware(
   req: Request,
   handle_request: fn(Request) -> Response,
 ) -> Response {
   let req = wisp.method_override(req)
+  use req <- cors_builder.wisp_middleware(req, cors())
   use <- wisp.log_request(req)
   use <- wisp.rescue_crashes
   use req <- wisp.handle_head(req)

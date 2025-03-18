@@ -70,6 +70,20 @@ pub fn find_one_from_user_id(user_id: String, ctx: Context) {
   }
 }
 
+pub fn find_one_from_id(id: String, ctx: Context) {
+  let sql = "select * from profiles where id = ?"
+
+  let result =
+    sqlight.query(sql, ctx.connection, [sqlight.text(id)], profile_decoder())
+
+  case result {
+    Ok([#(id, user_id, name, profile_picture)]) ->
+      Ok(Profile(id, user_id, name, profile_picture))
+    Ok(_) -> Error(ProfileNotFoundError)
+    Error(error) -> Error(DatabaseError(error))
+  }
+}
+
 pub fn upload_profile_picture(file_path: String, id: String, ctx: Context) {
   use file <- result.try(
     simplifile.read_bits(file_path)

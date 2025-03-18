@@ -7,7 +7,7 @@ import app/profile/profile_service
 import app/types.{type Context}
 import gleam/bit_array
 import gleam/bool
-import gleam/http.{Post}
+import gleam/http.{Get, Post}
 import gleam/json
 import gleam/list
 import simplifile
@@ -16,10 +16,27 @@ import wisp.{type Request, type Response}
 pub fn router(req: Request, ctx: Context, handle_request: fn() -> Response) {
   case wisp.path_segments(req), req.method {
     ["api", "profiles"], Post -> create_profile(req, ctx)
+    ["api", "profiles", id], Get -> find_one(req, ctx, id)
     ["api", "profiles", id, "profile-picture"], Post ->
       upload_profile_picture(req, ctx, id)
     _, _ -> handle_request()
   }
+}
+
+pub fn find_one(req: Request, ctx: Context, profile_id: String) {
+  use profile <- auth_guards.require_profile(req, ctx)
+  use <- bool.guard(
+    profile_id != profile.id,
+    response_utils.json_response(400, "forbidden"),
+  )
+
+  use result <- response_utils.map_service_errors(
+    profile_service.find_one_from_id(profile_id, ctx),
+  )
+
+  profile.to_json(result)
+  |> json.to_string_tree()
+  |> wisp.json_response(200)
 }
 
 pub fn create_profile(req: Request, ctx: Context) {

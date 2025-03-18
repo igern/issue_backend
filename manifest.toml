@@ -6,6 +6,7 @@ packages = [
   { name = "aws4_request", version = "1.2.0", build_tools = ["gleam"], requirements = ["gleam_crypto", "gleam_http", "gleam_stdlib"], otp_app = "aws4_request", source = "hex", outer_checksum = "A73515D60E2D164B8B546778F9471ADE6089D33B2DC5D362C1B2CAF12FB6471B" },
   { name = "birl", version = "1.8.0", build_tools = ["gleam"], requirements = ["gleam_regexp", "gleam_stdlib", "ranger"], otp_app = "birl", source = "hex", outer_checksum = "2AC7BA26F998E3DFADDB657148BD5DDFE966958AD4D6D6957DD0D22E5B56C400" },
   { name = "bucket", version = "1.2.0", build_tools = ["gleam"], requirements = ["aws4_request", "gleam_crypto", "gleam_http", "gleam_stdlib", "xmb", "xmlm"], otp_app = "bucket", source = "hex", outer_checksum = "ED97011EFBA7BEE3974D23A9596D0B0382E44ED35C21AAEFD4BBDA98AD770AE6" },
+  { name = "cors_builder", version = "2.0.4", build_tools = ["gleam"], requirements = ["gleam_http", "gleam_stdlib", "mist", "wisp"], otp_app = "cors_builder", source = "hex", outer_checksum = "5C8EB12AE3926CBD8ADEC3A7BC90292401D5B1A2F6EC0878C88950C6B0D52EB9" },
   { name = "directories", version = "1.1.0", build_tools = ["gleam"], requirements = ["envoy", "gleam_stdlib", "platform", "simplifile"], otp_app = "directories", source = "hex", outer_checksum = "BDA521A4EB9EE3A7894F0DC863797878E91FF5C7826F7084B2E731E208BDB076" },
   { name = "dot_env", version = "1.2.0", build_tools = ["gleam"], requirements = ["gleam_stdlib", "simplifile"], otp_app = "dot_env", source = "hex", outer_checksum = "F2B4815F1B5AF8F20A6EADBB393E715C4C35203EBD5BE8200F766EA83A0B18DE" },
   { name = "envoy", version = "1.0.2", build_tools = ["gleam"], requirements = ["gleam_stdlib"], otp_app = "envoy", source = "hex", outer_checksum = "95FD059345AA982E89A0B6E2A3BF1CF43E17A7048DCD85B5B65D3B9E4E39D359" },
@@ -44,6 +45,7 @@ packages = [
 argus = { version = ">= 1.0.2 and < 2.0.0" }
 birl = { version = ">= 1.8.0 and < 2.0.0" }
 bucket = { version = ">= 1.2.0 and < 2.0.0" }
+cors_builder = { version = ">= 2.0.4 and < 3.0.0" }
 dot_env = { version = ">= 1.2.0 and < 2.0.0" }
 gleam_crypto = { version = ">= 1.4.0 and < 2.0.0" }
 gleam_erlang = { version = ">= 0.33.0 and < 0.34.0" }

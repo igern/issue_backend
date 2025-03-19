@@ -2,7 +2,7 @@ import app/common/response_utils.{DatabaseError, TeamNotFoundError}
 import app/common/valid
 import app/team/inputs/add_to_team_input.{type AddToTeamInput}
 import app/team/inputs/create_team_input.{type CreateTeamInput}
-import app/team/outputs/team
+import app/team/outputs/team.{Team}
 import app/team/outputs/team_profile.{TeamProfile}
 import app/types
 import gleam/dynamic/decode
@@ -42,11 +42,35 @@ pub fn create(
     )
 
   case result {
-    Ok([#(id, name, owner_id)]) -> Ok(team.Team(id, name, owner_id))
+    Ok([#(id, name, owner_id)]) -> Ok(Team(id, name, owner_id))
     Error(sqlight.SqlightError(sqlight.ConstraintForeignkey, _, _)) ->
       Error(response_utils.ProfileNotFoundError)
     Error(error) -> Error(DatabaseError(error))
     _ -> panic as "More than one row was returned from an insert."
+  }
+}
+
+pub fn find_all(profile_id: String, ctx: types.Context) {
+  let sql =
+    "SELECT teams.* FROM teams JOIN team_profiles team_profiles ON teams.id = team_profiles.team_id WHERE team_profiles.profile_id = ?;"
+
+  let result =
+    sqlight.query(
+      sql,
+      ctx.connection,
+      [sqlight.text(profile_id)],
+      team_decoder(),
+    )
+
+  case result {
+    Error(error) -> Error(DatabaseError(error))
+    Ok(results) -> {
+      list.map(results, fn(team) {
+        let #(id, name, owner_id) = team
+        Team(id, name, owner_id)
+      })
+      |> Ok
+    }
   }
 }
 
@@ -57,7 +81,7 @@ pub fn find_one(id: String, ctx: types.Context) {
     sqlight.query(sql, ctx.connection, [sqlight.text(id)], team_decoder())
 
   case result {
-    Ok([#(id, name, owner_id)]) -> Ok(team.Team(id, name, owner_id))
+    Ok([#(id, name, owner_id)]) -> Ok(Team(id, name, owner_id))
     Error(error) -> Error(DatabaseError(error))
     Ok([]) -> Error(TeamNotFoundError)
     _ -> panic as "More than one row was returned from an insert."
@@ -71,7 +95,7 @@ pub fn delete_one(id: String, ctx: types.Context) {
     sqlight.query(sql, ctx.connection, [sqlight.text(id)], team_decoder())
 
   case result {
-    Ok([#(id, name, owner_id)]) -> Ok(team.Team(id, name, owner_id))
+    Ok([#(id, name, owner_id)]) -> Ok(Team(id, name, owner_id))
     Error(error) -> Error(DatabaseError(error))
     Ok([]) -> Error(TeamNotFoundError)
     _ -> panic as "More than one row was returned from a delete."

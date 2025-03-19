@@ -16,11 +16,24 @@ import wisp.{type Request, type Response}
 pub fn router(req: Request, ctx: Context, handle_request: fn() -> Response) {
   case wisp.path_segments(req), req.method {
     ["api", "profiles"], Post -> create_profile(req, ctx)
+    ["api", "profiles", "current"], Get -> find_one_current(req, ctx)
     ["api", "profiles", id], Get -> find_one(req, ctx, id)
     ["api", "profiles", id, "profile-picture"], Post ->
       upload_profile_picture(req, ctx, id)
     _, _ -> handle_request()
   }
+}
+
+pub fn find_one_current(req: Request, ctx: Context) {
+  use profile <- auth_guards.require_profile(req, ctx)
+
+  use result <- response_utils.map_service_errors(
+    profile_service.find_one_from_id(profile.id, ctx),
+  )
+
+  profile.to_json(result)
+  |> json.to_string_tree()
+  |> wisp.json_response(200)
 }
 
 pub fn find_one(req: Request, ctx: Context, profile_id: String) {

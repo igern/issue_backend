@@ -1,7 +1,7 @@
 # issue_backend
 
 ## Backlog
-- frontend: create user -> login -> create profile
+- add tests for api/profiles/current and api/teams
 
 ## Rainy Day Backlog
 

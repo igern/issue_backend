@@ -584,3 +584,55 @@ pub fn find_profiles_tom_team_invalid_jwt_test() {
 pub fn find_profiles_tom_team_profile_required_test() {
   utils.profile_required_tester(http.Get, "/api/teams/1/profiles")
 }
+
+pub fn find_teams_from_current_profile_test() {
+  use t <- utils.with_context
+
+  use t, auth_profile1 <- utils.next_create_user_and_profile_and_login(t)
+  use t, team1 <- utils.next_create_team(
+    t,
+    auth_profile1.auth_tokens.access_token,
+  )
+  use t, auth_profile2 <- utils.next_create_user_and_profile_and_login(t)
+  use t, team2 <- utils.next_create_team(
+    t,
+    auth_profile2.auth_tokens.access_token,
+  )
+  use <- utils.add_to_team(
+    t,
+    team2.id,
+    AddToTeamInput(auth_profile1.profile.id),
+    auth_profile2.auth_tokens.access_token,
+  )
+
+  let response =
+    router.handle_request(
+      testing.get("/api/profiles/me/teams", [
+        utils.bearer_header(auth_profile1.auth_tokens.access_token),
+      ]),
+      t.context,
+    )
+
+  utils.equal(
+    response,
+    json.array([team1, team2], team.to_json)
+      |> json.to_string_tree
+      |> wisp.json_response(200),
+  )
+}
+
+pub fn find_teams_from_current_profile_missing_authorization_header_test() {
+  utils.missing_authorization_header_tester(http.Get, "/api/profiles/me/teams")
+}
+
+pub fn find_teams_from_current_profile_invalid_bearer_format_test() {
+  utils.invalid_bearer_format_tester(http.Get, "/api/profiles/me/teams")
+}
+
+pub fn find_teams_from_current_profile_invalid_jwt_test() {
+  utils.invalid_jwt_tester(http.Get, "/api/profiles/me/teams")
+}
+
+pub fn find_teams_from_current_profile_profile_required_test() {
+  utils.profile_required_tester(http.Get, "/api/profiles/me/teams")
+}

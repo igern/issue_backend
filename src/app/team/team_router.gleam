@@ -20,7 +20,8 @@ pub fn router(
 ) {
   case wisp.path_segments(req), req.method {
     ["api", "teams"], http.Post -> create_team(req, ctx)
-    ["api", "teams"], http.Get -> find_teams(req, ctx)
+    ["api", "profiles", "me", "teams"], http.Get ->
+      find_teams_from_current_profile(req, ctx)
     ["api", "teams", id], http.Get -> find_team(req, id, ctx)
     ["api", "teams", id], http.Delete -> delete_team(req, id, ctx)
     ["api", "teams", id], http.Post -> add_to_team(req, id, ctx)
@@ -32,7 +33,7 @@ pub fn router(
   }
 }
 
-fn find_teams(req: wisp.Request, ctx: types.Context) {
+fn find_teams_from_current_profile(req: wisp.Request, ctx: types.Context) {
   use profile <- auth_guards.require_profile(req, ctx)
 
   use result <- response_utils.map_service_errors(team_service.find_all(

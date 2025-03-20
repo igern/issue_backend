@@ -1,7 +1,6 @@
 # issue_backend
 
 ## Backlog
-- add tests for and api/teams
 
 ## Rainy Day Backlog
 

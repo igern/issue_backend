@@ -289,3 +289,39 @@ pub fn upload_profile_picture_invalid_jwt_test() {
 pub fn upload_profile_picture_profile_required_test() {
   utils.profile_required_tester(http.Post, "/api/profiles/1/profile-picture")
 }
+
+pub fn find_current_profile_test() {
+  use t <- utils.with_context
+
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+
+  let response =
+    router.handle_request(
+      testing.get("/api/profiles/current", [
+        utils.bearer_header(authorized_profile.auth_tokens.access_token),
+      ]),
+      t.context,
+    )
+  response
+  |> utils.equal(
+    profile.to_json(authorized_profile.profile)
+    |> json.to_string_tree()
+    |> wisp.json_response(200),
+  )
+}
+
+pub fn find_current_profile_missing_authorization_header_test() {
+  utils.missing_authorization_header_tester(http.Get, "/api/profiles/current")
+}
+
+pub fn find_current_profile_invalid_bearer_format_test() {
+  utils.invalid_bearer_format_tester(http.Get, "/api/profiles/current")
+}
+
+pub fn find_current_profile_invalid_jwt_test() {
+  utils.invalid_jwt_tester(http.Get, "/api/profiles/current")
+}
+
+pub fn find_current_profile_profile_required_test() {
+  utils.profile_required_tester(http.Get, "/api/profiles/current")
+}

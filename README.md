@@ -1,7 +1,7 @@
 # issue_backend
 
 ## Backlog
-- add tests for api/profiles/current and api/teams
+- add tests for and api/teams
 
 ## Rainy Day Backlog
 

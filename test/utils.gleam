@@ -419,7 +419,7 @@ pub fn delete_directory(t: TestContext, access_token: String, id: String) {
   data
 }
 
-pub fn find_issues(t: TestContext, directory_id: String, access_token: String) {
+pub fn find_issues(t: TestContext, access_token: String, directory_id: String) {
   let response =
     router.handle_request(
       testing.get(
@@ -428,7 +428,6 @@ pub fn find_issues(t: TestContext, directory_id: String, access_token: String) {
       ),
       t.context,
     )
-
   response.status |> should.equal(200)
   let assert Ok(data) =
     json.parse(testing.string_body(response), paginated_issues.decoder())

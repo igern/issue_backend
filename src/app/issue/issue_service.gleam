@@ -57,16 +57,24 @@ pub fn create(
   }
 }
 
-pub fn find_paginated(input: valid.Valid(PaginationInput), ctx: Context) {
+pub fn find_paginated(
+  directory_id: String,
+  input: valid.Valid(PaginationInput),
+  ctx: Context,
+) {
   let input = valid.inner(input)
-  let items_sql = "select * from issues limit ? offset ?"
-  let total_sql = "select count(*) from issues"
+  let items_sql = "select * from issues where directory_id = ? limit ? offset ?"
+  let total_sql = "select count(*) from issues where directory_id = ?"
 
   let items_result =
     sqlight.query(
       items_sql,
       on: ctx.connection,
-      with: [sqlight.int(input.take), sqlight.int(input.skip)],
+      with: [
+        sqlight.text(directory_id),
+        sqlight.int(input.take),
+        sqlight.int(input.skip),
+      ],
       expecting: issue_decoder(),
     )
 
@@ -74,7 +82,13 @@ pub fn find_paginated(input: valid.Valid(PaginationInput), ctx: Context) {
     use total <- decode.field(0, decode.int)
     decode.success(total)
   }
-  let total_result = sqlight.query(total_sql, ctx.connection, [], count_decoder)
+  let total_result =
+    sqlight.query(
+      total_sql,
+      ctx.connection,
+      [sqlight.text(directory_id)],
+      count_decoder,
+    )
   case items_result, total_result {
     Ok(items_result), Ok(totals) -> {
       let assert [total] = totals

@@ -409,6 +409,51 @@ pub fn find_issues_3_test() {
   |> should.equal(paginated_issues.PaginatedIssues(3, False, [issue2, issue3]))
 }
 
+pub fn find_issues_only_in_directory_test() {
+  use t <- utils.with_context
+  use t, authorized_profile <- utils.next_create_user_and_profile_and_login(t)
+  use t, team <- utils.next_create_team(
+    t,
+    authorized_profile.auth_tokens.access_token,
+  )
+  use t, directory1 <- utils.next_create_directory(
+    t,
+    team.id,
+    authorized_profile.auth_tokens.access_token,
+  )
+  use t, directory2 <- utils.next_create_directory(
+    t,
+    team.id,
+    authorized_profile.auth_tokens.access_token,
+  )
+  use t, issue1 <- utils.next_create_issue(
+    t,
+    authorized_profile.auth_tokens.access_token,
+    directory1.id,
+  )
+  use t, issue2 <- utils.next_create_issue(
+    t,
+    authorized_profile.auth_tokens.access_token,
+    directory2.id,
+  )
+  let directory1_issues =
+    utils.find_issues(
+      t,
+      authorized_profile.auth_tokens.access_token,
+      directory1.id,
+    )
+  directory1_issues
+  |> should.equal(paginated_issues.PaginatedIssues(1, False, [issue1]))
+  let directory2_issues =
+    utils.find_issues(
+      t,
+      authorized_profile.auth_tokens.access_token,
+      directory2.id,
+    )
+  directory2_issues
+  |> should.equal(paginated_issues.PaginatedIssues(1, False, [issue2]))
+}
+
 pub fn find_issues_not_member_of_team_test() {
   use t <- utils.with_context
 

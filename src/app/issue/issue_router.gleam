@@ -129,6 +129,7 @@ fn find_issues(req: Request, directory_id: String, ctx: Context) {
   use input <- valid.or_bad_request_response(pagination_input.validate(input))
 
   use result <- response_utils.map_service_errors(issue_service.find_paginated(
+    directory_id,
     input,
     ctx,
   ))

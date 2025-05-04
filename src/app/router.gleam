@@ -40,6 +40,8 @@ fn cors() {
   cors_builder.new()
   |> cors_builder.allow_origin("*")
   |> cors_builder.allow_method(http.Post)
+  |> cors_builder.allow_method(http.Patch)
+  |> cors_builder.allow_method(http.Delete)
   |> cors_builder.allow_header("content-type")
   |> cors_builder.allow_header("authorization")
 }

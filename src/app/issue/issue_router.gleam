@@ -32,31 +32,6 @@ pub fn router(req: Request, ctx: Context, handle_request: fn() -> Response) {
   }
 }
 
-fn require_team_member_from_directory(
-  profile_id: String,
-  directory_id: String,
-  ctx: Context,
-  handle_request: fn() -> Response,
-) {
-  use directory <- response_utils.map_service_errors(directory_service.find_one(
-    directory_id,
-    ctx,
-  ))
-
-  use team_profiles <- response_utils.map_service_errors(
-    team_service.find_team_profiles_from_team(directory.team_id, ctx),
-  )
-
-  use _ <- response_utils.or_response(
-    list.find(team_profiles, fn(team_profile) {
-      team_profile.profile_id == profile_id
-    }),
-    response_utils.not_member_of_team_response(),
-  )
-
-  handle_request()
-}
-
 fn require_team_member_from_issue(
   profile_id: String,
   issue_id: String,
@@ -89,7 +64,11 @@ fn require_team_member_from_issue(
 
 fn create_issue(req: Request, directory_id: String, ctx: Context) {
   use profile <- auth_guards.require_profile(req, ctx)
-  use <- require_team_member_from_directory(profile.id, directory_id, ctx)
+  use <- auth_guards.require_team_member_from_directory(
+    profile.id,
+    directory_id,
+    ctx,
+  )
 
   use json <- wisp.require_json(req)
   use input <- response_utils.or_decode_error(create_issue_input.from_dynamic(
@@ -120,7 +99,11 @@ fn parse_pagination_input(query: option.Option(String)) {
 
 fn find_issues(req: Request, directory_id: String, ctx: Context) {
   use profile <- auth_guards.require_profile(req, ctx)
-  use <- require_team_member_from_directory(profile.id, directory_id, ctx)
+  use <- auth_guards.require_team_member_from_directory(
+    profile.id,
+    directory_id,
+    ctx,
+  )
 
   use input <- response_utils.or_response(
     parse_pagination_input(req.query),

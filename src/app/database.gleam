@@ -44,7 +44,6 @@ pub fn init_schemas(connection: Connection) {
 
   let profile_user_id_unique_index_sql =
     "CREATE UNIQUE INDEX IF NOT EXISTS profile_user_id ON profiles(user_id)"
-
   let assert Ok(Nil) =
     sqlight.exec(profile_user_id_unique_index_sql, connection)
   let directory_sql =
@@ -57,6 +56,17 @@ pub fn init_schemas(connection: Connection) {
   FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE)
   "
   let assert Ok(Nil) = sqlight.exec(directory_sql, connection)
+
+  let directory_status_sql =
+    "
+  CREATE TABLE IF NOT EXISTS directory_statuses (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  directory_id TEXT NOT NULL,
+  FOREIGN KEY (directory_id) REFERENCES directories (id) ON DELETE CASCADE
+  )
+  "
+  let assert Ok(Nil) = sqlight.exec(directory_status_sql, connection)
 
   let team_sql =
     "

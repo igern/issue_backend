@@ -1,6 +1,7 @@
 # issue_backend
 
 ## Backlog
+- add directory_status
 
 ## Rainy Day Backlog
 

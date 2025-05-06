@@ -9,6 +9,9 @@ import app/directory/inputs/update_directory_input.{
   type UpdateDirectoryInput, UpdateDirectoryInput,
 }
 import app/directory/outputs/directory.{type Directory}
+import app/directory_status/inputs/create_directory_status_input.{
+  type CreateDirectoryStatusInput,
+}
 import app/issue/inputs/create_issue_input.{
   type CreateIssueInput, CreateIssueInput,
 }
@@ -40,6 +43,14 @@ import simplifile
 import sqlight
 import wisp.{type Response}
 import wisp/testing
+
+pub fn expect_status_code(res: Response, status_code: Int) -> Nil {
+  case res.status == status_code {
+    True -> Nil
+    False ->
+      should.equal(#(res.status, testing.string_body(res)), #(status_code, ""))
+  }
+}
 
 pub type TestContext {
   TestContext(context: Context, next: Int)
@@ -497,4 +508,16 @@ pub fn add_to_team(
   response.status |> should.equal(201)
 
   handle()
+}
+
+pub fn next_create_directory_status_input(
+  t: TestContext,
+  handler: fn(TestContext, CreateDirectoryStatusInput) -> Nil,
+) {
+  handler(
+    TestContext(..t, next: t.next + 1),
+    create_directory_status_input.CreateDirectoryStatusInput(
+      name: "name" <> int.to_string(t.next),
+    ),
+  )
 }

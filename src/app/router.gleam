@@ -1,5 +1,6 @@
 import app/auth/auth_router
 import app/directory/directory_router
+import app/directory_status/directory_status_router
 import app/issue/issue_router
 import app/profile/profile_router
 import app/team/team_router
@@ -18,6 +19,7 @@ pub fn handle_request(req: Request, ctx: Context) -> Response {
   use <- profile_router.router(req, ctx)
   use <- directory_router.router(req, ctx)
   use <- team_router.router(req, ctx)
+  use <- directory_status_router.router(req, ctx)
 
   case wisp.path_segments(req), req.method {
     [], Get -> wisp.redirect("/login")

@@ -1,7 +1,9 @@
 import app/auth/outputs/jwt_payload.{type JwtPayload, JwtPayload}
 import app/common/response_utils
+import app/directory/directory_service
 import app/profile/outputs/profile.{type Profile}
 import app/profile/profile_service
+import app/team/team_service
 import app/types.{type Context}
 import gleam/list
 import gleam/string
@@ -40,4 +42,29 @@ pub fn require_profile(
     response_utils.profile_required_response(),
   )
   handle_request(profile)
+}
+
+pub fn require_team_member_from_directory(
+  profile_id: String,
+  directory_id: String,
+  ctx: Context,
+  handle_request: fn() -> Response,
+) {
+  use directory <- response_utils.map_service_errors(directory_service.find_one(
+    directory_id,
+    ctx,
+  ))
+
+  use team_profiles <- response_utils.map_service_errors(
+    team_service.find_team_profiles_from_team(directory.team_id, ctx),
+  )
+
+  use _ <- response_utils.or_response(
+    list.find(team_profiles, fn(team_profile) {
+      team_profile.profile_id == profile_id
+    }),
+    response_utils.not_member_of_team_response(),
+  )
+
+  handle_request()
 }

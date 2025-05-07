@@ -17,6 +17,8 @@ pub fn router(
   case wisp.path_segments(req), req.method {
     ["api", "directories", directory_id, "statuses"], http.Post ->
       create_directory_status(req, directory_id, ctx)
+    ["api", "directories", directory_id, "statuses"], http.Get ->
+      find_all_directory_statuses(req, directory_id, ctx)
     ["api", "directory-statuses", directory_status_id], http.Delete ->
       delete_directory_status(req, directory_status_id, ctx)
     _, _ -> handle_request()
@@ -72,5 +74,26 @@ fn delete_directory_status(
 
   directory_status.to_json(result)
   |> json.to_string_tree()
+  |> wisp.json_response(200)
+}
+
+fn find_all_directory_statuses(
+  req: Request,
+  directory_id: String,
+  ctx: types.Context,
+) {
+  use profile <- auth_guards.require_profile(req, ctx)
+  use <- auth_guards.require_team_member_from_directory(
+    profile.id,
+    directory_id,
+    ctx,
+  )
+
+  use result <- response_utils.map_service_errors(
+    directory_status_service.find_all_from_directory(directory_id, ctx),
+  )
+
+  json.array(result, directory_status.to_json)
+  |> json.to_string_tree
   |> wisp.json_response(200)
 }

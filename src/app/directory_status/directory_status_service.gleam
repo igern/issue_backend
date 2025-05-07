@@ -42,3 +42,41 @@ pub fn create(
     _ -> panic as "Should only return one row from an insert"
   }
 }
+
+pub fn find_one(directory_status_id: String, ctx: types.Context) {
+  let sql = "select * from directory_statuses where id = ?"
+
+  let result =
+    sqlight.query(
+      sql,
+      ctx.connection,
+      [sqlight.text(directory_status_id)],
+      directory_status_decoder(),
+    )
+
+  case result {
+    Ok([#(id, name, directory_id), ..]) ->
+      Ok(DirectoryStatus(id, name, directory_id))
+    Ok([]) -> Error(response_utils.DirectoryStatusNotFoundError)
+    Error(error) -> Error(response_utils.DatabaseError(error))
+  }
+}
+
+pub fn delete_one(id: String, ctx: types.Context) {
+  let sql = "delete from directory_statuses where id = ? returning *"
+
+  let result =
+    sqlight.query(
+      sql,
+      ctx.connection,
+      [sqlight.text(id)],
+      directory_status_decoder(),
+    )
+
+  case result {
+    Ok([#(id, name, directory_id), ..]) ->
+      Ok(DirectoryStatus(id, name, directory_id))
+    Ok([]) -> Error(response_utils.DirectoryStatusNotFoundError)
+    Error(error) -> Error(response_utils.DatabaseError(error))
+  }
+}

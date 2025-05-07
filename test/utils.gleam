@@ -12,6 +12,7 @@ import app/directory/outputs/directory.{type Directory}
 import app/directory_status/inputs/create_directory_status_input.{
   type CreateDirectoryStatusInput,
 }
+import app/directory_status/outputs/directory_status
 import app/issue/inputs/create_issue_input.{
   type CreateIssueInput, CreateIssueInput,
 }
@@ -520,4 +521,49 @@ pub fn next_create_directory_status_input(
       name: "name" <> int.to_string(t.next),
     ),
   )
+}
+
+pub fn create_directory_status(
+  t: TestContext,
+  directory_id: String,
+  input: create_directory_status_input.CreateDirectoryStatusInput,
+  access_token: String,
+  handle: fn(directory_status.DirectoryStatus) -> Nil,
+) -> Nil {
+  let json = create_directory_status_input.to_json(input)
+
+  let response =
+    router.handle_request(
+      testing.post_json(
+        "/api/directories/" <> directory_id <> "/statuses",
+        [bearer_header(access_token)],
+        json,
+      ),
+      t.context,
+    )
+
+  response |> expect_status_code(201)
+
+  let assert Ok(directory_status) =
+    json.parse(
+      testing.string_body(response),
+      directory_status.directory_status_decoder(),
+    )
+  handle(directory_status)
+}
+
+pub fn next_create_directory_status(
+  t: TestContext,
+  directory_id: String,
+  access_token: String,
+  handle: fn(TestContext, directory_status.DirectoryStatus) -> Nil,
+) {
+  use t, input <- next_create_directory_status_input(t)
+  use directory_status <- create_directory_status(
+    t,
+    directory_id,
+    input,
+    access_token,
+  )
+  handle(t, directory_status)
 }

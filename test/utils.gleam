@@ -12,6 +12,7 @@ import app/directory/outputs/directory.{type Directory}
 import app/directory_status/inputs/create_directory_status_input.{
   type CreateDirectoryStatusInput,
 }
+import app/directory_status/inputs/update_directory_status_input
 import app/directory_status/outputs/directory_status
 import app/issue/inputs/create_issue_input.{
   type CreateIssueInput, CreateIssueInput,
@@ -566,4 +567,20 @@ pub fn next_create_directory_status(
     access_token,
   )
   handle(t, directory_status)
+}
+
+pub fn next_update_directory_status_input(
+  t: TestContext,
+  handler: fn(
+    TestContext,
+    update_directory_status_input.UpdateDirectoryStatusInput,
+  ) ->
+    Nil,
+) {
+  handler(
+    TestContext(..t, next: t.next + 1),
+    update_directory_status_input.UpdateDirectoryStatusInput(name: option.Some(
+      "name" <> int.to_string(t.next),
+    )),
+  )
 }

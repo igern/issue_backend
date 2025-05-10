@@ -1,6 +1,7 @@
 import app/auth/outputs/jwt_payload.{type JwtPayload, JwtPayload}
 import app/common/response_utils
 import app/directory/directory_service
+import app/directory_status/directory_status_service
 import app/profile/outputs/profile.{type Profile}
 import app/profile/profile_service
 import app/team/team_service
@@ -66,5 +67,23 @@ pub fn require_team_member_from_directory(
     response_utils.not_member_of_team_response(),
   )
 
+  handle_request()
+}
+
+pub fn require_team_member_from_directory_status(
+  profile_id: String,
+  directory_status_id: String,
+  ctx: types.Context,
+  handle_request: fn() -> Response,
+) {
+  use directory_status <- response_utils.or_response(
+    directory_status_service.find_one(directory_status_id, ctx),
+    response_utils.directory_status_not_found_error_response(),
+  )
+  use <- require_team_member_from_directory(
+    profile_id,
+    directory_status.directory_id,
+    ctx,
+  )
   handle_request()
 }

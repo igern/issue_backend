@@ -3,6 +3,7 @@ import app/common/response_utils
 import app/common/valid
 import app/directory/inputs/create_directory_input
 import app/directory_status/directory_status_service
+import app/directory_status/inputs/update_directory_status_input
 import app/directory_status/outputs/directory_status
 import app/types
 import gleam/http
@@ -19,6 +20,8 @@ pub fn router(
       create_directory_status(req, directory_id, ctx)
     ["api", "directories", directory_id, "statuses"], http.Get ->
       find_all_directory_statuses(req, directory_id, ctx)
+    ["api", "directory-statuses", directory_status_id], http.Patch ->
+      update_directory_status(req, directory_status_id, ctx)
     ["api", "directory-statuses", directory_status_id], http.Delete ->
       delete_directory_status(req, directory_status_id, ctx)
     _, _ -> handle_request()
@@ -94,6 +97,37 @@ fn find_all_directory_statuses(
   )
 
   json.array(result, directory_status.to_json)
+  |> json.to_string_tree
+  |> wisp.json_response(200)
+}
+
+fn update_directory_status(
+  req: Request,
+  directory_status_id: String,
+  ctx: types.Context,
+) {
+  use profile <- auth_guards.require_profile(req, ctx)
+  use <- auth_guards.require_team_member_from_directory_status(
+    profile.id,
+    directory_status_id,
+    ctx,
+  )
+
+  use json <- wisp.require_json(req)
+  use input <- response_utils.or_decode_error(
+    update_directory_status_input.from_dynamic(json),
+  )
+
+  use input <- valid.or_bad_request_response(
+    update_directory_status_input.validate(input),
+  )
+
+  use result <- response_utils.map_service_errors(
+    directory_status_service.update_one(directory_status_id, input, ctx),
+  )
+
+  result
+  |> directory_status.to_json
   |> json.to_string_tree
   |> wisp.json_response(200)
 }

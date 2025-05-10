@@ -1,10 +1,13 @@
 import app/common/response_utils
+import app/common/sqlight_utils
 import app/common/valid
 import app/directory/inputs/create_directory_input
+import app/directory_status/inputs/update_directory_status_input
 import app/directory_status/outputs/directory_status.{DirectoryStatus}
 import app/types
 import gleam/dynamic/decode
 import gleam/list
+import gleam/string
 import sqlight.{ConstraintForeignkey}
 import youid/uuid
 
@@ -83,6 +86,40 @@ pub fn find_all_from_directory(directory_id: String, ctx: types.Context) {
       |> Ok
     }
     Error(error) -> Error(response_utils.DatabaseError(error))
+  }
+}
+
+pub fn update_one(
+  id: String,
+  input: valid.Valid(update_directory_status_input.UpdateDirectoryStatusInput),
+  ctx: types.Context,
+) {
+  let input = valid.inner(input)
+  let sql = "update directory_statuses set $set where id = ? returning *"
+
+  case
+    sqlight_utils.sqlight_patch_helper([
+      sqlight_utils.sqlight_string_optional(#("name", input.name)),
+    ])
+  {
+    Ok(#(set, values)) -> {
+      let sql = string.replace(sql, "$set", set)
+      let result =
+        sqlight.query(
+          sql,
+          ctx.connection,
+          list.flatten([values, [sqlight.text(id)]]),
+          directory_status_decoder(),
+        )
+
+      case result {
+        Ok([#(id, name, directory_id), ..]) ->
+          Ok(DirectoryStatus(id, name, directory_id))
+        Ok([]) -> Error(response_utils.DirectoryStatusNotFoundError)
+        Error(error) -> Error(response_utils.DatabaseError(error))
+      }
+    }
+    _ -> find_one(id, ctx)
   }
 }
 

@@ -13,7 +13,7 @@ pub fn router(
   handle_request: fn() -> Response,
 ) {
   case wisp.path_segments(req), req.method {
-    ["api", "directory_status_types"], http.Get ->
+    ["api", "directory-status-types"], http.Get ->
       find_all_directory_status_types(req, ctx)
     _, _ -> handle_request()
   }

@@ -13,7 +13,7 @@ pub fn find_all_directory_status_types_test() {
 
   let response =
     router.handle_request(
-      testing.get("/api/directory_status_types", [
+      testing.get("/api/directory-status-types", [
         utils.bearer_header(authorized_user.auth_tokens.access_token),
       ]),
       t.context,
@@ -30,14 +30,14 @@ pub fn find_all_directory_status_types_test() {
 pub fn find_all_directory_status_types_missing_authorization_header_test() {
   utils.missing_authorization_header_tester(
     http.Get,
-    "/api/directory_status_types",
+    "/api/directory-status-types",
   )
 }
 
 pub fn find_all_directory_status_types_invalid_bearer_format_test() {
-  utils.invalid_bearer_format_tester(http.Get, "/api/directory_status_types")
+  utils.invalid_bearer_format_tester(http.Get, "/api/directory-status-types")
 }
 
 pub fn find_all_directory_status_types_invalid_jwt_test() {
-  utils.invalid_jwt_tester(http.Get, "/api/directory_status_types")
+  utils.invalid_jwt_tester(http.Get, "/api/directory-status-types")
 }

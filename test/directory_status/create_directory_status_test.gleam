@@ -46,6 +46,7 @@ pub fn create_directory_status_test() {
     data.id,
     input.name,
     data.directory_id,
+    input.directory_status_type_name,
   ))
 }
 
@@ -63,7 +64,9 @@ pub fn create_directory_status_validate_name_test() {
     authorized_profile.auth_tokens.access_token,
   )
 
-  let input = create_directory_status_input.CreateDirectoryStatusInput("")
+  let assert [todo_type, ..] = t.directory_status_types
+  let input =
+    create_directory_status_input.CreateDirectoryStatusInput("", todo_type.name)
   let json = create_directory_status_input.to_json(input)
 
   let response =

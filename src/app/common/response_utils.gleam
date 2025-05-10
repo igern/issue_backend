@@ -18,6 +18,8 @@ pub fn map_service_errors(
     Error(DirectoryStatusNotFoundError) ->
       directory_status_not_found_error_response()
     Error(DirectoryNotFoundError) -> directory_not_found_error_response()
+    Error(DirectoryStatusTypeNotFoundError) ->
+      directory_status_type_not_found_error_response()
     Error(UserNotFoundError) -> user_not_found_error_response()
     Error(ProfileNotFoundError) -> profile_not_found_error_response()
     Error(IssueNotFoundError) -> issue_not_found_error_response()
@@ -47,6 +49,7 @@ pub type ServiceError {
   EmailAlreadyExistsError
   TeamNotFoundError
   DirectoryNotFoundError
+  DirectoryStatusTypeNotFoundError
   UserNotFoundError
   ProfileNotFoundError
   IssueNotFoundError
@@ -132,6 +135,10 @@ pub fn directory_status_not_found_error_response() {
 
 pub fn directory_not_found_error_response() {
   json_response(404, "directory not found")
+}
+
+pub fn directory_status_type_not_found_error_response() {
+  json_response(404, "directory status type not found")
 }
 
 pub fn team_not_found_error_response() {

@@ -63,7 +63,9 @@ pub fn init_schemas(connection: Connection) {
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   directory_id TEXT NOT NULL,
+  directory_status_type_name TEXT NOT NULL,
   FOREIGN KEY (directory_id) REFERENCES directories (id) ON DELETE CASCADE
+  FOREIGN KEY (directory_status_type_name) REFERENCES directory_status_types (name) ON DELETE CASCADE
   )
   "
   let assert Ok(Nil) = sqlight.exec(directory_status_sql, connection)

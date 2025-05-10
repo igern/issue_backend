@@ -1,8 +1,8 @@
 import app/auth/auth_guards
 import app/common/response_utils
 import app/common/valid
-import app/directory/inputs/create_directory_input
 import app/directory_status/directory_status_service
+import app/directory_status/inputs/create_directory_status_input
 import app/directory_status/inputs/update_directory_status_input
 import app/directory_status/outputs/directory_status
 import app/types
@@ -42,12 +42,12 @@ fn create_directory_status(
 
   use json <- wisp.require_json(req)
   use input <- response_utils.or_decode_error(
-    create_directory_input.from_dynamic(json),
+    create_directory_status_input.from_dynamic(json),
   )
 
-  use input <- valid.or_bad_request_response(create_directory_input.validate(
-    input,
-  ))
+  use input <- valid.or_bad_request_response(
+    create_directory_status_input.validate(input),
+  )
   use result <- response_utils.map_service_errors(
     directory_status_service.create(directory_id, input, ctx),
   )

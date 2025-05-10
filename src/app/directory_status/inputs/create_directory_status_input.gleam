@@ -4,14 +4,21 @@ import gleam/dynamic/decode
 import gleam/json
 
 pub type CreateDirectoryStatusInput {
-  CreateDirectoryStatusInput(name: String)
+  CreateDirectoryStatusInput(name: String, directory_status_type_name: String)
 }
 
 fn create_directory_status_input_decoder() -> decode.Decoder(
   CreateDirectoryStatusInput,
 ) {
   use name <- decode.field("name", decode.string)
-  decode.success(CreateDirectoryStatusInput(name:))
+  use directory_status_type_name <- decode.field(
+    "directory_status_type_name",
+    decode.string,
+  )
+  decode.success(CreateDirectoryStatusInput(
+    name: name,
+    directory_status_type_name:,
+  ))
 }
 
 pub fn from_dynamic(
@@ -23,7 +30,13 @@ pub fn from_dynamic(
 pub fn to_json(
   create_directory_status_input: CreateDirectoryStatusInput,
 ) -> json.Json {
-  json.object([#("name", json.string(create_directory_status_input.name))])
+  json.object([
+    #("name", json.string(create_directory_status_input.name)),
+    #(
+      "directory_status_type_name",
+      json.string(create_directory_status_input.directory_status_type_name),
+    ),
+  ])
 }
 
 pub fn validate(input: CreateDirectoryStatusInput) {

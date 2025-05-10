@@ -29,7 +29,13 @@ pub fn update_directory_status_test() {
     authorized_profile.auth_tokens.access_token,
   )
 
-  use t, input <- utils.next_update_directory_status_input(t)
+  let assert [_, in_progress_type, ..] = t.directory_status_types
+
+  let input =
+    update_directory_status_input.UpdateDirectoryStatusInput(
+      option.Some("new Name"),
+      option.Some(in_progress_type.name),
+    )
   let json = update_directory_status_input.to_json(input)
 
   let response =
@@ -47,7 +53,8 @@ pub fn update_directory_status_test() {
     directory_status.to_json(
       directory_status.DirectoryStatus(
         ..directory_status,
-        name: option.unwrap(input.name, "invalid"),
+        name: "new Name",
+        directory_status_type_name: in_progress_type.name,
       ),
     )
     |> json.to_string_tree

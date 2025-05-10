@@ -5,7 +5,10 @@ import gleam/json
 import gleam/option
 
 pub type UpdateDirectoryStatusInput {
-  UpdateDirectoryStatusInput(name: option.Option(String))
+  UpdateDirectoryStatusInput(
+    name: option.Option(String),
+    directory_status_type_name: option.Option(String),
+  )
 }
 
 fn update_directory_status_input_decoder() -> decode.Decoder(
@@ -16,7 +19,15 @@ fn update_directory_status_input_decoder() -> decode.Decoder(
     option.None,
     decode.optional(decode.string),
   )
-  decode.success(UpdateDirectoryStatusInput(name:))
+  use directory_status_type_name <- decode.optional_field(
+    "directory_status_type_name",
+    option.None,
+    decode.optional(decode.string),
+  )
+  decode.success(UpdateDirectoryStatusInput(
+    name: name,
+    directory_status_type_name: directory_status_type_name,
+  ))
 }
 
 pub fn from_dynamic(json: dynamic.Dynamic) {
@@ -24,9 +35,16 @@ pub fn from_dynamic(json: dynamic.Dynamic) {
 }
 
 pub fn to_json(input: UpdateDirectoryStatusInput) -> json.Json {
-  json.object(case input.name {
-    option.Some(name) -> [#("name", json.string(name))]
-    option.None -> []
+  json.object(case input.name, input.directory_status_type_name {
+    option.Some(name), option.Some(directory_status_type_name) -> [
+      #("name", json.string(name)),
+      #("directory_status_type_name", json.string(directory_status_type_name)),
+    ]
+    option.Some(name), option.None -> [#("name", json.string(name))]
+    option.None, option.Some(directory_status_type_name) -> [
+      #("directory_status_type_name", json.string(directory_status_type_name)),
+    ]
+    option.None, option.None -> []
   })
 }
 

@@ -535,10 +535,12 @@ pub fn next_create_directory_status_input(
   t: TestContext,
   handler: fn(TestContext, CreateDirectoryStatusInput) -> Nil,
 ) {
+  let assert [todo_type, ..] = t.directory_status_types
   handler(
     TestContext(..t, next: t.next + 1),
     create_directory_status_input.CreateDirectoryStatusInput(
       name: "name" <> int.to_string(t.next),
+      directory_status_type_name: todo_type.name,
     ),
   )
 }
@@ -586,20 +588,4 @@ pub fn next_create_directory_status(
     access_token,
   )
   handle(t, directory_status)
-}
-
-pub fn next_update_directory_status_input(
-  t: TestContext,
-  handler: fn(
-    TestContext,
-    update_directory_status_input.UpdateDirectoryStatusInput,
-  ) ->
-    Nil,
-) {
-  handler(
-    TestContext(..t, next: t.next + 1),
-    update_directory_status_input.UpdateDirectoryStatusInput(name: option.Some(
-      "name" <> int.to_string(t.next),
-    )),
-  )
 }

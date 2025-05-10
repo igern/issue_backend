@@ -143,7 +143,7 @@ fn create_access_token(sub: String) -> String {
   gwt.new()
   |> gwt.set_subject(sub)
   |> gwt.set_expiration(
-    birl.now() |> birl.add(duration.seconds(5)) |> birl.to_unix,
+    birl.now() |> birl.add(duration.seconds(300)) |> birl.to_unix,
   )
   |> gwt.to_signed_string(gwt.HS256, "secret")
 }

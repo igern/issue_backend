@@ -14,6 +14,8 @@ import app/directory_status/inputs/create_directory_status_input.{
 }
 import app/directory_status/inputs/update_directory_status_input
 import app/directory_status/outputs/directory_status
+import app/directory_status_type/directory_status_type_service
+import app/directory_status_type/outputs/directory_status_type
 import app/issue/inputs/create_issue_input.{
   type CreateIssueInput, CreateIssueInput,
 }
@@ -55,7 +57,11 @@ pub fn expect_status_code(res: Response, status_code: Int) -> Nil {
 }
 
 pub type TestContext {
-  TestContext(context: Context, next: Int)
+  TestContext(
+    context: Context,
+    next: Int,
+    directory_status_types: List(directory_status_type.DirectoryStatusType),
+  )
 }
 
 pub type AuthorizedUser {
@@ -93,7 +99,20 @@ pub fn with_context(test_case: fn(TestContext) -> Nil) -> Nil {
       storage_credentials: creds,
       storage_bucket: storage,
     )
-  let test_context = TestContext(context: context, next: 1)
+
+  let assert Ok(todo_type) =
+    directory_status_type_service.create("todo", context)
+  let assert Ok(in_progress_type) =
+    directory_status_type_service.create("in_progress", context)
+  let assert Ok(done_type) =
+    directory_status_type_service.create("done", context)
+
+  let test_context =
+    TestContext(context: context, next: 1, directory_status_types: [
+      todo_type,
+      in_progress_type,
+      done_type,
+    ])
 
   test_case(test_context)
 }

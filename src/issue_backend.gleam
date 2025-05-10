@@ -1,4 +1,5 @@
 import app/database
+import app/directory_status_type/directory_status_type_service
 import app/router
 import app/types.{Context}
 import bucket
@@ -44,6 +45,10 @@ pub fn main() {
       storage_credentials: creds,
       storage_bucket: bucket,
     )
+
+  let _ = directory_status_type_service.create("todo", context)
+  let _ = directory_status_type_service.create("in_progress", context)
+  let _ = directory_status_type_service.create("done", context)
 
   let handler = router.handle_request(_, context)
   let assert Ok(_) =

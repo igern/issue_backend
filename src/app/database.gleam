@@ -68,6 +68,14 @@ pub fn init_schemas(connection: Connection) {
   "
   let assert Ok(Nil) = sqlight.exec(directory_status_sql, connection)
 
+  let directory_status_types_sql =
+    "
+  CREATE TABLE IF NOT EXISTS directory_status_types (
+  name TEXT PRIMARY KEY
+  )
+  "
+  let assert Ok(Nil) = sqlight.exec(directory_status_types_sql, connection)
+
   let team_sql =
     "
   CREATE TABLE IF NOT EXISTS teams (
